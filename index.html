@@ -1,0 +1,1848 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sourdough Studio</title>
+<style>
+:root {
+  --bg: #faf8f4;
+  --surface: #ffffff;
+  --surface-alt: #f3efe8;
+  --border: #e0d8cc;
+  --text: #2c2416;
+  --text-muted: #7a6e5f;
+  --accent: #c4622d;
+  --accent-hover: #a84f22;
+  --accent-light: #f9ede4;
+  --success: #5a7a4a;
+  --success-bg: #eef4eb;
+  --warning: #b87333;
+  --warning-bg: #fef4e4;
+  --danger: #b83232;
+  --danger-bg: #fde8e8;
+  --radius: 8px;
+  --shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.5;
+}
+/* ── Header ── */
+header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+.logo {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
+  padding: 14px 0;
+  white-space: nowrap;
+  letter-spacing: -0.3px;
+}
+.logo span { color: var(--text-muted); font-weight: 400; }
+nav.tabs {
+  display: flex;
+  gap: 0;
+  flex: 1;
+}
+nav.tabs button {
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: 16px 18px 13px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+  transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+nav.tabs button:hover { color: var(--text); }
+nav.tabs button.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+/* ── Layout ── */
+main { max-width: 960px; margin: 0 auto; padding: 24px 16px 48px; }
+section.tab-section { display: none; }
+section.tab-section.active { display: block; }
+/* ── Cards ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+.card-header {
+  padding: 14px 18px;
+  background: var(--surface-alt);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+}
+.card-header h3 {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+}
+.card-header .card-toggle {
+  color: var(--text-muted);
+  font-size: 16px;
+  transition: transform 0.2s;
+}
+.card.collapsed .card-toggle { transform: rotate(-90deg); }
+.card.collapsed .card-body { display: none; }
+.card-body { padding: 16px 18px; }
+/* ── Form Elements ── */
+.form-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.form-row:last-child { margin-bottom: 0; }
+label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+}
+input[type=number], input[type=text], select, textarea {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 7px 10px;
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  font-family: inherit;
+}
+input[type=number]:focus, input[type=text]:focus, select:focus, textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(196,98,45,0.12);
+}
+input[type=number] { width: 90px; }
+.input-suffix {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-left: -6px;
+}
+select { min-width: 140px; }
+.w-full { width: 100%; }
+/* ── Flour Rows ── */
+.flour-rows { margin-bottom: 12px; }
+.flour-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding: 8px 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.flour-row select { flex: 1; min-width: 0; }
+.flour-row .pct-input { width: 72px; }
+.flour-row .remove-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 4px;
+  border-radius: 4px;
+  font-size: 16px;
+  line-height: 1;
+  transition: color 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+.flour-row .remove-btn:hover { color: var(--danger); background: var(--danger-bg); }
+/* ── Badges / Alerts ── */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.badge-success { background: var(--success-bg); color: var(--success); }
+.badge-warning { background: var(--warning-bg); color: var(--warning); }
+.badge-danger  { background: var(--danger-bg);  color: var(--danger);  }
+.alert {
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  margin-top: 8px;
+}
+.alert-warning { background: var(--warning-bg); color: var(--warning); border: 1px solid #e8c090; }
+.alert-danger  { background: var(--danger-bg);  color: var(--danger);  border: 1px solid #f0b8b8; }
+/* ── Buttons ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s, opacity 0.15s;
+  white-space: nowrap;
+  font-family: inherit;
+}
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
+.btn-secondary { background: var(--surface-alt); color: var(--text); border: 1px solid var(--border); }
+.btn-secondary:hover:not(:disabled) { background: var(--border); }
+.btn-ghost { background: none; color: var(--accent); padding: 6px 10px; }
+.btn-ghost:hover { background: var(--accent-light); }
+.btn-danger { background: var(--danger-bg); color: var(--danger); border: 1px solid #f0b8b8; }
+.btn-danger:hover { background: var(--danger); color: #fff; }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.btn-icon { padding: 6px 8px; }
+/* ── Results Panel ── */
+#results-panel {
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+}
+.results-header {
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.results-header h3 {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+}
+#results-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+#results-table td {
+  padding: 8px 18px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+#results-table td:last-child { text-align: right; font-variant-numeric: tabular-nums; font-weight: 500; }
+#results-table tr:last-child td { border-bottom: none; }
+#results-table .row-sub td { padding-left: 34px; color: var(--text-muted); font-size: 12px; }
+#results-table .row-total td { font-weight: 700; font-size: 14px; background: var(--surface); }
+#results-table .row-divider td { padding: 2px 0; border-bottom: 1px solid var(--border); }
+#results-table .row-stat td { color: var(--text-muted); font-size: 12px; background: var(--surface); }
+.results-actions {
+  padding: 12px 18px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+/* ── Calculator Layout ── */
+.calc-layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 700px) {
+  .calc-layout { grid-template-columns: 1fr; }
+}
+.calc-sidebar { position: sticky; top: 72px; }
+/* ── Base Weight Card ── */
+.base-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.radio-group { display: flex; gap: 8px; flex-wrap: wrap; }
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font-size: 13px;
+  transition: background 0.15s, border-color 0.15s;
+}
+.radio-label:has(input:checked) {
+  background: var(--accent-light);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 500;
+}
+.radio-label input { display: none; }
+/* ── Percentage Inputs Row ── */
+.pct-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 4px;
+}
+.pct-field { display: flex; flex-direction: column; gap: 4px; }
+.pct-field label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; }
+.pct-field .input-wrap { display: flex; align-items: center; gap: 4px; }
+.pct-field input { width: 80px; }
+/* ── Recipes ── */
+.recipes-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.search-input {
+  flex: 1;
+  min-width: 160px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  background: var(--surface);
+}
+.search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(196,98,45,0.12); }
+.recipe-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+.recipe-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: box-shadow 0.15s;
+}
+.recipe-card:hover { box-shadow: 0 3px 10px rgba(0,0,0,0.1); }
+.recipe-card h3 { font-size: 15px; font-weight: 600; }
+.recipe-card .meta { font-size: 12px; color: var(--text-muted); }
+.recipe-card .summary { font-size: 12px; color: var(--text-muted); }
+.recipe-card .desc { font-size: 13px; color: var(--text); }
+.recipe-card-actions { display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
+.empty-state {
+  text-align: center;
+  padding: 60px 24px;
+  color: var(--text-muted);
+}
+.empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+.empty-state p { margin-bottom: 16px; }
+/* ── Products ── */
+.products-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.products-table-wrap { overflow-x: auto; }
+table.products-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+table.products-table th {
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  background: var(--surface-alt);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+table.products-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  vertical-align: middle;
+}
+table.products-table tr:last-child td { border-bottom: none; }
+table.products-table tr:hover td { background: var(--bg); }
+.builtin-tag {
+  font-size: 10px;
+  padding: 2px 6px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--text-muted);
+  margin-left: 6px;
+}
+/* ── Modal ── */
+dialog {
+  padding: 0;
+  border: none;
+  border-radius: var(--radius);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  max-width: 480px;
+  width: calc(100vw - 32px);
+  background: var(--surface);
+}
+dialog::backdrop { background: rgba(0,0,0,0.4); }
+.modal-header {
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.modal-header h2 { font-size: 16px; font-weight: 600; }
+.modal-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 20px;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.modal-close:hover { background: var(--surface-alt); color: var(--text); }
+.modal-body { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+.modal-footer {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label { font-size: 13px; font-weight: 500; }
+.field input, .field select, .field textarea { width: 100%; }
+.field textarea { resize: vertical; min-height: 70px; }
+/* ── Batch Controls ── */
+.batch-bar {
+  padding: 10px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface);
+  flex-wrap: wrap;
+}
+.batch-bar label { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+.batch-field { display: flex; align-items: center; gap: 5px; }
+.batch-field input { width: 70px; padding: 5px 8px; font-size: 13px; }
+.batch-field span { font-size: 12px; color: var(--text-muted); }
+.batch-total { font-size: 12px; color: var(--accent); font-weight: 600; margin-left: 2px; }
+/* ── Misc ── */
+.section-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+.text-muted { color: var(--text-muted); }
+.text-sm { font-size: 12px; }
+.sum-indicator { font-size: 12px; margin-top: 6px; }
+/* ── Dark Mode ── */
+html[data-theme="dark"] {
+  --bg: #1c1a16;
+  --surface: #26221c;
+  --surface-alt: #302b23;
+  --border: #3e3728;
+  --text: #ede8de;
+  --text-muted: #9a8d7a;
+  --accent: #e07840;
+  --accent-hover: #c96a32;
+  --accent-light: #3a2010;
+  --success: #6a9a5a;
+  --success-bg: #1c2c14;
+  --warning: #c88848;
+  --warning-bg: #2c2010;
+  --danger: #c85050;
+  --danger-bg: #2c1414;
+  --shadow: 0 1px 4px rgba(0,0,0,0.4);
+}
+/* ── Header Controls ── */
+.header-controls { display: flex; gap: 6px; align-items: center; margin-left: auto; }
+.btn-toggle {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-family: inherit;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.btn-toggle:hover { background: var(--surface-alt); color: var(--text); }
+[dir="rtl"] .header-controls { margin-left: 0; margin-right: auto; }
+[dir="rtl"] .input-suffix { margin-left: 0; margin-right: -6px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">🍞 Sourdough <span>Studio</span></div>
+    <nav class="tabs" id="main-tabs">
+      <button data-tab="calculator" class="active" data-i18n="tabCalculator">Calculator</button>
+      <button data-tab="recipes" data-i18n="tabRecipes">Recipes</button>
+      <button data-tab="products" data-i18n="tabProducts">Products</button>
+    </nav>
+    <div class="header-controls">
+      <button id="btn-lang" class="btn-toggle" title="Switch Language">עב</button>
+      <button id="btn-theme" class="btn-toggle" title="Toggle Dark Mode">🌙</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- ══ CALCULATOR TAB ══ -->
+  <section class="tab-section active" id="tab-calculator">
+    <div class="calc-layout">
+      <div class="calc-main">
+
+        <!-- Batch & Hydration -->
+        <div class="card" id="card-base">
+          <div class="card-header"><h3 data-i18n="cardBatch">Batch</h3></div>
+          <div class="card-body">
+            <div class="pct-grid">
+              <div class="pct-field">
+                <label data-i18n="labelLoaves">Number of Loaves</label>
+                <div class="input-wrap">
+                  <input type="number" id="batch-loaves" value="1" min="1" max="99" step="1">
+                </div>
+              </div>
+              <div class="pct-field">
+                <label data-i18n="labelGPerLoaf">Dough Weight per Loaf</label>
+                <div class="input-wrap">
+                  <input type="number" id="batch-weight" value="900" min="100" max="9999" step="10">
+                  <span class="input-suffix">g</span>
+                </div>
+              </div>
+              <div class="pct-field">
+                <label data-i18n="labelTotalHydration">Total Hydration</label>
+                <div class="input-wrap">
+                  <input type="number" id="totalHydration" value="75" min="40" max="200" step="0.5">
+                  <span class="input-suffix">%</span>
+                </div>
+              </div>
+            </div>
+            <div id="batch-total-display" style="margin-top:10px;font-size:13px;color:var(--text-muted)"></div>
+          </div>
+        </div>
+
+        <!-- Main Flour -->
+        <div class="card" id="card-flour">
+          <div class="card-header" data-collapse="card-flour">
+            <h3 data-i18n="cardMainFlour">Main Flour</h3>
+            <span class="card-toggle">▾</span>
+          </div>
+          <div class="card-body">
+            <div class="flour-rows" id="main-flour-rows"></div>
+            <div id="main-flour-sum" class="sum-indicator"></div>
+            <button class="btn btn-ghost btn-sm" id="add-main-flour" data-i18n="btnAddFlour">+ Add Flour</button>
+          </div>
+        </div>
+
+        <!-- Levain -->
+        <div class="card" id="card-levain">
+          <div class="card-header" data-collapse="card-levain">
+            <h3 data-i18n="cardLevain">Levain / Starter</h3>
+            <span class="card-toggle">▾</span>
+          </div>
+          <div class="card-body">
+            <div class="flour-rows" id="levain-flour-rows"></div>
+            <div id="levain-flour-sum" class="sum-indicator"></div>
+            <button class="btn btn-ghost btn-sm" id="add-levain-flour" data-i18n="btnAddLevainFlour">+ Add Levain Flour</button>
+            <hr class="divider">
+            <div class="pct-grid">
+              <div class="pct-field">
+                <label data-i18n-html="labelLevainPct">Levain % <span style="font-weight:400;color:var(--text-muted)">(baker's %)</span></label>
+                <div class="input-wrap">
+                  <input type="number" id="levainFlourPct" value="20" min="0" max="100" step="0.5">
+                  <span class="input-suffix">%</span>
+                </div>
+                <span class="text-sm text-muted" data-i18n="hintLevainPct">Total levain weight as % of total flour</span>
+              </div>
+              <div class="pct-field">
+                <label data-i18n="labelLevainHydration">Levain Hydration</label>
+                <div class="input-wrap">
+                  <input type="number" id="levainHydration" value="100" min="0" max="300" step="1">
+                  <span class="input-suffix">%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Water -->
+        <div class="card" id="card-water">
+          <div class="card-header" data-collapse="card-water">
+            <h3 data-i18n="cardWater">Water</h3>
+            <span class="card-toggle">▾</span>
+          </div>
+          <div class="card-body">
+            <div class="pct-grid">
+              <div class="pct-field">
+                <label data-i18n="labelMainWater">Main Dough Water</label>
+                <div class="input-wrap" id="mainWater-display" style="color:var(--text-muted);font-size:14px;font-weight:600;padding:7px 0;">—</div>
+                <span class="text-sm text-muted" data-i18n="hintMainWater">Derived from total hydration</span>
+              </div>
+              <div class="pct-field">
+                <label data-i18n="labelBasinage">Basinage (held back)</label>
+                <div class="input-wrap">
+                  <input type="number" id="basinage" value="5" min="0" max="50" step="0.5">
+                  <span class="input-suffix">%</span>
+                </div>
+                <span class="text-sm text-muted" data-i18n="hintBasinage">% of total flour, added during final mix</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Salt -->
+        <div class="card" id="card-salt">
+          <div class="card-header" data-collapse="card-salt">
+            <h3 data-i18n="cardSalt">Salt</h3>
+            <span class="card-toggle">▾</span>
+          </div>
+          <div class="card-body">
+            <div class="pct-grid">
+              <div class="pct-field">
+                <label data-i18n="labelSalt">Salt</label>
+                <div class="input-wrap">
+                  <input type="number" id="saltPct" value="2" min="0" max="10" step="0.1">
+                  <span class="input-suffix">%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add-ins -->
+        <div class="card collapsed" id="card-addins">
+          <div class="card-header" data-collapse="card-addins">
+            <h3 data-i18n="cardAddins">Optional Add-ins</h3>
+            <span class="card-toggle">▾</span>
+          </div>
+          <div class="card-body">
+            <div class="flour-rows" id="addins-rows"></div>
+            <button class="btn btn-ghost btn-sm" id="add-addin" data-i18n="btnAddAddin">+ Add Ingredient</button>
+          </div>
+        </div>
+
+      </div><!-- /calc-main -->
+
+      <!-- ── Sidebar: Results ── -->
+      <div class="calc-sidebar">
+        <div id="results-panel">
+          <div class="results-header">
+            <h3 data-i18n="cardResults">Results</h3>
+            <span id="results-hydration-badge"></span>
+          </div>
+          <table id="results-table"><tbody id="results-body"></tbody></table>
+          <div class="results-actions">
+            <button class="btn btn-primary" id="btn-save-recipe" data-i18n="btnSaveRecipe">Save Recipe</button>
+            <button class="btn btn-secondary" id="btn-copy-results" data-i18n="btnCopy">Copy</button>
+            <button class="btn btn-secondary" id="btn-pdf-results">PDF</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /calc-layout -->
+  </section>
+
+  <!-- ══ RECIPES TAB ══ -->
+  <section class="tab-section" id="tab-recipes">
+    <div class="recipes-toolbar">
+      <h2 class="section-title" style="margin:0" data-i18n="titleRecipes">Recipes</h2>
+      <input type="text" class="search-input" id="recipe-search" placeholder="Search recipes…" data-i18n-placeholder="searchPlaceholder">
+    </div>
+    <div class="recipe-grid" id="recipe-grid"></div>
+  </section>
+
+  <!-- ══ PRODUCTS TAB ══ -->
+  <section class="tab-section" id="tab-products">
+    <div class="products-toolbar">
+      <h2 class="section-title" style="margin:0">Products</h2>
+      <button class="btn btn-primary" id="btn-add-product" data-i18n="btnAddProduct">+ Add Product</button>
+    </div>
+    <div class="products-table-wrap">
+      <table class="products-table">
+        <thead>
+          <tr>
+            <th data-i18n="colName">Name</th>
+            <th data-i18n="colType">Type</th>
+            <th data-i18n="colProtein">Protein %</th>
+            <th data-i18n="colNotes">Notes</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="products-tbody"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<!-- ══ MODAL ══ -->
+<dialog id="modal">
+  <div class="modal-header">
+    <h2 id="modal-title"></h2>
+    <button class="modal-close" id="modal-close-btn">✕</button>
+  </div>
+  <div class="modal-body" id="modal-body"></div>
+  <div class="modal-footer" id="modal-footer">
+    <button class="btn btn-secondary" id="modal-cancel" data-i18n="btnCancel">Cancel</button>
+    <button class="btn btn-primary" id="modal-confirm">Confirm</button>
+  </div>
+</dialog>
+
+<script>
+'use strict';
+
+// ════════════════════════════════════════════════
+// 1. CONSTANTS & DEFAULTS
+// ════════════════════════════════════════════════
+
+const STORAGE_KEY = 'sourdough_studio_v1';
+
+// ── Translations ──
+const TRANSLATIONS = {
+  en: {
+    tabCalculator:'Calculator', tabRecipes:'Recipes', tabProducts:'Products',
+    cardBatch:'Batch', cardMainFlour:'Main Flour', cardLevain:'Levain / Starter',
+    cardWater:'Water', cardSalt:'Salt', cardAddins:'Optional Add-ins', cardResults:'Results',
+    labelLoaves:'Number of Loaves', labelGPerLoaf:'Dough Weight per Loaf',
+    labelTotalHydration:'Total Hydration',
+    labelLevainPct:'Levain % <span style="font-weight:400;color:var(--text-muted)">(baker\'s %)</span>',
+    labelLevainHydration:'Levain Hydration',
+    hintLevainPct:'Total levain weight as % of total flour',
+    labelMainWater:'Main Dough Water', hintMainWater:'Derived from total hydration',
+    labelBasinage:'Basinage (held back)', hintBasinage:'% of total flour, added during final mix',
+    labelSalt:'Salt',
+    btnAddFlour:'+ Add Flour', btnAddLevainFlour:'+ Add Levain Flour', btnAddAddin:'+ Add Ingredient',
+    btnSaveRecipe:'Save Recipe', btnCopy:'Copy', btnAddProduct:'+ Add Product',
+    btnCancel:'Cancel', btnConfirm:'Confirm',
+    titleRecipes:'Recipes', searchPlaceholder:'Search recipes…',
+    colName:'Name', colType:'Type', colProtein:'Protein %', colNotes:'Notes',
+    rowTotalFlour:'Total Flour', rowLevain:'Levain', rowLevainWater:'Levain water',
+    rowMainWater:'Main Dough Water', rowBasinage:'Basinage', rowSalt:'Salt',
+    rowTotalDough:'Total Dough', rowTotalHydration:'Total Hydration', rowLevainPct:'Levain %',
+    totalBatch:(l,g,tot)=>`Total batch: ${l} × ${g}g = ${tot}g`,
+    perLoaf:n=>`Per loaf (÷${n})`,
+    splitsOk:'✓ Splits total 100%', splitsWarn:s=>`Splits total ${s}% (must = 100%)`,
+    negativeWater:'⚠ Negative — reduce basinage or levain %',
+    saveRecipeTitle:'Save Recipe', updateRecipeTitle:'Update Recipe',
+    recipeNameLabel:'Recipe Name', recipeDescLabel:'Description (optional)', recipeNotesLabel:'Notes (optional)',
+    recipeNamePlaceholder:'e.g. Saturday Country Loaf', recipeDescPlaceholder:'Short description',
+    recipeNotesPlaceholder:'Method, timing, observations…',
+    saveBtn:'Save', updateBtn:'Update', deleteBtn:'Delete',
+    deleteRecipeTitle:'Delete Recipe', deleteProductTitle:'Delete Product',
+    deleteRecipeConfirm:name=>`Delete <strong>${name}</strong>? This cannot be undone.`,
+    deleteProductConfirm:name=>`Delete <strong>${name}</strong>?<br><span class="text-muted text-sm">Any recipe rows using this product will show as unset.</span>`,
+    addProductTitle:'Add Product', editProductTitle:'Edit Product',
+    productNameLabel:'Name', productTypeLabel:'Type', productProteinLabel:'Protein % (flours only)',
+    productNotesLabel:'Notes', productNamePlaceholder:'Product name', productNotesPlaceholder:'Optional notes',
+    saveChangesBtn:'Save Changes', addProductBtn:'Add Product',
+    builtInTag:'built-in',
+    noProductsMsg:'No products. Add one above.',
+    noRecipesMsg:'No recipes yet.<br>Build a dough in the Calculator and save it here.',
+    savedDate:d=>`Saved ${d}`,
+    scaleLabel:(l,g)=>` — ${l} loaf${l>1?'s':''} × ${g}g`,
+    btnLoad:'Load', btnDuplicate:'Duplicate', btnDelete:'Delete', btnEdit:'Edit',
+    recipeSummary:(h,l,f)=>`${h}% hydration · ${l}% levain · ${f}`,
+    noFlour:'no flour',
+    pdfBatch:'Batch', pdfHydration:'Hydration', pdfLevainPct:'Levain %',
+    pdfTotalDough:'Total dough', pdfNotes:'Notes', pdfFooter:'Generated by Sourdough Studio',
+    pdfLevainWater:'Levain water', pdfMainWater:'Main Dough Water',
+    pdfBasinage:'Basinage (held back)', pdfSalt:'Salt', pdfTotalDoughRow:'Total Dough',
+    pdfPerLoaf:n=>`Per loaf (÷${n})`, pdfNegative:'⚠ negative',
+  },
+  he: {
+    tabCalculator:'מחשבון', tabRecipes:'מתכונים', tabProducts:'מוצרים',
+    cardBatch:'אצווה', cardMainFlour:'קמח ראשי', cardLevain:'מחמצת / סטרטר',
+    cardWater:'מים', cardSalt:'מלח', cardAddins:'תוספות אופציונליות', cardResults:'תוצאות',
+    labelLoaves:'מספר כיכרות', labelGPerLoaf:'משקל בצק לכיכר',
+    labelTotalHydration:'הידרציה כוללת',
+    labelLevainPct:'% מחמצת <span style="font-weight:400;color:var(--text-muted)">(% אופה)</span>',
+    labelLevainHydration:'הידרציית מחמצת',
+    hintLevainPct:'משקל מחמצת כולל כ-% מסך הקמח',
+    labelMainWater:'מי בצק ראשי', hintMainWater:'מחושב מהידרציה הכוללת',
+    labelBasinage:'בסינאז׳ (מים שמורים)', hintBasinage:'% מסך הקמח, מוסף בערבוב הסופי',
+    labelSalt:'מלח',
+    btnAddFlour:'+ הוסף קמח', btnAddLevainFlour:'+ הוסף קמח למחמצת', btnAddAddin:'+ הוסף מרכיב',
+    btnSaveRecipe:'שמור מתכון', btnCopy:'העתק', btnAddProduct:'+ הוסף מוצר',
+    btnCancel:'ביטול', btnConfirm:'אישור',
+    titleRecipes:'מתכונים', searchPlaceholder:'חפש מתכונים…',
+    colName:'שם', colType:'סוג', colProtein:'% חלבון', colNotes:'הערות',
+    rowTotalFlour:'סך קמח', rowLevain:'מחמצת', rowLevainWater:'מים במחמצת',
+    rowMainWater:'מי בצק ראשי', rowBasinage:'בסינאז׳', rowSalt:'מלח',
+    rowTotalDough:'סך בצק', rowTotalHydration:'הידרציה כוללת', rowLevainPct:'% מחמצת',
+    totalBatch:(l,g,tot)=>`סך אצווה: ${l} × ${g}ג = ${tot}ג`,
+    perLoaf:n=>`לכיכר (÷${n})`,
+    splitsOk:'✓ סך פיצולים 100%', splitsWarn:s=>`סך פיצולים ${s}% (חייב = 100%)`,
+    negativeWater:'⚠ שלילי — הפחת בסינאז׳ או % מחמצת',
+    saveRecipeTitle:'שמור מתכון', updateRecipeTitle:'עדכן מתכון',
+    recipeNameLabel:'שם המתכון', recipeDescLabel:'תיאור (אופציונלי)', recipeNotesLabel:'הערות (אופציונלי)',
+    recipeNamePlaceholder:'לדוגמה: כיכר שבת', recipeDescPlaceholder:'תיאור קצר',
+    recipeNotesPlaceholder:'שיטה, תזמון, תצפיות…',
+    saveBtn:'שמור', updateBtn:'עדכן', deleteBtn:'מחק',
+    deleteRecipeTitle:'מחיקת מתכון', deleteProductTitle:'מחיקת מוצר',
+    deleteRecipeConfirm:name=>`למחוק <strong>${name}</strong>? פעולה זו אינה ניתנת לביטול.`,
+    deleteProductConfirm:name=>`למחוק <strong>${name}</strong>?<br><span class="text-muted text-sm">שורות המשתמשות במוצר זה יוצגו כלא מוגדרות.</span>`,
+    addProductTitle:'הוסף מוצר', editProductTitle:'ערוך מוצר',
+    productNameLabel:'שם', productTypeLabel:'סוג', productProteinLabel:'% חלבון (לקמחים)',
+    productNotesLabel:'הערות', productNamePlaceholder:'שם המוצר', productNotesPlaceholder:'הערות אופציונליות',
+    saveChangesBtn:'שמור שינויים', addProductBtn:'הוסף מוצר',
+    builtInTag:'מובנה',
+    noProductsMsg:'אין מוצרים. הוסף מוצר למעלה.',
+    noRecipesMsg:'אין מתכונים עדיין.<br>חשב בצק במחשבון ושמור כאן.',
+    savedDate:d=>`נשמר ${d}`,
+    scaleLabel:(l,g)=>` — ${l} כיכר${l>1?'ות':''} × ${g}ג`,
+    btnLoad:'טען', btnDuplicate:'שכפל', btnDelete:'מחק', btnEdit:'ערוך',
+    recipeSummary:(h,l,f)=>`${h}% הידרציה · ${l}% מחמצת · ${f}`,
+    noFlour:'ללא קמח',
+    pdfBatch:'אצווה', pdfHydration:'הידרציה', pdfLevainPct:'% מחמצת',
+    pdfTotalDough:'סך בצק', pdfNotes:'הערות', pdfFooter:'נוצר על ידי Sourdough Studio',
+    pdfLevainWater:'מים במחמצת', pdfMainWater:'מי בצק ראשי',
+    pdfBasinage:'בסינאז׳ (מים שמורים)', pdfSalt:'מלח', pdfTotalDoughRow:'סך בצק',
+    pdfPerLoaf:n=>`לכיכר (÷${n})`, pdfNegative:'⚠ שלילי',
+  }
+};
+
+const PRODUCT_TYPES = ['flour','fat','liquid','seed','grain','other'];
+
+const DEFAULT_PRODUCTS = [
+  { id:'p-ap',   name:'All-Purpose Flour',   type:'flour', proteinPct:10.5, notes:'Versatile, lower protein', builtIn:true },
+  { id:'p-bf',   name:'Bread Flour',          type:'flour', proteinPct:12.7, notes:'High gluten, strong structure', builtIn:true },
+  { id:'p-ww',   name:'Whole Wheat Flour',    type:'flour', proteinPct:13.5, notes:'Nutty flavour, active fermentation', builtIn:true },
+  { id:'p-rye',  name:'Rye Flour',            type:'flour', proteinPct:9.0,  notes:'Dark, complex flavour', builtIn:true },
+  { id:'p-sp',   name:'Spelt Flour',          type:'flour', proteinPct:14.0, notes:'Ancient grain, slightly sweet', builtIn:true },
+  { id:'p-emm',  name:'Einkorn Flour',        type:'flour', proteinPct:17.0, notes:'Ancient wheat, nutty', builtIn:true },
+  { id:'p-rice', name:'White Rice Flour',     type:'flour', proteinPct:6.0,  notes:'Gluten-free, dusting', builtIn:true },
+  { id:'p-sem',  name:'Semolina',             type:'flour', proteinPct:13.0, notes:'Coarse, for dusting & crust', builtIn:true },
+  { id:'p-butter', name:'Unsalted Butter',    type:'fat',   proteinPct:null, notes:'Enriched doughs', builtIn:true },
+  { id:'p-oil',  name:'Olive Oil',            type:'fat',   proteinPct:null, notes:'Adds extensibility', builtIn:true },
+  { id:'p-ses',  name:'Sesame Seeds',         type:'seed',  proteinPct:null, notes:'Toasted for crust', builtIn:true },
+  { id:'p-sun',  name:'Sunflower Seeds',      type:'seed',  proteinPct:null, notes:'Soaked before adding', builtIn:true },
+  { id:'p-hon',  name:'Honey',               type:'other', proteinPct:null, notes:'Enrichment, crust colour', builtIn:true },
+];
+
+function defaultCalc() {
+  return {
+    loaves: 1,
+    gPerLoaf: 900,
+    totalHydrationPct: 75,
+    flourRows: [{ id: uid(), productId: 'p-bf', splitPct: 100 }],
+    levain: {
+      flourRows: [{ id: uid(), productId: 'p-bf', splitPct: 100 }],
+      hydrationPct: 100,
+      flourPct: 20,
+    },
+    basinagePct: 5,
+    saltPct: 2,
+    addIns: []
+  };
+}
+
+// ════════════════════════════════════════════════
+// 2. STORAGE & STATE
+// ════════════════════════════════════════════════
+
+let state = { products:[], recipes:[], calculator: defaultCalc(), activeTab:'calculator', lang:'en', theme:'light' };
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const saved = JSON.parse(raw);
+      state.products   = saved.products   || DEFAULT_PRODUCTS;
+      state.recipes    = saved.recipes    || [];
+      state.calculator = saved.calculator || defaultCalc();
+      state.activeTab  = saved.activeTab  || 'calculator';
+      state.lang  = saved.lang  || 'en';
+      state.theme = saved.theme || 'light';
+    } else {
+      state.products = DEFAULT_PRODUCTS.map(p => ({...p}));
+    }
+  } catch(e) {
+    state.products = DEFAULT_PRODUCTS.map(p => ({...p}));
+  }
+}
+
+let _saveTimer = null;
+function saveState() {
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      products:   state.products,
+      recipes:    state.recipes,
+      calculator: state.calculator,
+      activeTab:  state.activeTab,
+      lang:       state.lang,
+      theme:      state.theme
+    }));
+  }, 300);
+}
+
+function uid() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
+  return 'id-' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
+
+function deepClone(obj) { return JSON.parse(JSON.stringify(obj)); }
+
+// ════════════════════════════════════════════════
+// 2b. I18N & THEME
+// ════════════════════════════════════════════════
+
+function t(key, ...args) {
+  const lang = state.lang || 'en';
+  const val = (TRANSLATIONS[lang] || TRANSLATIONS.en)[key] ?? TRANSLATIONS.en[key] ?? key;
+  return typeof val === 'function' ? val(...args) : val;
+}
+
+function applyLang() {
+  const lang = state.lang || 'en';
+  document.documentElement.lang = lang;
+  document.documentElement.dir  = lang === 'he' ? 'rtl' : 'ltr';
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = t(el.dataset.i18n);
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    el.innerHTML = t(el.dataset.i18nHtml);
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    el.placeholder = t(el.dataset.i18nPlaceholder);
+  });
+  const btnLang = document.getElementById('btn-lang');
+  if (btnLang) btnLang.textContent = lang === 'he' ? 'EN' : 'עב';
+  renderResults();
+  renderRecipesTab();
+  renderProductsTab();
+}
+
+function applyTheme() {
+  const theme = state.theme || 'light';
+  document.documentElement.dataset.theme = theme === 'dark' ? 'dark' : '';
+  const btnTheme = document.getElementById('btn-theme');
+  if (btnTheme) btnTheme.textContent = theme === 'dark' ? '☀️' : '🌙';
+}
+
+// ════════════════════════════════════════════════
+// 3. CALCULATOR ENGINE
+// ════════════════════════════════════════════════
+
+function computeIngredients(calc) {
+  const loaves         = parseFloat(calc.loaves)            || 1;
+  const gPerLoaf       = parseFloat(calc.gPerLoaf)          || 0;
+  const totalHydPct    = parseFloat(calc.totalHydrationPct) || 0;
+  const basinagePct    = parseFloat(calc.basinagePct)       || 0;
+  const saltPct        = parseFloat(calc.saltPct)           || 0;
+  const levainPct      = parseFloat(calc.levain.flourPct)     || 0;
+  const levainHydPct   = parseFloat(calc.levain.hydrationPct) || 0;
+
+  const totalDoughTarget = loaves * gPerLoaf;
+  const addInSum = (calc.addIns || []).reduce((s,a) => s + (parseFloat(a.pct)||0), 0);
+
+  // flour = totalDough / (1 + totalHyd/100 + salt/100 + addIns/100)
+  const K = 1 + totalHydPct/100 + saltPct/100 + addInSum/100;
+  const flourWeight = (K > 0 && totalDoughTarget > 0) ? totalDoughTarget / K : 0;
+
+  const totalWater  = flourWeight * totalHydPct / 100;
+  // levainPct = total levain (flour+water) as % of total flour
+  const levainTotal = flourWeight * levainPct / 100;
+  const levainFlour = (levainHydPct > 0) ? levainTotal / (1 + levainHydPct/100) : levainTotal;
+  const levainWater = levainTotal - levainFlour;
+  const basinage    = flourWeight * basinagePct / 100;
+  const mainWater   = totalWater - levainWater - basinage;
+  const salt        = flourWeight * saltPct / 100;
+
+  const addIns = (calc.addIns || []).map(a => ({
+    productId: a.productId,
+    pct: parseFloat(a.pct) || 0,
+    weight: flourWeight * (parseFloat(a.pct)||0) / 100
+  }));
+  const addInsTotal = addIns.reduce((s,a) => s + a.weight, 0);
+
+  const totalDoughWeight = flourWeight + totalWater + salt + addInsTotal;
+
+  const mainFlourSum = (calc.flourRows||[]).reduce((s,r) => s + (parseFloat(r.splitPct)||0), 0);
+  const flourBreakdown = (calc.flourRows||[]).map(r => ({
+    productId: r.productId,
+    pct: parseFloat(r.splitPct) || 0,
+    weight: flourWeight * (parseFloat(r.splitPct)||0) / 100
+  }));
+
+  const levainFlourSum = (calc.levain.flourRows||[]).reduce((s,r) => s + (parseFloat(r.splitPct)||0), 0);
+  const levainFlourBreakdown = (calc.levain.flourRows||[]).map(r => ({
+    productId: r.productId,
+    pct: parseFloat(r.splitPct) || 0,
+    weight: levainFlour * (parseFloat(r.splitPct)||0) / 100
+  }));
+
+  return {
+    flourWeight, flourBreakdown, mainFlourSum,
+    levainFlour, levainFlourBreakdown, levainFlourSum,
+    levainWater, levainTotal, levainPct,
+    mainWater, mainWaterNegative: mainWater < 0,
+    basinage, salt,
+    addIns, addInsTotal,
+    totalDoughWeight, totalDoughTarget,
+    totalHydration: totalHydPct
+  };
+}
+
+// ════════════════════════════════════════════════
+// 4. PRODUCT HELPERS
+// ════════════════════════════════════════════════
+
+function productName(id) {
+  const p = state.products.find(p => p.id === id);
+  return p ? p.name : '(unknown)';
+}
+
+function flourProducts() {
+  return state.products.filter(p => p.type === 'flour');
+}
+
+function buildProductOptions(selectedId, filterType) {
+  const list = filterType ? state.products.filter(p => p.type === filterType) : state.products;
+  let html = '<option value="">— select —</option>';
+  for (const p of list) {
+    html += `<option value="${p.id}" ${p.id === selectedId ? 'selected' : ''}>${esc(p.name)}</option>`;
+  }
+  return html;
+}
+
+function esc(str) {
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function fmt(g) {
+  if (!isFinite(g) || g === 0) return '—';
+  return g.toFixed(1) + 'g';
+}
+
+function fmtPct(p) {
+  if (!isFinite(p)) return '—';
+  return p.toFixed(1) + '%';
+}
+
+// ════════════════════════════════════════════════
+// 5. RENDER: FLOUR ROWS
+// ════════════════════════════════════════════════
+
+function renderFlourRows(containerId, rows, namespace, filterType) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = rows.map((row, idx) => `
+    <div class="flour-row" data-ns="${namespace}" data-id="${row.id}">
+      <select class="fr-product" data-ns="${namespace}" data-id="${row.id}">
+        ${buildProductOptions(row.productId, filterType)}
+      </select>
+      <input type="number" class="pct-input fr-split" min="0" max="100" step="0.5"
+        value="${row.splitPct}" data-ns="${namespace}" data-id="${row.id}">
+      <span class="input-suffix">%</span>
+      ${rows.length > 1 ? `<button class="remove-btn" data-ns="${namespace}" data-id="${row.id}" title="Remove">✕</button>` : '<span style="width:28px"></span>'}
+    </div>
+  `).join('');
+}
+
+function renderSumIndicator(elId, sum) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  if (Math.abs(sum - 100) < 0.05) {
+    el.innerHTML = `<span class="badge badge-success">${t('splitsOk')}</span>`;
+  } else {
+    el.innerHTML = `<span class="badge badge-warning">${t('splitsWarn', sum.toFixed(1))}</span>`;
+  }
+}
+
+// ════════════════════════════════════════════════
+// 6. RENDER: RESULTS
+// ════════════════════════════════════════════════
+
+function renderResults() {
+  const calc = state.calculator;
+  const c = computeIngredients(calc);
+  const tbody = document.getElementById('results-body');
+  if (!tbody) return;
+
+  // Update calculated main water display in Water card
+  const mwd = document.getElementById('mainWater-display');
+  if (mwd) {
+    if (c.mainWaterNegative) {
+      mwd.innerHTML = `<span style="color:var(--danger);font-size:12px">${t('negativeWater')}</span>`;
+    } else {
+      const pct = c.flourWeight > 0 ? ` (${fmtPct(c.mainWater / c.flourWeight * 100)})` : '';
+      mwd.textContent = fmt(c.mainWater) + pct;
+    }
+  }
+
+  // Update batch total display
+  const btd = document.getElementById('batch-total-display');
+  if (btd) {
+    const loaves = parseFloat(calc.loaves) || 1;
+    const g = parseFloat(calc.gPerLoaf) || 0;
+    btd.textContent = g > 0 ? t('totalBatch', loaves, g, (loaves*g).toFixed(0)) : '';
+  }
+
+  const rows = [];
+  const tr = (label, weight, cls='') => `<tr class="${cls}"><td>${label}</td><td>${weight}</td></tr>`;
+
+  // Flour
+  rows.push(tr(`<strong>${t('rowTotalFlour')}</strong>`, `<strong>${fmt(c.flourWeight)}</strong>`));
+  if (c.flourBreakdown.length > 1 || c.flourBreakdown.some(r => r.productId)) {
+    for (const f of c.flourBreakdown) {
+      const name = f.productId ? productName(f.productId) : '(unset)';
+      rows.push(tr(`↳ ${esc(name)} <span class="text-muted text-sm">${fmtPct(f.pct)}</span>`, fmt(f.weight), 'row-sub'));
+    }
+  }
+  rows.push(tr('','','row-divider'));
+
+  // Levain
+  rows.push(tr(`<strong>${t('rowLevain')}</strong>`, `<strong>${fmt(c.levainTotal)}</strong>`));
+  if (c.levainFlourBreakdown.length > 1 || c.levainFlourBreakdown.some(r => r.productId)) {
+    for (const f of c.levainFlourBreakdown) {
+      const name = f.productId ? productName(f.productId) : '(unset)';
+      rows.push(tr(`↳ ${esc(name)} flour <span class="text-muted text-sm">${fmtPct(f.pct)}</span>`, fmt(f.weight), 'row-sub'));
+    }
+  }
+  rows.push(tr(`↳ ${t('rowLevainWater')}`, fmt(c.levainWater), 'row-sub'));
+  rows.push(tr('','','row-divider'));
+
+  // Water
+  const mainWaterCell = c.mainWaterNegative
+    ? `<span style="color:var(--danger)">⚠ negative</span>`
+    : fmt(c.mainWater);
+  rows.push(tr(t('rowMainWater'), mainWaterCell));
+  rows.push(tr(t('rowBasinage'), fmt(c.basinage)));
+  rows.push(tr('','','row-divider'));
+
+  // Salt
+  rows.push(tr(t('rowSalt'), fmt(c.salt)));
+
+  // Add-ins
+  if (c.addIns.length > 0) {
+    rows.push(tr('','','row-divider'));
+    for (const a of c.addIns) {
+      const name = a.productId ? productName(a.productId) : '(unset)';
+      rows.push(tr(`${esc(name)} <span class="text-muted text-sm">${fmtPct(a.pct)}</span>`, fmt(a.weight)));
+    }
+  }
+
+  rows.push(tr('','','row-divider'));
+  rows.push(tr(`<strong>${t('rowTotalDough')}</strong>`, `<strong>${fmt(c.totalDoughWeight)}</strong>`, 'row-total'));
+  const loaves = parseFloat(calc.loaves) || 1;
+  if (loaves > 1) rows.push(tr(t('perLoaf', loaves), fmt(c.totalDoughWeight / loaves), 'row-stat'));
+  rows.push(tr(t('rowTotalHydration'), fmtPct(c.totalHydration), 'row-stat'));
+  rows.push(tr(t('rowLevainPct'), fmtPct(c.levainPct), 'row-stat'));
+
+  tbody.innerHTML = rows.join('');
+
+  // Badge
+  const badge = document.getElementById('results-hydration-badge');
+  if (badge) {
+    const h = c.totalHydration;
+    if (h < 65)       badge.innerHTML = `<span class="badge badge-warning">${h.toFixed(0)}% hydration</span>`;
+    else if (h <= 85) badge.innerHTML = `<span class="badge badge-success">${h.toFixed(0)}% hydration</span>`;
+    else              badge.innerHTML = `<span class="badge badge-danger">${h.toFixed(0)}% hydration</span>`;
+  }
+
+  // Sum indicators
+  renderSumIndicator('main-flour-sum', c.mainFlourSum);
+  renderSumIndicator('levain-flour-sum', c.levainFlourSum);
+}
+
+// ════════════════════════════════════════════════
+// 7. RENDER: CALCULATOR TAB
+// ════════════════════════════════════════════════
+
+function renderCalculatorTab() {
+  const calc = state.calculator;
+
+  // Batch / hydration
+  document.getElementById('batch-loaves').value   = calc.loaves ?? 1;
+  document.getElementById('batch-weight').value   = calc.gPerLoaf ?? 900;
+  document.getElementById('totalHydration').value = calc.totalHydrationPct ?? 75;
+
+  // Main flour rows
+  renderFlourRows('main-flour-rows', calc.flourRows || [], 'main', 'flour');
+
+  // Levain
+  renderFlourRows('levain-flour-rows', calc.levain.flourRows || [], 'levain', 'flour');
+  document.getElementById('levainFlourPct').value  = calc.levain.flourPct ?? 20;
+  document.getElementById('levainHydration').value = calc.levain.hydrationPct ?? 100;
+
+  // Water / salt
+  document.getElementById('basinage').value = calc.basinagePct ?? 5;
+  document.getElementById('saltPct').value  = calc.saltPct ?? 2;
+
+  // Add-ins
+  renderAddInRows();
+
+  // Results
+  renderResults();
+}
+
+function renderAddInRows() {
+  const container = document.getElementById('addins-rows');
+  if (!container) return;
+  const rows = state.calculator.addIns || [];
+  container.innerHTML = rows.map(row => `
+    <div class="flour-row" data-ns="addin" data-id="${row.id}">
+      <select class="fr-product" data-ns="addin" data-id="${row.id}">
+        ${buildProductOptions(row.productId, null)}
+      </select>
+      <input type="number" class="pct-input fr-split" min="0" max="500" step="0.5"
+        value="${row.pct}" data-ns="addin" data-id="${row.id}">
+      <span class="input-suffix">%</span>
+      <button class="remove-btn" data-ns="addin" data-id="${row.id}" title="Remove">✕</button>
+    </div>
+  `).join('');
+}
+
+// ════════════════════════════════════════════════
+// 8. RENDER: RECIPES TAB
+// ════════════════════════════════════════════════
+
+function recipeSummary(calc) {
+  try {
+    const c = computeIngredients(calc);
+    const flours = (calc.flourRows||[])
+      .filter(r => r.productId)
+      .map(r => productName(r.productId))
+      .join(' + ');
+    return t('recipeSummary', c.totalHydration.toFixed(0), c.levainPct.toFixed(0), flours || t('noFlour'));
+  } catch(e) { return ''; }
+}
+
+function renderRecipesTab() {
+  const grid = document.getElementById('recipe-grid');
+  if (!grid) return;
+  const q = (document.getElementById('recipe-search')?.value || '').toLowerCase();
+  const recipes = state.recipes
+    .filter(r => !q || r.name.toLowerCase().includes(q) || (r.description||'').toLowerCase().includes(q))
+    .sort((a,b) => b.updatedAt - a.updatedAt);
+
+  if (recipes.length === 0) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+      <div class="icon">📋</div>
+      <p>${t('noRecipesMsg')}</p>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = recipes.map(r => {
+    const locale = state.lang === 'he' ? 'he-IL' : 'en-US';
+    const date = new Date(r.updatedAt).toLocaleDateString(locale, {month:'short',day:'numeric',year:'numeric'});
+    return `
+    <div class="recipe-card">
+      <h3>${esc(r.name)}</h3>
+      ${r.description ? `<div class="desc">${esc(r.description)}</div>` : ''}
+      <div class="summary">${esc(recipeSummary(r.calculator))}</div>
+      <div class="meta">${t('savedDate', date)}</div>
+      <div class="recipe-card-actions">
+        <button class="btn btn-primary btn-sm" data-action="load-recipe" data-id="${r.id}">${t('btnLoad')}</button>
+        <button class="btn btn-secondary btn-sm" data-action="dup-recipe" data-id="${r.id}">${t('btnDuplicate')}</button>
+        <button class="btn btn-secondary btn-sm" data-action="pdf-recipe" data-id="${r.id}">PDF</button>
+        <button class="btn btn-danger btn-sm" data-action="del-recipe" data-id="${r.id}">${t('btnDelete')}</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════════
+// 9. RENDER: PRODUCTS TAB
+// ════════════════════════════════════════════════
+
+function renderProductsTab() {
+  const tbody = document.getElementById('products-tbody');
+  if (!tbody) return;
+
+  if (state.products.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" class="empty-state" style="text-align:center;padding:40px;color:var(--text-muted)">${t('noProductsMsg')}</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = state.products.map(p => `
+    <tr>
+      <td>
+        ${esc(p.name)}
+        ${p.builtIn ? `<span class="builtin-tag">${t('builtInTag')}</span>` : ''}
+      </td>
+      <td style="text-transform:capitalize">${esc(p.type)}</td>
+      <td>${p.proteinPct != null ? p.proteinPct + '%' : '—'}</td>
+      <td class="text-muted">${esc(p.notes||'')}</td>
+      <td style="white-space:nowrap;text-align:right">
+        <button class="btn btn-secondary btn-sm" data-action="edit-product" data-id="${p.id}">${t('btnEdit')}</button>
+        ${!p.builtIn ? `<button class="btn btn-danger btn-sm" data-action="del-product" data-id="${p.id}" style="margin-left:4px">${t('btnDelete')}</button>` : ''}
+      </td>
+    </tr>
+  `).join('');
+}
+
+// ════════════════════════════════════════════════
+// 10. MODAL SYSTEM
+// ════════════════════════════════════════════════
+
+let _modalConfirmFn = null;
+
+function openModal(title, bodyHTML, onConfirm, confirmLabel, confirmClass) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = bodyHTML;
+  document.getElementById('modal-confirm').textContent = confirmLabel || 'Confirm';
+  document.getElementById('modal-confirm').className = 'btn ' + (confirmClass || 'btn-primary');
+  _modalConfirmFn = onConfirm;
+  document.getElementById('modal').showModal();
+}
+
+function closeModal() {
+  document.getElementById('modal').close();
+  _modalConfirmFn = null;
+}
+
+document.getElementById('modal-cancel').addEventListener('click', closeModal);
+document.getElementById('modal-close-btn').addEventListener('click', closeModal);
+document.getElementById('modal-confirm').addEventListener('click', () => {
+  if (_modalConfirmFn) _modalConfirmFn();
+});
+document.getElementById('modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal')) closeModal();
+});
+
+// Language & Theme toggles
+document.getElementById('btn-lang')?.addEventListener('click', () => {
+  state.lang = state.lang === 'he' ? 'en' : 'he';
+  saveState();
+  applyLang();
+});
+
+document.getElementById('btn-theme')?.addEventListener('click', () => {
+  state.theme = state.theme === 'dark' ? 'light' : 'dark';
+  saveState();
+  applyTheme();
+});
+
+// ════════════════════════════════════════════════
+// 11. RECIPE CRUD
+// ════════════════════════════════════════════════
+
+function openSaveRecipeModal(existingId) {
+  const existing = existingId ? state.recipes.find(r => r.id === existingId) : null;
+  openModal(
+    existing ? t('updateRecipeTitle') : t('saveRecipeTitle'),
+    `<div class="field"><label>${t('recipeNameLabel')}</label>
+      <input type="text" id="m-name" value="${esc(existing?.name||'')}" placeholder="${t('recipeNamePlaceholder')}"></div>
+     <div class="field"><label>${t('recipeDescLabel')}</label>
+      <input type="text" id="m-desc" value="${esc(existing?.description||'')}" placeholder="${t('recipeDescPlaceholder')}"></div>
+     <div class="field"><label>${t('recipeNotesLabel')}</label>
+      <textarea id="m-notes" placeholder="${t('recipeNotesPlaceholder')}">${esc(existing?.notes||'')}</textarea></div>`,
+    () => {
+      const name = document.getElementById('m-name').value.trim();
+      if (!name) { alert(t('recipeNameLabel') + '?'); return; }
+      const desc  = document.getElementById('m-desc').value.trim();
+      const notes = document.getElementById('m-notes').value.trim();
+      if (existing) {
+        existing.name = name; existing.description = desc; existing.notes = notes;
+        existing.updatedAt = Date.now();
+        existing.calculator = deepClone(state.calculator);
+      } else {
+        state.recipes.push({
+          id: uid(), name, description: desc, notes,
+          createdAt: Date.now(), updatedAt: Date.now(),
+          calculator: deepClone(state.calculator)
+        });
+      }
+      saveState();
+      renderRecipesTab();
+      closeModal();
+    },
+    existing ? t('updateBtn') : t('saveBtn')
+  );
+  setTimeout(() => document.getElementById('m-name')?.focus(), 50);
+}
+
+function loadRecipe(id) {
+  const r = state.recipes.find(r => r.id === id);
+  if (!r) return;
+  state.calculator = deepClone(r.calculator);
+  saveState();
+  switchTab('calculator');
+  renderCalculatorTab();
+}
+
+function duplicateRecipe(id) {
+  const r = state.recipes.find(r => r.id === id);
+  if (!r) return;
+  const copy = deepClone(r);
+  copy.id = uid();
+  copy.name = r.name + ' (copy)';
+  copy.createdAt = copy.updatedAt = Date.now();
+  state.recipes.push(copy);
+  saveState();
+  renderRecipesTab();
+}
+
+function deleteRecipe(id) {
+  const r = state.recipes.find(r => r.id === id);
+  if (!r) return;
+  openModal(
+    t('deleteRecipeTitle'),
+    `<p>${t('deleteRecipeConfirm', esc(r.name))}</p>`,
+    () => {
+      state.recipes = state.recipes.filter(x => x.id !== id);
+      saveState(); renderRecipesTab(); closeModal();
+    },
+    t('deleteBtn'), 'btn-danger'
+  );
+}
+
+// ════════════════════════════════════════════════
+// 12. PRODUCT CRUD
+// ════════════════════════════════════════════════
+
+function openProductModal(id) {
+  const p = id ? state.products.find(p => p.id === id) : null;
+  const typeOpts = PRODUCT_TYPES.map(t =>
+    `<option value="${t}" ${(p?.type||'flour')===t?'selected':''}>${t.charAt(0).toUpperCase()+t.slice(1)}</option>`
+  ).join('');
+  openModal(
+    p ? t('editProductTitle') : t('addProductTitle'),
+    `<div class="field"><label>${t('productNameLabel')}</label>
+      <input type="text" id="m-pname" value="${esc(p?.name||'')}" placeholder="${t('productNamePlaceholder')}"></div>
+     <div class="field"><label>${t('productTypeLabel')}</label>
+      <select id="m-ptype">${typeOpts}</select></div>
+     <div class="field"><label>${t('productProteinLabel')}</label>
+      <input type="number" id="m-pprot" value="${p?.proteinPct??''}" min="0" max="30" step="0.1" placeholder="e.g. 12.7"></div>
+     <div class="field"><label>${t('productNotesLabel')}</label>
+      <input type="text" id="m-pnotes" value="${esc(p?.notes||'')}" placeholder="${t('productNotesPlaceholder')}"></div>`,
+    () => {
+      const name = document.getElementById('m-pname').value.trim();
+      if (!name) { alert(t('productNameLabel') + '?'); return; }
+      const type  = document.getElementById('m-ptype').value;
+      const prot  = document.getElementById('m-pprot').value;
+      const notes = document.getElementById('m-pnotes').value.trim();
+      const proteinPct = prot !== '' ? parseFloat(prot) : null;
+      if (p) {
+        p.name = name; p.type = type; p.proteinPct = proteinPct; p.notes = notes;
+      } else {
+        state.products.push({ id: uid(), name, type, proteinPct, notes, builtIn: false });
+      }
+      saveState();
+      renderProductsTab();
+      // Refresh dropdowns in calculator
+      renderFlourRows('main-flour-rows', state.calculator.flourRows||[], 'main', 'flour');
+      renderFlourRows('levain-flour-rows', state.calculator.levain.flourRows||[], 'levain', 'flour');
+      renderAddInRows();
+      closeModal();
+    },
+    p ? t('saveChangesBtn') : t('addProductBtn')
+  );
+  setTimeout(() => document.getElementById('m-pname')?.focus(), 50);
+}
+
+function deleteProduct(id) {
+  const p = state.products.find(p => p.id === id);
+  if (!p || p.builtIn) return;
+  openModal(
+    t('deleteProductTitle'),
+    `<p>${t('deleteProductConfirm', esc(p.name))}</p>`,
+    () => {
+      state.products = state.products.filter(x => x.id !== id);
+      // Clear references in calculator
+      (state.calculator.flourRows||[]).forEach(r => { if (r.productId===id) r.productId=''; });
+      (state.calculator.levain.flourRows||[]).forEach(r => { if (r.productId===id) r.productId=''; });
+      (state.calculator.addIns||[]).forEach(r => { if (r.productId===id) r.productId=''; });
+      saveState();
+      renderProductsTab();
+      renderFlourRows('main-flour-rows', state.calculator.flourRows||[], 'main', 'flour');
+      renderFlourRows('levain-flour-rows', state.calculator.levain.flourRows||[], 'levain', 'flour');
+      renderAddInRows();
+      renderResults();
+      closeModal();
+    },
+    t('deleteBtn'), 'btn-danger'
+  );
+}
+
+// ════════════════════════════════════════════════
+// 13. COPY RESULTS
+// ════════════════════════════════════════════════
+
+function copyResults() {
+  const c = computeIngredients(state.calculator);
+  const loaves   = parseFloat(state.calculator.loaves)   || 1;
+  const gPerLoaf = parseFloat(state.calculator.gPerLoaf) || 0;
+  const s = g => fmt(g);
+  const scaleLabel = gPerLoaf > 0 ? ` — ${loaves} loaf${loaves>1?'s':''} × ${gPerLoaf}g` : '';
+  const lines = [
+    '=== SOURDOUGH RECIPE ===' + scaleLabel,
+    '',
+    `Total Flour:       ${s(c.flourWeight)}`,
+  ];
+  if (c.flourBreakdown.length > 1 || c.flourBreakdown.some(r=>r.productId)) {
+    c.flourBreakdown.forEach(f => {
+      lines.push(`  ${productName(f.productId)} (${fmtPct(f.pct)}): ${s(f.weight)}`);
+    });
+  }
+  lines.push('');
+  lines.push(`Levain (total):    ${s(c.levainTotal)}`);
+  c.levainFlourBreakdown.forEach(f => {
+    lines.push(`  ${productName(f.productId)} flour (${fmtPct(f.pct)}): ${s(f.weight)}`);
+  });
+  lines.push(`  Water:           ${s(c.levainWater)}`);
+  lines.push(`  Starter:         ${s(c.levainCulture)}`);
+  lines.push('');
+  lines.push(`Main Water:        ${s(c.mainWater)}`);
+  lines.push(`Basinage:          ${s(c.basinage)}`);
+  lines.push(`Salt:              ${s(c.salt)}`);
+  if (c.addIns.length > 0) {
+    lines.push('');
+    c.addIns.forEach(a => lines.push(`${productName(a.productId)} (${fmtPct(a.pct)}): ${s(a.weight)}`));
+  }
+  lines.push('');
+  lines.push(`Total Dough:       ${s(c.totalDoughWeight)}`);
+  lines.push(`Total Hydration:   ${fmtPct(c.totalHydration)}`);
+  lines.push(`Levain %:          ${fmtPct(c.levainPct)}`);
+  const text = lines.join('\n');
+  navigator.clipboard?.writeText(text).then(() => {
+    const btn = document.getElementById('btn-copy-results');
+    if (btn) { const orig = btn.textContent; btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = orig, 1500); }
+  }).catch(() => {
+    // fallback
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+  });
+}
+
+// ════════════════════════════════════════════════
+// 14. TAB SWITCHING
+// ════════════════════════════════════════════════
+
+function switchTab(tab) {
+  state.activeTab = tab;
+  document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('#main-tabs button').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab)?.classList.add('active');
+  document.querySelector(`#main-tabs [data-tab="${tab}"]`)?.classList.add('active');
+  if (tab === 'recipes') renderRecipesTab();
+  if (tab === 'products') renderProductsTab();
+  saveState();
+}
+
+document.getElementById('main-tabs').addEventListener('click', e => {
+  const btn = e.target.closest('button[data-tab]');
+  if (btn) switchTab(btn.dataset.tab);
+});
+
+// ════════════════════════════════════════════════
+// 15. COLLAPSIBLE CARDS
+// ════════════════════════════════════════════════
+
+document.addEventListener('click', e => {
+  const header = e.target.closest('.card-header[data-collapse]');
+  if (header) {
+    const card = document.getElementById(header.dataset.collapse);
+    if (card) card.classList.toggle('collapsed');
+  }
+});
+
+// ════════════════════════════════════════════════
+// 16. CALCULATOR EVENT HANDLING
+// ════════════════════════════════════════════════
+
+function readCalcFromDOM() {
+  const calc = state.calculator;
+
+  // Batch / hydration
+  calc.loaves           = parseFloat(document.getElementById('batch-loaves')?.value)   || 1;
+  calc.gPerLoaf         = parseFloat(document.getElementById('batch-weight')?.value)   || 0;
+  calc.totalHydrationPct = parseFloat(document.getElementById('totalHydration')?.value) || 0;
+
+  // Salt / basinage
+  calc.basinagePct = parseFloat(document.getElementById('basinage')?.value) || 0;
+  calc.saltPct     = parseFloat(document.getElementById('saltPct')?.value)  || 0;
+
+  // Levain
+  calc.levain.flourPct     = parseFloat(document.getElementById('levainFlourPct')?.value)  || 0;
+  calc.levain.hydrationPct = parseFloat(document.getElementById('levainHydration')?.value) || 0;
+
+  // Flour rows
+  document.querySelectorAll('.flour-row[data-ns=main]').forEach(row => {
+    const id = row.dataset.id;
+    const r  = calc.flourRows.find(x => x.id === id);
+    if (r) {
+      r.productId = row.querySelector('.fr-product')?.value || '';
+      r.splitPct  = parseFloat(row.querySelector('.fr-split')?.value) || 0;
+    }
+  });
+
+  // Levain flour rows
+  document.querySelectorAll('.flour-row[data-ns=levain]').forEach(row => {
+    const id = row.dataset.id;
+    const r  = calc.levain.flourRows.find(x => x.id === id);
+    if (r) {
+      r.productId = row.querySelector('.fr-product')?.value || '';
+      r.splitPct  = parseFloat(row.querySelector('.fr-split')?.value) || 0;
+    }
+  });
+
+  // Add-in rows
+  document.querySelectorAll('.flour-row[data-ns=addin]').forEach(row => {
+    const id = row.dataset.id;
+    const r  = calc.addIns.find(x => x.id === id);
+    if (r) {
+      r.productId = row.querySelector('.fr-product')?.value || '';
+      r.pct       = parseFloat(row.querySelector('.fr-split')?.value) || 0;
+    }
+  });
+}
+
+// Input events on calculator
+document.getElementById('tab-calculator').addEventListener('input', e => {
+  if (e.target.name === 'baseMode' || e.target.closest('#tab-calculator')) {
+    readCalcFromDOM();
+    renderResults();
+    saveState();
+  }
+});
+
+// Button clicks
+document.getElementById('tab-calculator').addEventListener('click', e => {
+  // Add flour row
+  if (e.target.id === 'add-main-flour') {
+    readCalcFromDOM();
+    state.calculator.flourRows.push({ id: uid(), productId: 'p-bf', splitPct: 0 });
+    renderFlourRows('main-flour-rows', state.calculator.flourRows, 'main', 'flour');
+    renderResults(); saveState(); return;
+  }
+  if (e.target.id === 'add-levain-flour') {
+    readCalcFromDOM();
+    state.calculator.levain.flourRows.push({ id: uid(), productId: 'p-bf', splitPct: 0 });
+    renderFlourRows('levain-flour-rows', state.calculator.levain.flourRows, 'levain', 'flour');
+    renderResults(); saveState(); return;
+  }
+  if (e.target.id === 'add-addin') {
+    readCalcFromDOM();
+    state.calculator.addIns.push({ id: uid(), productId: '', pct: 0 });
+    renderAddInRows(); renderResults(); saveState(); return;
+  }
+
+  // Remove flour/addin row
+  const removeBtn = e.target.closest('.remove-btn');
+  if (removeBtn) {
+    readCalcFromDOM();
+    const ns = removeBtn.dataset.ns;
+    const id = removeBtn.dataset.id;
+    if (ns === 'main') {
+      if (state.calculator.flourRows.length > 1)
+        state.calculator.flourRows = state.calculator.flourRows.filter(r => r.id !== id);
+      renderFlourRows('main-flour-rows', state.calculator.flourRows, 'main', 'flour');
+    } else if (ns === 'levain') {
+      if (state.calculator.levain.flourRows.length > 1)
+        state.calculator.levain.flourRows = state.calculator.levain.flourRows.filter(r => r.id !== id);
+      renderFlourRows('levain-flour-rows', state.calculator.levain.flourRows, 'levain', 'flour');
+    } else if (ns === 'addin') {
+      state.calculator.addIns = state.calculator.addIns.filter(r => r.id !== id);
+      renderAddInRows();
+    }
+    renderResults(); saveState(); return;
+  }
+
+  // Save recipe
+  if (e.target.id === 'btn-save-recipe') {
+    readCalcFromDOM();
+    openSaveRecipeModal(); return;
+  }
+
+  // Copy results
+  if (e.target.id === 'btn-copy-results') {
+    readCalcFromDOM();
+    copyResults(); return;
+  }
+
+  // PDF from calculator
+  if (e.target.id === 'btn-pdf-results') {
+    readCalcFromDOM();
+    printRecipePDF(state.calculator, null, null); return;
+  }
+});
+
+// Recipes tab events
+document.getElementById('tab-recipes').addEventListener('click', e => {
+  const btn = e.target.closest('[data-action]');
+  if (!btn) return;
+  const { action, id } = btn.dataset;
+  if (action === 'load-recipe')   loadRecipe(id);
+  if (action === 'dup-recipe')    duplicateRecipe(id);
+  if (action === 'del-recipe')    deleteRecipe(id);
+  if (action === 'pdf-recipe') {
+    const r = state.recipes.find(x => x.id === id);
+    if (r) printRecipePDF(r.calculator, r.name, r.notes);
+  }
+});
+document.getElementById('recipe-search')?.addEventListener('input', () => renderRecipesTab());
+
+// Products tab events
+document.getElementById('btn-add-product')?.addEventListener('click', () => openProductModal(null));
+document.getElementById('tab-products').addEventListener('click', e => {
+  const btn = e.target.closest('[data-action]');
+  if (!btn) return;
+  const { action, id } = btn.dataset;
+  if (action === 'edit-product') openProductModal(id);
+  if (action === 'del-product')  deleteProduct(id);
+});
+
+// ════════════════════════════════════════════════
+// 17. PDF EXPORT
+// ════════════════════════════════════════════════
+
+function printRecipePDF(calc, name, notes) {
+  const c = computeIngredients(calc);
+  const title = name || 'Sourdough Recipe';
+  const loaves = parseFloat(calc.loaves) || 1;
+  const gPerLoaf = parseFloat(calc.gPerLoaf) || 0;
+  const date = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+
+  function row(label, value, sub) {
+    const indent = sub ? 'padding-left:24px;color:#7a6e5f;font-size:13px;' : '';
+    return `<tr style="${indent}"><td style="padding:6px 0;border-bottom:1px solid #e0d8cc;">${label}</td>
+            <td style="padding:6px 0;border-bottom:1px solid #e0d8cc;text-align:right;font-weight:${sub?'400':'500'}">${value}</td></tr>`;
+  }
+  function divider() {
+    return `<tr><td colspan="2" style="padding:2px 0;border-bottom:2px solid #c4622d;"></td></tr>`;
+  }
+
+  let ingredientRows = '';
+  // Flour
+  ingredientRows += divider();
+  ingredientRows += row('<strong>Total Flour</strong>', fmt(c.flourWeight));
+  c.flourBreakdown.forEach(f => {
+    if (f.productId) ingredientRows += row(`↳ ${productName(f.productId)} (${fmtPct(f.pct)})`, fmt(f.weight), true);
+  });
+  // Levain
+  ingredientRows += divider();
+  ingredientRows += row('<strong>Levain</strong>', fmt(c.levainTotal));
+  c.levainFlourBreakdown.forEach(f => {
+    if (f.productId) ingredientRows += row(`↳ ${productName(f.productId)} flour (${fmtPct(f.pct)})`, fmt(f.weight), true);
+  });
+  ingredientRows += row(`↳ ${t('pdfLevainWater')}`, fmt(c.levainWater), true);
+  // Water
+  ingredientRows += divider();
+  ingredientRows += row(t('pdfMainWater'), c.mainWaterNegative ? t('pdfNegative') : fmt(c.mainWater));
+  ingredientRows += row(t('pdfBasinage'), fmt(c.basinage));
+  // Salt
+  ingredientRows += divider();
+  ingredientRows += row(t('pdfSalt'), fmt(c.salt));
+  // Add-ins
+  if (c.addIns.length > 0) {
+    ingredientRows += divider();
+    c.addIns.forEach(a => {
+      if (a.productId) ingredientRows += row(`${productName(a.productId)} (${fmtPct(a.pct)})`, fmt(a.weight));
+    });
+  }
+  // Total
+  ingredientRows += `<tr><td colspan="2" style="padding:4px 0;"></td></tr>`;
+  ingredientRows += `<tr style="background:#f3efe8;"><td style="padding:8px 6px;font-weight:700;font-size:15px;">${t('pdfTotalDoughRow')}</td>
+    <td style="padding:8px 6px;font-weight:700;font-size:15px;text-align:right;">${fmt(c.totalDoughWeight)}</td></tr>`;
+  if (loaves > 1) ingredientRows += row(t('pdfPerLoaf', loaves), fmt(c.totalDoughWeight / loaves));
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <title>${title}</title>
+  <style>
+    @page { margin: 20mm 18mm; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, "Segoe UI", Georgia, serif; }
+    body { color: #2c2416; font-size: 14px; }
+    .header { border-bottom: 3px solid #c4622d; padding-bottom: 12px; margin-bottom: 20px; }
+    .header h1 { font-size: 24px; color: #c4622d; }
+    .header .meta { font-size: 12px; color: #7a6e5f; margin-top: 4px; }
+    .stats { display: flex; gap: 24px; margin-bottom: 20px; flex-wrap: wrap; }
+    .stat { background: #f3efe8; border-radius: 6px; padding: 10px 16px; }
+    .stat .val { font-size: 20px; font-weight: 700; color: #c4622d; }
+    .stat .lbl { font-size: 11px; color: #7a6e5f; text-transform: uppercase; letter-spacing: 0.5px; }
+    table { width: 100%; border-collapse: collapse; }
+    .notes { margin-top: 24px; padding: 12px 16px; background: #f3efe8; border-radius: 6px; font-size: 13px; white-space: pre-wrap; }
+    .notes h4 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #7a6e5f; margin-bottom: 6px; }
+    .footer { margin-top: 28px; font-size: 11px; color: #b0a89a; text-align: center; }
+  </style></head><body>
+  <div class="header">
+    <h1>🍞 ${title}</h1>
+    <div class="meta">Sourdough Studio &nbsp;·&nbsp; ${date}</div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="val">${loaves} × ${gPerLoaf}g</div><div class="lbl">${t('pdfBatch')}</div></div>
+    <div class="stat"><div class="val">${fmtPct(c.totalHydration)}</div><div class="lbl">${t('pdfHydration')}</div></div>
+    <div class="stat"><div class="val">${fmtPct(c.levainPct)}</div><div class="lbl">${t('pdfLevainPct')}</div></div>
+    <div class="stat"><div class="val">${fmt(c.totalDoughWeight)}</div><div class="lbl">${t('pdfTotalDough')}</div></div>
+  </div>
+  <table>${ingredientRows}</table>
+  ${notes ? `<div class="notes"><h4>${t('pdfNotes')}</h4>${notes}</div>` : ''}
+  <div class="footer">${t('pdfFooter')}</div>
+  </body></html>`;
+
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+  win.onload = () => { win.focus(); win.print(); };
+}
+
+// ════════════════════════════════════════════════
+// 18. INIT
+// ════════════════════════════════════════════════
+
+loadState();
+applyTheme();
+applyLang();
+switchTab(state.activeTab || 'calculator');
+renderCalculatorTab();
+renderProductsTab();
+
+</script>
+</body>
+</html>
