@@ -519,28 +519,95 @@ html[data-theme="dark"] {
 .btn-toggle:hover { background: var(--surface-alt); color: var(--text); }
 [dir="rtl"] .header-controls { margin-left: 0; margin-right: auto; }
 [dir="rtl"] .input-suffix { margin-left: 0; margin-right: -6px; }
+
+/* ── AUTH OVERLAY ── */
+#auth-overlay {
+  display: none; position: fixed; inset: 0; z-index: 9999;
+  background: var(--bg); align-items: center; justify-content: center;
+}
+.auth-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; padding: 40px 36px; width: 100%; max-width: 400px;
+  box-shadow: 0 8px 40px rgba(0,0,0,.12);
+}
+.auth-logo { font-size: 28px; font-weight: 800; text-align: center; margin-bottom: 28px; color: var(--text); }
+.auth-logo span { color: var(--primary); }
+.auth-mode-tabs { display: flex; gap: 0; margin-bottom: 24px; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
+.auth-mode-tab { flex: 1; padding: 10px; background: var(--surface-alt); border: none; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--text-muted); transition: all .15s; }
+.auth-mode-tab.active { background: var(--primary); color: #fff; }
+#auth-error { color: var(--danger); font-size: 13px; min-height: 18px; margin-bottom: 8px; }
+#auth-success { color: var(--success); font-size: 13px; min-height: 18px; margin-bottom: 8px; }
+.auth-submit { width: 100%; margin-top: 16px; padding: 12px; font-size: 15px; font-weight: 700; }
+.auth-forgot { text-align: center; margin-top: 12px; font-size: 13px; color: var(--text-muted); }
+.auth-forgot a { color: var(--primary); cursor: pointer; text-decoration: none; }
+
+/* ── USER MENU ── */
+.user-chip { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); }
+.user-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+#btn-logout { font-size: 12px; padding: 4px 10px; }
+
+/* ── SHARE BADGE ── */
+.badge-public { background: #d1fae5; color: #065f46; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
+.dark .badge-public { background: #064e3b; color: #6ee7b7; }
+.recipe-card-share { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+
+/* ── COMMUNITY TAB ── */
+.community-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.community-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.community-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+.community-card .author { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+.community-card h3 { margin: 0 0 6px; font-size: 16px; }
+.community-card .summary { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body>
 
-<header>
+<!-- ══ AUTH OVERLAY ══ -->
+<div id="auth-overlay">
+  <div class="auth-card">
+    <div class="auth-logo">🍞 Sourdough <span>Studio</span></div>
+    <div class="auth-mode-tabs">
+      <button class="auth-mode-tab active" data-auth-mode="login">Sign In</button>
+      <button class="auth-mode-tab" data-auth-mode="register">Create Account</button>
+    </div>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="auth-email" placeholder="your@email.com" autocomplete="email">
+    </div>
+    <div class="field" style="margin-top:12px">
+      <label>Password</label>
+      <input type="password" id="auth-password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <div id="auth-error"></div>
+    <div id="auth-success"></div>
+    <button class="btn btn-primary auth-submit" id="auth-submit">Sign In</button>
+  </div>
+</div>
+
+<header style="display:none">
   <div class="header-inner">
     <div class="logo">🍞 Sourdough <span>Studio</span></div>
     <nav class="tabs" id="main-tabs">
       <button data-tab="calculator" class="active" data-i18n="tabCalculator">Calculator</button>
       <button data-tab="recipes" data-i18n="tabRecipes">Recipes</button>
+      <button data-tab="community">🌐 Community</button>
       <button data-tab="products" data-i18n="tabProducts">Products</button>
     </nav>
     <div class="header-controls">
       <span id="cloud-status" style="font-size:12px;transition:opacity 1s;opacity:0;"></span>
+      <div class="user-chip">
+        <div class="user-avatar" id="user-avatar">?</div>
+        <span id="user-email" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+      </div>
+      <button class="btn btn-ghost btn-sm" id="btn-logout" style="display:none">Logout</button>
       <button id="btn-lang" class="btn-toggle" title="Switch Language">עב</button>
       <button id="btn-theme" class="btn-toggle" title="Toggle Dark Mode">🌙</button>
     </div>
   </div>
 </header>
 
-<main>
+<main style="display:none">
   <!-- ══ CALCULATOR TAB ══ -->
   <section class="tab-section active" id="tab-calculator">
     <div class="calc-layout">
@@ -706,6 +773,17 @@ html[data-theme="dark"] {
     <div class="recipe-grid" id="recipe-grid"></div>
   </section>
 
+  <!-- ══ COMMUNITY TAB ══ -->
+  <section class="tab-section" id="tab-community">
+    <div class="community-header">
+      <h2 class="section-title" style="margin:0">🌐 Community Recipes</h2>
+      <input type="text" class="search-input" id="community-search" placeholder="Search shared recipes…">
+    </div>
+    <div class="community-grid" id="community-grid">
+      <div class="empty-state"><div class="icon">🌐</div><p>Loading shared recipes…</p></div>
+    </div>
+  </section>
+
   <!-- ══ PRODUCTS TAB ══ -->
   <section class="tab-section" id="tab-products">
     <div class="products-toolbar">
@@ -755,6 +833,81 @@ const STORAGE_KEY = 'sourdough_studio_v1';
 const SB_URL = 'https://wzyfiazxqubkrtgiszsh.supabase.co';
 const SB_KEY = 'sb_publishable_rd0y1evNyaHYgpCz5xtMDw_u_RanBVA';
 const sb = supabase.createClient(SB_URL, SB_KEY);
+let currentUser = null;
+
+// ── AUTH ──────────────────────────────────────────
+function showAuthScreen() {
+  document.getElementById('auth-overlay').style.display = 'flex';
+  document.querySelector('header').style.display = 'none';
+  document.querySelector('main').style.display = 'none';
+}
+function hideAuthScreen() {
+  document.getElementById('auth-overlay').style.display = 'none';
+  document.querySelector('header').style.display = '';
+  document.querySelector('main').style.display = '';
+  const email = currentUser?.email || '';
+  document.getElementById('user-email').textContent = email;
+  document.getElementById('user-avatar').textContent = email.charAt(0).toUpperCase();
+  document.getElementById('btn-logout').style.display = '';
+}
+
+let _authMode = 'login';
+document.querySelectorAll('.auth-mode-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    _authMode = btn.dataset.authMode;
+    document.querySelectorAll('.auth-mode-tab').forEach(b => b.classList.toggle('active', b.dataset.authMode === _authMode));
+    document.getElementById('auth-submit').textContent = _authMode === 'login' ? 'Sign In' : 'Create Account';
+    document.getElementById('auth-error').textContent = '';
+    document.getElementById('auth-success').textContent = '';
+  });
+});
+
+document.getElementById('auth-submit').addEventListener('click', async () => {
+  const email    = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  const errEl    = document.getElementById('auth-error');
+  const okEl     = document.getElementById('auth-success');
+  errEl.textContent = ''; okEl.textContent = '';
+  if (!email || !password) { errEl.textContent = 'Please enter email and password.'; return; }
+  const btn = document.getElementById('auth-submit');
+  btn.disabled = true; btn.textContent = '…';
+  try {
+    if (_authMode === 'login') {
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) errEl.textContent = error.message;
+    } else {
+      const { error } = await sb.auth.signUp({ email, password });
+      if (error) errEl.textContent = error.message;
+      else okEl.textContent = 'Account created! Check your email to confirm, then sign in.';
+    }
+  } catch(e) { errEl.textContent = e.message; }
+  finally { btn.disabled = false; btn.textContent = _authMode === 'login' ? 'Sign In' : 'Create Account'; }
+});
+
+document.getElementById('auth-email').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('auth-password').focus(); });
+document.getElementById('auth-password').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('auth-submit').click(); });
+
+document.getElementById('btn-logout').addEventListener('click', async () => {
+  await sb.auth.signOut();
+});
+
+async function initAuth() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session?.user) { currentUser = session.user; hideAuthScreen(); startApp(); }
+  else showAuthScreen();
+
+  sb.auth.onAuthStateChange((event, session) => {
+    if (session?.user) {
+      currentUser = session.user;
+      hideAuthScreen();
+      if (event === 'SIGNED_IN') startApp();
+    } else {
+      currentUser = null;
+      state.recipes = []; state.products = DEFAULT_PRODUCTS.map(p => ({...p}));
+      showAuthScreen();
+    }
+  });
+}
 
 function showCloudStatus(msg, ok = true) {
   let el = document.getElementById('cloud-status');
@@ -774,7 +927,7 @@ async function cloudLoad() {
       sb.from('products').select('*')
     ]);
     if (re || pe) throw re || pe;
-    if (recipes)  state.recipes  = recipes.map(r => ({ id: r.id, name: r.name, description: r.description||'', notes: r.notes||'', createdAt: r.created_at, updatedAt: r.updated_at, calculator: r.calculator }));
+    if (recipes)  state.recipes  = recipes.map(r => ({ id: r.id, name: r.name, description: r.description||'', notes: r.notes||'', createdAt: r.created_at, updatedAt: r.updated_at, calculator: r.calculator, isPublic: r.is_public||false }));
     if (products) {
       const custom = products.map(p => ({ id: p.id, name: p.name, type: p.type, proteinPct: p.protein_pct, notes: p.notes||'', builtIn: p.built_in }));
       // merge: keep built-ins from DEFAULT_PRODUCTS, replace/add custom
@@ -790,10 +943,13 @@ async function cloudLoad() {
 }
 
 async function cloudSaveRecipe(recipe) {
+  if (!currentUser) return;
   const { error } = await sb.from('recipes').upsert({
     id: recipe.id, name: recipe.name, description: recipe.description||'',
     notes: recipe.notes||'', calculator: recipe.calculator,
-    created_at: recipe.createdAt, updated_at: recipe.updatedAt
+    created_at: recipe.createdAt, updated_at: recipe.updatedAt,
+    user_id: currentUser.id, author_email: currentUser.email,
+    is_public: recipe.isPublic || false
   });
   if (error) { console.error('cloudSaveRecipe', error); showCloudStatus('☁ save failed', false); }
   else showCloudStatus('☁ saved', true);
@@ -806,10 +962,11 @@ async function cloudDeleteRecipe(id) {
 }
 
 async function cloudSaveProduct(product) {
-  if (product.builtIn) return;
+  if (product.builtIn || !currentUser) return;
   const { error } = await sb.from('products').upsert({
     id: product.id, name: product.name, type: product.type,
-    protein_pct: product.proteinPct ?? null, notes: product.notes||'', built_in: false
+    protein_pct: product.proteinPct ?? null, notes: product.notes||'',
+    built_in: false, user_id: currentUser.id
   });
   if (error) { console.error('cloudSaveProduct', error); showCloudStatus('☁ save failed', false); }
   else showCloudStatus('☁ saved', true);
@@ -819,6 +976,62 @@ async function cloudDeleteProduct(id) {
   const { error } = await sb.from('products').delete().eq('id', id);
   if (error) { console.error('cloudDeleteProduct', error); showCloudStatus('☁ delete failed', false); }
   else showCloudStatus('☁ deleted', true);
+}
+
+async function toggleShareRecipe(id) {
+  const r = state.recipes.find(r => r.id === id);
+  if (!r) return;
+  r.isPublic = !r.isPublic;
+  saveState();
+  renderRecipesTab();
+  const { error } = await sb.from('recipes').update({
+    is_public: r.isPublic, author_email: currentUser?.email
+  }).eq('id', id);
+  if (error) { console.error('toggleShare', error); showCloudStatus('☁ share failed', false); }
+  else showCloudStatus(r.isPublic ? '🌐 shared!' : '🔒 made private', true);
+}
+
+async function renderCommunityTab() {
+  const grid = document.getElementById('community-grid');
+  if (!grid) return;
+  grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="icon">⏳</div><p>Loading…</p></div>';
+  const q = (document.getElementById('community-search')?.value || '').toLowerCase();
+  const { data: recipes, error } = await sb.from('recipes')
+    .select('id, name, description, notes, calculator, author_email, updated_at')
+    .eq('is_public', true)
+    .order('updated_at', { ascending: false });
+  if (error || !recipes?.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="icon">🌐</div><p>No shared recipes yet. Be the first!</p></div>';
+    return;
+  }
+  const filtered = q ? recipes.filter(r => r.name.toLowerCase().includes(q) || (r.description||'').toLowerCase().includes(q)) : recipes;
+  grid.innerHTML = filtered.map(r => {
+    const summary = (() => { try { return recipeSummary(r.calculator); } catch(e) { return ''; } })();
+    const isOwn = r.author_email === currentUser?.email;
+    return `<div class="community-card">
+      <div class="author">👤 ${esc(r.author_email || 'Anonymous')}</div>
+      <h3>${esc(r.name)}</h3>
+      ${r.description ? `<div style="font-size:13px;color:var(--text-muted);margin-bottom:6px">${esc(r.description)}</div>` : ''}
+      <div class="summary">${esc(summary)}</div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        ${!isOwn ? `<button class="btn btn-primary btn-sm" data-action="copy-community" data-recipe='${JSON.stringify(r).replace(/'/g,"&#39;")}'>Copy to my recipes</button>` : '<span style="font-size:12px;color:var(--text-muted)">Your recipe</span>'}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function copyPublicRecipe(recipeData) {
+  const copy = {
+    id: uid(), name: recipeData.name + ' (copy)', description: recipeData.description||'',
+    notes: recipeData.notes||'', createdAt: Date.now(), updatedAt: Date.now(),
+    calculator: recipeData.calculator, isPublic: false
+  };
+  state.recipes.push(copy);
+  saveState();
+  await cloudSaveRecipe(copy);
+  switchTab('recipes');
+  renderRecipesTab();
+  showCloudStatus('✓ copied to your recipes!', true);
 }
 
 // ── Translations ──
@@ -1364,6 +1577,10 @@ function renderRecipesTab() {
         <button class="btn btn-secondary btn-sm" data-action="pdf-recipe" data-id="${r.id}">PDF</button>
         <button class="btn btn-danger btn-sm" data-action="del-recipe" data-id="${r.id}">${t('btnDelete')}</button>
       </div>
+      <div class="recipe-card-share">
+        <span>${r.isPublic ? '<span class="badge-public">🌐 Public</span>' : '<span style="font-size:12px;color:var(--text-muted)">🔒 Private</span>'}</span>
+        <button class="btn btn-ghost btn-sm" data-action="share-recipe" data-id="${r.id}">${r.isPublic ? 'Make Private' : 'Share'}</button>
+      </div>
     </div>`;
   }).join('');
 }
@@ -1651,6 +1868,7 @@ function switchTab(tab) {
   document.querySelector(`#main-tabs [data-tab="${tab}"]`)?.classList.add('active');
   if (tab === 'recipes') renderRecipesTab();
   if (tab === 'products') renderProductsTab();
+  if (tab === 'community') renderCommunityTab();
   saveState();
 }
 
@@ -1800,12 +2018,23 @@ document.getElementById('tab-recipes').addEventListener('click', e => {
   if (action === 'load-recipe')   loadRecipe(id);
   if (action === 'dup-recipe')    duplicateRecipe(id);
   if (action === 'del-recipe')    deleteRecipe(id);
+  if (action === 'share-recipe')  toggleShareRecipe(id);
   if (action === 'pdf-recipe') {
     const r = state.recipes.find(x => x.id === id);
     if (r) printRecipePDF(r.calculator, r.name, r.notes);
   }
 });
 document.getElementById('recipe-search')?.addEventListener('input', () => renderRecipesTab());
+
+// Community tab events
+document.getElementById('tab-community').addEventListener('click', e => {
+  const btn = e.target.closest('[data-action]');
+  if (!btn) return;
+  if (btn.dataset.action === 'copy-community') {
+    try { copyPublicRecipe(JSON.parse(btn.dataset.recipe)); } catch(err) { console.error(err); }
+  }
+});
+document.getElementById('community-search')?.addEventListener('input', () => renderCommunityTab());
 
 // Products tab events
 document.getElementById('btn-add-product')?.addEventListener('click', () => openProductModal(null));
@@ -1914,20 +2143,22 @@ function printRecipePDF(calc, name, notes) {
 // 18. INIT
 // ════════════════════════════════════════════════
 
-loadState();
-applyTheme();
-applyLang();
-switchTab(state.activeTab || 'calculator');
-renderCalculatorTab();
-renderProductsTab();
-
-// Load from cloud and refresh
-cloudLoad().then(() => {
-  renderRecipesTab();
+function startApp() {
+  loadState();
+  applyTheme();
+  applyLang();
+  switchTab(state.activeTab || 'calculator');
+  renderCalculatorTab();
   renderProductsTab();
-  renderFlourRows('main-flour-rows', state.calculator.flourRows||[], 'main', 'flour');
-  renderFlourRows('levain-flour-rows', state.calculator.levain?.flourRows||[], 'levain', 'flour');
-});
+  cloudLoad().then(() => {
+    renderRecipesTab();
+    renderProductsTab();
+    renderFlourRows('main-flour-rows', state.calculator.flourRows||[], 'main', 'flour');
+    renderFlourRows('levain-flour-rows', state.calculator.levain?.flourRows||[], 'levain', 'flour');
+  });
+}
+
+initAuth();
 
 </script>
 </body>
