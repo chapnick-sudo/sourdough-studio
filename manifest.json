@@ -1,0 +1,13 @@
+{
+  "name": "Sourdough Studio",
+  "short_name": "Sourdough",
+  "description": "Baker's percentage calculator and recipe database",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#faf8f4",
+  "theme_color": "#c2440e",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

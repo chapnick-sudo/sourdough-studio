@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sourdough Studio</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#c2440e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Sourdough">
+<link rel="apple-touch-icon" href="/icon.svg">
 <style>
 :root {
   --bg: #faf8f4;
@@ -520,6 +526,14 @@ html[data-theme="dark"] {
 [dir="rtl"] .header-controls { margin-left: 0; margin-right: auto; }
 [dir="rtl"] .input-suffix { margin-left: 0; margin-right: -6px; }
 
+/* ── OFFLINE BANNER ── */
+#offline-banner {
+  display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 9998;
+  background: #92400e; color: #fff; text-align: center;
+  padding: 8px; font-size: 13px; font-weight: 600;
+}
+#offline-banner.visible { display: block; }
+
 /* ── AUTH OVERLAY ── */
 #auth-overlay {
   display: none; position: fixed; inset: 0; z-index: 9999;
@@ -563,6 +577,8 @@ html[data-theme="dark"] {
 </head>
 <body>
 
+<div id="offline-banner">📵 You're offline — changes will sync when reconnected</div>
+
 <!-- ══ AUTH OVERLAY ══ -->
 <div id="auth-overlay">
   <div class="auth-card">
@@ -582,6 +598,9 @@ html[data-theme="dark"] {
     <div id="auth-error"></div>
     <div id="auth-success"></div>
     <button class="btn btn-primary auth-submit" id="auth-submit">Sign In</button>
+    <div class="auth-forgot" id="auth-forgot-wrap">
+      <a id="auth-forgot-link">Forgot password?</a>
+    </div>
     <div style="display:flex;align-items:center;gap:10px;margin:16px 0 4px">
       <div style="flex:1;height:1px;background:var(--border)"></div>
       <span style="font-size:12px;color:var(--text-muted)">or</span>
@@ -2174,6 +2193,136 @@ function startApp() {
     renderFlourRows('levain-flour-rows', state.calculator.levain?.flourRows||[], 'levain', 'flour');
   });
 }
+
+// ════════════════════════════════════════════════
+// PWA — Service Worker Registration
+// ════════════════════════════════════════════════
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(console.error);
+  navigator.serviceWorker.addEventListener('message', e => {
+    if (e.data?.type === 'SYNC_NOW') syncPending();
+  });
+}
+
+// ════════════════════════════════════════════════
+// OFFLINE MODE
+// ════════════════════════════════════════════════
+let _pendingSync = JSON.parse(localStorage.getItem('_pendingSync') || '[]');
+
+function savePendingSync() {
+  localStorage.setItem('_pendingSync', JSON.stringify(_pendingSync));
+}
+
+function queuePendingRecipe(recipe) {
+  _pendingSync = _pendingSync.filter(p => p.id !== recipe.id);
+  _pendingSync.push({ type: 'recipe', data: recipe, ts: Date.now() });
+  savePendingSync();
+}
+
+function queuePendingDelete(type, id) {
+  _pendingSync = _pendingSync.filter(p => p.data?.id !== id);
+  _pendingSync.push({ type: 'delete-' + type, id, ts: Date.now() });
+  savePendingSync();
+}
+
+async function syncPending() {
+  if (!navigator.onLine || !currentUser || _pendingSync.length === 0) return;
+  const pending = [..._pendingSync];
+  for (const item of pending) {
+    try {
+      if (item.type === 'recipe')         await cloudSaveRecipe(item.data);
+      if (item.type === 'delete-recipe')  await cloudDeleteRecipe(item.id);
+      if (item.type === 'delete-product') await cloudDeleteProduct(item.id);
+      _pendingSync = _pendingSync.filter(p => p.ts !== item.ts);
+      savePendingSync();
+    } catch(e) { console.error('sync failed', e); }
+  }
+  if (_pendingSync.length === 0) showCloudStatus('☁ synced', true);
+}
+
+function updateOfflineBanner() {
+  const banner = document.getElementById('offline-banner');
+  if (!banner) return;
+  if (!navigator.onLine) {
+    banner.classList.add('visible');
+    banner.textContent = `📵 You're offline — ${_pendingSync.length ? _pendingSync.length + ' changes pending sync' : 'changes will sync when reconnected'}`;
+  } else {
+    banner.classList.remove('visible');
+    if (_pendingSync.length > 0) syncPending();
+  }
+}
+
+window.addEventListener('online',  updateOfflineBanner);
+window.addEventListener('offline', updateOfflineBanner);
+updateOfflineBanner();
+
+// Override cloud functions to handle offline
+const _origSaveRecipe = cloudSaveRecipe;
+cloudSaveRecipe = async function(recipe) {
+  if (!navigator.onLine) { queuePendingRecipe(recipe); updateOfflineBanner(); showCloudStatus('📵 queued', false); return; }
+  return _origSaveRecipe(recipe);
+};
+
+const _origDeleteRecipe = cloudDeleteRecipe;
+cloudDeleteRecipe = async function(id) {
+  if (!navigator.onLine) { queuePendingDelete('recipe', id); updateOfflineBanner(); return; }
+  return _origDeleteRecipe(id);
+};
+
+// ════════════════════════════════════════════════
+// FORGOT PASSWORD
+// ════════════════════════════════════════════════
+document.getElementById('auth-forgot-link')?.addEventListener('click', async () => {
+  const email = document.getElementById('auth-email').value.trim();
+  const errEl = document.getElementById('auth-error');
+  const okEl  = document.getElementById('auth-success');
+  errEl.textContent = ''; okEl.textContent = '';
+  if (!email) { errEl.textContent = 'Enter your email first.'; return; }
+  const { error } = await sb.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin
+  });
+  if (error) errEl.textContent = error.message;
+  else okEl.textContent = '✓ Check your email for a reset link!';
+});
+
+// Hide forgot password on register mode
+document.querySelectorAll('.auth-mode-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const wrap = document.getElementById('auth-forgot-wrap');
+    if (wrap) wrap.style.display = btn.dataset.authMode === 'register' ? 'none' : '';
+  });
+});
+
+// ════════════════════════════════════════════════
+// KEYBOARD SHORTCUTS
+// ════════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  const mod = e.ctrlKey || e.metaKey;
+  if (!mod || !currentUser) return;
+
+  // Ctrl/Cmd + S — Save recipe
+  if (e.key === 's') {
+    e.preventDefault();
+    if (state.activeTab === 'calculator') {
+      readCalcFromDOM();
+      openSaveRecipeModal();
+    }
+    showCloudStatus('⌨ Ctrl+S', true);
+  }
+
+  // Ctrl/Cmd + D — Duplicate current recipe (if in recipes tab)
+  if (e.key === 'd' && state.activeTab === 'recipes') {
+    e.preventDefault();
+    const first = state.recipes[0];
+    if (first) duplicateRecipe(first.id);
+  }
+
+  // Ctrl/Cmd + 1/2/3 — Switch tabs
+  if (e.key === '1') { e.preventDefault(); switchTab('calculator'); }
+  if (e.key === '2') { e.preventDefault(); switchTab('recipes'); }
+  if (e.key === '3') { e.preventDefault(); switchTab('community'); }
+  if (e.key === '4') { e.preventDefault(); switchTab('products'); }
+});
 
 initAuth();
 
