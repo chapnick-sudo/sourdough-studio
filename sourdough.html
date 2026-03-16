@@ -520,6 +520,7 @@ html[data-theme="dark"] {
 [dir="rtl"] .header-controls { margin-left: 0; margin-right: auto; }
 [dir="rtl"] .input-suffix { margin-left: 0; margin-right: -6px; }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body>
 
@@ -532,6 +533,7 @@ html[data-theme="dark"] {
       <button data-tab="products" data-i18n="tabProducts">Products</button>
     </nav>
     <div class="header-controls">
+      <span id="cloud-status" style="font-size:12px;transition:opacity 1s;opacity:0;"></span>
       <button id="btn-lang" class="btn-toggle" title="Switch Language">עב</button>
       <button id="btn-theme" class="btn-toggle" title="Toggle Dark Mode">🌙</button>
     </div>
@@ -748,6 +750,76 @@ html[data-theme="dark"] {
 // ════════════════════════════════════════════════
 
 const STORAGE_KEY = 'sourdough_studio_v1';
+
+// ── Supabase ──────────────────────────────────────
+const SB_URL = 'https://wzyfiazxqubkrtgiszsh.supabase.co';
+const SB_KEY = 'sb_publishable_rd0y1evNyaHYgpCz5xtMDw_u_RanBVA';
+const sb = supabase.createClient(SB_URL, SB_KEY);
+
+function showCloudStatus(msg, ok = true) {
+  let el = document.getElementById('cloud-status');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.color = ok ? 'var(--success)' : 'var(--danger)';
+  el.style.opacity = '1';
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.style.opacity = '0', 2500);
+}
+
+async function cloudLoad() {
+  try {
+    showCloudStatus('☁ syncing…', true);
+    const [{ data: recipes, error: re }, { data: products, error: pe }] = await Promise.all([
+      sb.from('recipes').select('*').order('created_at', { ascending: true }),
+      sb.from('products').select('*')
+    ]);
+    if (re || pe) throw re || pe;
+    if (recipes)  state.recipes  = recipes.map(r => ({ id: r.id, name: r.name, description: r.description||'', notes: r.notes||'', createdAt: r.created_at, updatedAt: r.updated_at, calculator: r.calculator }));
+    if (products) {
+      const custom = products.map(p => ({ id: p.id, name: p.name, type: p.type, proteinPct: p.protein_pct, notes: p.notes||'', builtIn: p.built_in }));
+      // merge: keep built-ins from DEFAULT_PRODUCTS, replace/add custom
+      const builtIns = DEFAULT_PRODUCTS.filter(p => p.builtIn);
+      const customNonBuiltIn = custom.filter(p => !p.builtIn);
+      state.products = [...builtIns, ...customNonBuiltIn];
+    }
+    showCloudStatus('☁ synced', true);
+  } catch(e) {
+    console.error('cloudLoad error', e);
+    showCloudStatus('☁ offline', false);
+  }
+}
+
+async function cloudSaveRecipe(recipe) {
+  const { error } = await sb.from('recipes').upsert({
+    id: recipe.id, name: recipe.name, description: recipe.description||'',
+    notes: recipe.notes||'', calculator: recipe.calculator,
+    created_at: recipe.createdAt, updated_at: recipe.updatedAt
+  });
+  if (error) { console.error('cloudSaveRecipe', error); showCloudStatus('☁ save failed', false); }
+  else showCloudStatus('☁ saved', true);
+}
+
+async function cloudDeleteRecipe(id) {
+  const { error } = await sb.from('recipes').delete().eq('id', id);
+  if (error) { console.error('cloudDeleteRecipe', error); showCloudStatus('☁ delete failed', false); }
+  else showCloudStatus('☁ deleted', true);
+}
+
+async function cloudSaveProduct(product) {
+  if (product.builtIn) return;
+  const { error } = await sb.from('products').upsert({
+    id: product.id, name: product.name, type: product.type,
+    protein_pct: product.proteinPct ?? null, notes: product.notes||'', built_in: false
+  });
+  if (error) { console.error('cloudSaveProduct', error); showCloudStatus('☁ save failed', false); }
+  else showCloudStatus('☁ saved', true);
+}
+
+async function cloudDeleteProduct(id) {
+  const { error } = await sb.from('products').delete().eq('id', id);
+  if (error) { console.error('cloudDeleteProduct', error); showCloudStatus('☁ delete failed', false); }
+  else showCloudStatus('☁ deleted', true);
+}
 
 // ── Translations ──
 const TRANSLATIONS = {
@@ -1391,16 +1463,16 @@ function openSaveRecipeModal(existingId) {
         existing.name = name; existing.description = desc; existing.notes = notes;
         existing.updatedAt = Date.now();
         existing.calculator = deepClone(state.calculator);
+        saveState(); renderRecipesTab(); closeModal();
+        cloudSaveRecipe(existing);
       } else {
-        state.recipes.push({
-          id: uid(), name, description: desc, notes,
+        const recipe = { id: uid(), name, description: desc, notes,
           createdAt: Date.now(), updatedAt: Date.now(),
-          calculator: deepClone(state.calculator)
-        });
+          calculator: deepClone(state.calculator) };
+        state.recipes.push(recipe);
+        saveState(); renderRecipesTab(); closeModal();
+        cloudSaveRecipe(recipe);
       }
-      saveState();
-      renderRecipesTab();
-      closeModal();
     },
     existing ? t('updateBtn') : t('saveBtn')
   );
@@ -1426,6 +1498,7 @@ function duplicateRecipe(id) {
   state.recipes.push(copy);
   saveState();
   renderRecipesTab();
+  cloudSaveRecipe(copy);
 }
 
 function deleteRecipe(id) {
@@ -1437,6 +1510,7 @@ function deleteRecipe(id) {
     () => {
       state.recipes = state.recipes.filter(x => x.id !== id);
       saveState(); renderRecipesTab(); closeModal();
+      cloudDeleteRecipe(id);
     },
     t('deleteBtn'), 'btn-danger'
   );
@@ -1470,11 +1544,14 @@ function openProductModal(id) {
       const proteinPct = prot !== '' ? parseFloat(prot) : null;
       if (p) {
         p.name = name; p.type = type; p.proteinPct = proteinPct; p.notes = notes;
+        saveState(); renderProductsTab();
+        cloudSaveProduct(p);
       } else {
-        state.products.push({ id: uid(), name, type, proteinPct, notes, builtIn: false });
+        const prod = { id: uid(), name, type, proteinPct, notes, builtIn: false };
+        state.products.push(prod);
+        saveState(); renderProductsTab();
+        cloudSaveProduct(prod);
       }
-      saveState();
-      renderProductsTab();
       // Refresh dropdowns in calculator
       renderFlourRows('main-flour-rows', state.calculator.flourRows||[], 'main', 'flour');
       renderFlourRows('levain-flour-rows', state.calculator.levain.flourRows||[], 'levain', 'flour');
@@ -1499,6 +1576,7 @@ function deleteProduct(id) {
       (state.calculator.levain.flourRows||[]).forEach(r => { if (r.productId===id) r.productId=''; });
       (state.calculator.addIns||[]).forEach(r => { if (r.productId===id) r.productId=''; });
       saveState();
+      cloudDeleteProduct(id);
       renderProductsTab();
       renderFlourRows('main-flour-rows', state.calculator.flourRows||[], 'main', 'flour');
       renderFlourRows('levain-flour-rows', state.calculator.levain.flourRows||[], 'levain', 'flour');
@@ -1842,6 +1920,14 @@ applyLang();
 switchTab(state.activeTab || 'calculator');
 renderCalculatorTab();
 renderProductsTab();
+
+// Load from cloud and refresh
+cloudLoad().then(() => {
+  renderRecipesTab();
+  renderProductsTab();
+  renderFlourRows('main-flour-rows', state.calculator.flourRows||[], 'main', 'flour');
+  renderFlourRows('levain-flour-rows', state.calculator.levain?.flourRows||[], 'levain', 'flour');
+});
 
 </script>
 </body>
