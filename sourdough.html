@@ -628,7 +628,7 @@ select { min-width: 140px; }
 
 /* ── CLICKABLE TABLE ROWS ── */
 table.products-table tbody tr { cursor: pointer; }
-table.products-table tbody tr:hover td { background: var(--hover); }
+table.products-table tbody tr:hover td { background: var(--bg); }
 
 .products-table-wrap { overflow-x: auto; }
 table.products-table {
@@ -886,7 +886,7 @@ html[data-theme="dark"] {
   <section class="tab-section active" id="tab-calculator">
     <div id="active-recipe-banner" style="display:none;background:var(--accent);color:#fff;padding:8px 16px;border-radius:8px;margin-bottom:12px;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:space-between">
       <span id="active-recipe-name"></span>
-      <button onclick="state.activeRecipeId=null;this.parentElement.style.display='none'" style="background:none;border:none;color:#fff;cursor:pointer;font-size:16px">✕</button>
+      <button onclick="state.activeRecipeId=null;saveState();this.parentElement.style.display='none'" style="background:none;border:none;color:#fff;cursor:pointer;font-size:16px">✕</button>
     </div>
     <div class="calc-layout">
       <div class="calc-main">
@@ -1673,7 +1673,7 @@ function computeIngredients(calc) {
     levainFlour, levainFlourBreakdown, levainFlourSum,
     levainWater, levainTotal, levainPct,
     mainWater, mainWaterNegative: mainWater < 0,
-    basinage, salt,
+    totalWater, basinage, salt,
     addIns, addInsTotal,
     totalDoughWeight, totalDoughTarget,
     totalHydration: totalHydPct
@@ -2220,7 +2220,7 @@ function openRecipeDetail(id) {
     ['מחמצת', `${Math.round(c.levainTotal)} g`],
     ['מלח', `${Math.round(c.salt)} g`],
     ...(c.basinage > 0 ? [['בסינאז׳', `${Math.round(c.basinage)} g`]] : []),
-    ...(c.addIns||[]).map(a => [a.name, `${Math.round(a.weight)} g`]),
+    ...(c.addIns||[]).map(a => [productName(a.productId), `${Math.round(a.weight)} g`]),
     ['<strong>סה"כ</strong>', `<strong>${Math.round(c.totalDoughWeight)} g</strong>`],
   ];
 
@@ -2278,7 +2278,7 @@ function openRecipeDetail(id) {
   document.getElementById('rd-share-btn')?.addEventListener('click',() => { toggleShareRecipe(id); overlay.classList.remove('open'); });
   document.getElementById('rd-del-btn')?.addEventListener('click',  () => {
     overlay.classList.remove('open');
-    confirmDeleteRecipe(id);
+    deleteRecipe(id);
   });
 }
 
@@ -2508,7 +2508,7 @@ function copyResults() {
     lines.push(`  ${productName(f.productId)} flour (${fmtPct(f.pct)}): ${s(f.weight)}`);
   });
   lines.push(`  Water:           ${s(c.levainWater)}`);
-  lines.push(`  Starter:         ${s(c.levainCulture)}`);
+  lines.push(`  Starter:         ${s(c.levainTotal - c.levainWater - c.levainFlour)}`);
   lines.push('');
   lines.push(`Main Water:        ${s(c.mainWater)}`);
   lines.push(`Basinage:          ${s(c.basinage)}`);
@@ -2819,6 +2819,7 @@ function printRecipePDF(calc, name, notes) {
   </body></html>`;
 
   const win = window.open('', '_blank');
+  if (!win) { alert('Please allow popups for PDF export'); return; }
   win.document.write(html);
   win.document.close();
   win.onload = () => { win.focus(); win.print(); };
