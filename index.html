@@ -421,6 +421,7 @@ select { min-width: 140px; }
   transition: box-shadow 0.15s;
 }
 .recipe-card:hover { box-shadow: 0 3px 10px rgba(0,0,0,0.1); }
+.recipe-card-img { width:100%; height:160px; object-fit:cover; border-radius:8px 8px 0 0; margin:-16px -16px 12px; width:calc(100% + 32px); }
 .recipe-card h3 { font-size: 15px; font-weight: 600; }
 .recipe-card .meta { font-size: 12px; color: var(--text-muted); }
 .recipe-card .summary { font-size: 12px; color: var(--text-muted); }
@@ -1219,7 +1220,7 @@ async function cloudLoad() {
       sb.from('products').select('*')
     ]);
     if (re || pe) throw re || pe;
-    if (recipes)  state.recipes  = recipes.map(r => ({ id: r.id, name: r.name, description: r.description||'', notes: r.notes||'', createdAt: r.created_at, updatedAt: r.updated_at, calculator: r.calculator, isPublic: r.is_public||false }));
+    if (recipes)  state.recipes  = recipes.map(r => ({ id: r.id, name: r.name, description: r.description||'', notes: r.notes||'', createdAt: r.created_at, updatedAt: r.updated_at, calculator: r.calculator, isPublic: r.is_public||false, imageUrl: r.image_url||'' }));
     if (products) {
       const custom = products.map(p => ({ id: p.id, name: p.name, type: p.type, proteinPct: p.protein_pct, notes: p.notes||'', builtIn: p.built_in, imageUrl: p.image_url||'', sourceUrl: p.source_url||'', brand: p.brand||'' }));
       // merge: keep built-ins from DEFAULT_PRODUCTS, replace/add custom
@@ -1234,6 +1235,15 @@ async function cloudLoad() {
   }
 }
 
+async function uploadRecipeImage(recipeId, file) {
+  const ext  = file.name.split('.').pop();
+  const path = `${currentUser.id}/${recipeId}.${ext}`;
+  const { error } = await sb.storage.from('recipe-images').upload(path, file, { upsert: true });
+  if (error) { console.error('uploadRecipeImage', error); return null; }
+  const { data } = sb.storage.from('recipe-images').getPublicUrl(path);
+  return data.publicUrl;
+}
+
 async function cloudSaveRecipe(recipe) {
   if (!currentUser) return;
   const { error } = await sb.from('recipes').upsert({
@@ -1241,7 +1251,8 @@ async function cloudSaveRecipe(recipe) {
     notes: recipe.notes||'', calculator: recipe.calculator,
     created_at: recipe.createdAt, updated_at: recipe.updatedAt,
     user_id: currentUser.id, author_email: currentUser.email,
-    is_public: recipe.isPublic || false
+    is_public: recipe.isPublic || false,
+    image_url: recipe.imageUrl || null
   });
   if (error) { console.error('cloudSaveRecipe', error); showCloudStatus('☁ save failed', false); }
   else showCloudStatus('☁ saved', true);
@@ -1862,6 +1873,7 @@ function renderRecipesTab() {
     const date = new Date(r.updatedAt).toLocaleDateString(locale, {month:'short',day:'numeric',year:'numeric'});
     return `
     <div class="recipe-card">
+      ${r.imageUrl ? `<img src="${esc(r.imageUrl)}" class="recipe-card-img" onerror="this.style.display='none'" alt="${esc(r.name)}">` : ''}
       <h3>${esc(r.name)}</h3>
       ${r.description ? `<div class="desc">${esc(r.description)}</div>` : ''}
       <div class="summary">${esc(recipeSummary(r.calculator))}</div>
@@ -2043,24 +2055,43 @@ function openSaveRecipeModal(existingId) {
      <div class="field"><label>${t('recipeDescLabel')}</label>
       <input type="text" id="m-desc" value="${esc(existing?.description||'')}" placeholder="${t('recipeDescPlaceholder')}"></div>
      <div class="field"><label>${t('recipeNotesLabel')}</label>
-      <textarea id="m-notes" placeholder="${t('recipeNotesPlaceholder')}">${esc(existing?.notes||'')}</textarea></div>`,
-    () => {
+      <textarea id="m-notes" placeholder="${t('recipeNotesPlaceholder')}">${esc(existing?.notes||'')}</textarea></div>
+     <div class="field">
+       <label>📸 תמונת לחם (אופציונלי)</label>
+       ${existing?.imageUrl ? `<div style="margin-bottom:8px"><img src="${esc(existing.imageUrl)}" style="width:100%;max-height:160px;object-fit:cover;border-radius:8px;"></div>` : ''}
+       <input type="file" id="m-image" accept="image/*" capture="environment" style="width:100%">
+       <span class="text-sm text-muted">צלם את הלחם לאחר אפייה</span>
+     </div>`,
+    async () => {
       const name = document.getElementById('m-name').value.trim();
       if (!name) { alert(t('recipeNameLabel') + '?'); return; }
       const desc  = document.getElementById('m-desc').value.trim();
       const notes = document.getElementById('m-notes').value.trim();
+      const imageFile = document.getElementById('m-image')?.files?.[0];
       if (existing) {
         existing.name = name; existing.description = desc; existing.notes = notes;
         existing.updatedAt = Date.now();
         existing.calculator = deepClone(state.calculator);
-        saveState(); renderRecipesTab(); closeModal();
+        closeModal();
+        if (imageFile) {
+          showCloudStatus('☁ uploading...', true);
+          const url = await uploadRecipeImage(existing.id, imageFile);
+          if (url) existing.imageUrl = url;
+        }
+        saveState(); renderRecipesTab();
         cloudSaveRecipe(existing);
       } else {
         const recipe = { id: uid(), name, description: desc, notes,
           createdAt: Date.now(), updatedAt: Date.now(),
           calculator: deepClone(state.calculator) };
+        closeModal();
+        if (imageFile) {
+          showCloudStatus('☁ uploading...', true);
+          const url = await uploadRecipeImage(recipe.id, imageFile);
+          if (url) recipe.imageUrl = url;
+        }
         state.recipes.push(recipe);
-        saveState(); renderRecipesTab(); closeModal();
+        saveState(); renderRecipesTab();
         cloudSaveRecipe(recipe);
       }
     },
