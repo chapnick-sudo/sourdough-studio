@@ -484,6 +484,45 @@ select { min-width: 140px; }
   border-radius: 0 0 var(--radius) var(--radius);
   overflow: hidden;
 }
+/* ── Product Fetch UI ── */
+.fetch-url-box {
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin-bottom: 14px;
+}
+.fetch-url-box label {
+  font-size: 12px; font-weight: 600; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.4px;
+  display: flex; align-items: center; gap: 6px; margin-bottom: 8px;
+}
+.fetch-row { display: flex; gap: 8px; }
+.fetch-row input { flex: 1; min-width: 0; }
+.fetch-preview {
+  display: flex; align-items: center; gap: 12px;
+  margin-top: 10px; padding: 10px 12px;
+  background: var(--success-bg); border: 1px solid #c3dbb5;
+  border-radius: 6px;
+}
+.fetch-preview img {
+  width: 56px; height: 56px; object-fit: contain;
+  border-radius: 6px; background: #fff; border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.fetch-preview .fetch-info { flex: 1; min-width: 0; }
+.fetch-preview .fetch-info strong { display: block; font-size: 13px; margin-bottom: 2px; }
+.fetch-preview .fetch-info span { font-size: 12px; color: var(--text-muted); }
+.fetch-status { font-size: 12px; margin-top: 6px; min-height: 18px; }
+.fetch-status.loading { color: var(--text-muted); }
+.fetch-status.error   { color: var(--danger); }
+.fetch-status.ok      { color: var(--success); }
+/* Product thumbnail in table */
+.prod-thumb {
+  width: 32px; height: 32px; object-fit: contain;
+  border-radius: 4px; vertical-align: middle; margin-right: 8px;
+  background: var(--bg); border: 1px solid var(--border);
+}
 .products-table-wrap { overflow-x: auto; }
 table.products-table {
   width: 100%;
@@ -1751,8 +1790,10 @@ function renderProductsTab() {
     const rows = products.map(p => `
       <tr>
         <td>
+          ${p.imageUrl ? `<img class="prod-thumb" src="${esc(p.imageUrl)}" onerror="this.style.display='none'" alt="">` : ''}
           ${esc(p.name)}
           ${p.builtIn ? `<span class="builtin-tag">${t('builtInTag')}</span>` : ''}
+          ${p.sourceUrl ? `<a href="${esc(p.sourceUrl)}" target="_blank" style="font-size:11px;color:var(--text-muted);margin-left:6px">↗</a>` : ''}
         </td>
         ${cat.showProtein ? `<td>${p.proteinPct != null ? p.proteinPct + '%' : '—'}</td>` : ''}
         <td class="text-muted">${esc(p.notes||'')}</td>
@@ -1919,39 +1960,65 @@ function deleteRecipe(id) {
 // 12. PRODUCT CRUD
 // ════════════════════════════════════════════════
 
+async function fetchProductFromUrl(url) {
+  const SUPABASE_URL = 'https://wzyfiazxqubkrtgiszsh.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_rd0y1evNyaHYgpCz5xtMDw_u_RanBVA';
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/fetch-product`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
+    body: JSON.stringify({ url })
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
 function openProductModal(id) {
   const p = id ? state.products.find(p => p.id === id) : null;
-  const typeOpts = PRODUCT_TYPES.map(t =>
-    `<option value="${t}" ${(p?.type||'flour')===t?'selected':''}>${t.charAt(0).toUpperCase()+t.slice(1)}</option>`
+  const typeOpts = PRODUCT_TYPES.map(tp =>
+    `<option value="${tp}" ${(p?.type||'flour')===tp?'selected':''}>${tp.charAt(0).toUpperCase()+tp.slice(1)}</option>`
   ).join('');
+
+  const fetchBox = !p ? `
+    <div class="fetch-url-box">
+      <label>🔍 Smart Import — Fetch from Manufacturer's Website</label>
+      <div class="fetch-row">
+        <input type="url" id="m-fetch-url" placeholder="https://example.com/product/bread-flour">
+        <button type="button" class="btn btn-secondary btn-sm" id="m-fetch-btn">Fetch</button>
+      </div>
+      <div class="fetch-status" id="m-fetch-status"></div>
+      <div id="m-fetch-preview" style="display:none"></div>
+    </div>` : '';
+
   openModal(
     p ? t('editProductTitle') : t('addProductTitle'),
-    `<div class="field"><label>${t('productNameLabel')}</label>
+    `${fetchBox}
+     <div class="field"><label>${t('productNameLabel')}</label>
       <input type="text" id="m-pname" value="${esc(p?.name||'')}" placeholder="${t('productNamePlaceholder')}"></div>
      <div class="field"><label>${t('productTypeLabel')}</label>
       <select id="m-ptype">${typeOpts}</select></div>
      <div class="field"><label>${t('productProteinLabel')}</label>
       <input type="number" id="m-pprot" value="${p?.proteinPct??''}" min="0" max="30" step="0.1" placeholder="e.g. 12.7"></div>
      <div class="field"><label>${t('productNotesLabel')}</label>
-      <input type="text" id="m-pnotes" value="${esc(p?.notes||'')}" placeholder="${t('productNotesPlaceholder')}"></div>`,
+      <input type="text" id="m-pnotes" value="${esc(p?.notes||'')}" placeholder="${t('productNotesPlaceholder')}"></div>
+     <input type="hidden" id="m-pimage" value="${esc(p?.imageUrl||'')}">
+     <input type="hidden" id="m-psource" value="${esc(p?.sourceUrl||'')}">`,
     () => {
       const name = document.getElementById('m-pname').value.trim();
       if (!name) { alert(t('productNameLabel') + '?'); return; }
-      const type  = document.getElementById('m-ptype').value;
-      const prot  = document.getElementById('m-pprot').value;
-      const notes = document.getElementById('m-pnotes').value.trim();
+      const type      = document.getElementById('m-ptype').value;
+      const prot      = document.getElementById('m-pprot').value;
+      const notes     = document.getElementById('m-pnotes').value.trim();
+      const imageUrl  = document.getElementById('m-pimage').value.trim();
+      const sourceUrl = document.getElementById('m-psource').value.trim();
       const proteinPct = prot !== '' ? parseFloat(prot) : null;
       if (p) {
-        p.name = name; p.type = type; p.proteinPct = proteinPct; p.notes = notes;
-        saveState(); renderProductsTab();
-        cloudSaveProduct(p);
+        Object.assign(p, { name, type, proteinPct, notes, imageUrl, sourceUrl });
+        saveState(); renderProductsTab(); cloudSaveProduct(p);
       } else {
-        const prod = { id: uid(), name, type, proteinPct, notes, builtIn: false };
+        const prod = { id: uid(), name, type, proteinPct, notes, imageUrl, sourceUrl, builtIn: false };
         state.products.push(prod);
-        saveState(); renderProductsTab();
-        cloudSaveProduct(prod);
+        saveState(); renderProductsTab(); cloudSaveProduct(prod);
       }
-      // Refresh dropdowns in calculator
       renderFlourRows('main-flour-rows', state.calculator.flourRows||[], 'main', 'flour');
       renderFlourRows('levain-flour-rows', state.calculator.levain.flourRows||[], 'levain', 'flour');
       renderAddInRows();
@@ -1959,7 +2026,58 @@ function openProductModal(id) {
     },
     p ? t('saveChangesBtn') : t('addProductBtn')
   );
-  setTimeout(() => document.getElementById('m-pname')?.focus(), 50);
+
+  // Wire up Fetch button
+  setTimeout(() => {
+    const fetchBtn = document.getElementById('m-fetch-btn');
+    const fetchUrl = document.getElementById('m-fetch-url');
+    if (!fetchBtn) { document.getElementById('m-pname')?.focus(); return; }
+
+    fetchBtn.addEventListener('click', async () => {
+      const url = fetchUrl.value.trim();
+      if (!url) return;
+      const status  = document.getElementById('m-fetch-status');
+      const preview = document.getElementById('m-fetch-preview');
+      status.textContent = '⏳ Fetching product data...';
+      status.className = 'fetch-status loading';
+      preview.style.display = 'none';
+      fetchBtn.disabled = true;
+
+      try {
+        const data = await fetchProductFromUrl(url);
+        if (data.error) throw new Error(data.error);
+
+        // Fill form fields
+        if (data.name)        document.getElementById('m-pname').value = data.name;
+        if (data.proteinPct)  document.getElementById('m-pprot').value = data.proteinPct;
+        if (data.description) document.getElementById('m-pnotes').value = data.description.slice(0, 120);
+        if (data.image)       document.getElementById('m-pimage').value = data.image;
+        document.getElementById('m-psource').value = url;
+
+        // Show preview
+        status.textContent = '✓ Data imported successfully!';
+        status.className = 'fetch-status ok';
+        preview.style.display = 'flex';
+        preview.className = 'fetch-preview';
+        preview.innerHTML = `
+          ${data.image ? `<img src="${esc(data.image)}" onerror="this.style.display='none'" alt="">` : ''}
+          <div class="fetch-info">
+            <strong>${esc(data.name || '—')}</strong>
+            <span>${data.proteinPct ? `Protein: ${data.proteinPct}%` : ''}${data.brand ? ` · ${esc(data.brand)}` : ''}</span>
+            ${data.description ? `<span style="display:block;margin-top:2px;font-size:11px">${esc(data.description.slice(0,80))}…</span>` : ''}
+          </div>`;
+      } catch(e) {
+        status.textContent = `✗ Could not fetch: ${e.message}. Fill in manually.`;
+        status.className = 'fetch-status error';
+      } finally {
+        fetchBtn.disabled = false;
+      }
+    });
+
+    // Allow Enter key in URL field
+    fetchUrl.addEventListener('keydown', e => { if (e.key === 'Enter') fetchBtn.click(); });
+    fetchUrl.focus();
+  }, 50);
 }
 
 function deleteProduct(id) {
