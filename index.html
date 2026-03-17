@@ -523,6 +523,67 @@ select { min-width: 140px; }
   border-radius: 4px; vertical-align: middle; margin-right: 8px;
   background: var(--bg); border: 1px solid var(--border);
 }
+/* ── PRODUCTS FILTER BAR ── */
+.products-filter-bar {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  margin-bottom: 16px; align-items: center;
+}
+.products-filter-bar input,
+.products-filter-bar select {
+  padding: 8px 12px; border: 1px solid var(--border);
+  border-radius: 8px; background: var(--surface);
+  color: var(--text); font-size: 13px; height: 38px;
+}
+
+/* ── PRODUCT DETAIL PANEL ── */
+#product-detail-overlay {
+  display: none; position: fixed; inset: 0; z-index: 3000;
+  background: rgba(0,0,0,.45); backdrop-filter: blur(3px);
+  animation: fadeIn .15s ease;
+}
+#product-detail-overlay.open { display: flex; align-items: center; justify-content: center; }
+.product-detail-panel {
+  background: var(--surface); border-radius: 16px;
+  width: min(640px, 95vw); max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,.3);
+  animation: slideUp .2s ease;
+}
+.pd-hero {
+  position: relative; background: var(--bg);
+  border-radius: 16px 16px 0 0; overflow: hidden;
+  min-height: 80px; display: flex; align-items: center; justify-content: center;
+}
+.pd-hero img { width: 100%; max-height: 240px; object-fit: cover; }
+.pd-hero-placeholder { font-size: 64px; padding: 32px; }
+.pd-close {
+  position: absolute; top: 12px; right: 12px;
+  background: rgba(0,0,0,.4); color: #fff; border: none;
+  border-radius: 50%; width: 32px; height: 32px;
+  cursor: pointer; font-size: 16px; line-height: 32px; text-align: center;
+}
+.pd-body { padding: 24px; }
+.pd-title { font-size: 22px; font-weight: 700; margin: 0 0 4px; }
+.pd-brand { font-size: 14px; color: var(--text-muted); margin-bottom: 12px; }
+.pd-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.pd-badge {
+  padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;
+  background: var(--bg); border: 1px solid var(--border); color: var(--text-muted);
+}
+.pd-badge.accent { background: var(--accent); color: #fff; border-color: var(--accent); }
+.pd-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+.pd-info-item label { font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .05em; color: var(--text-muted); display: block; margin-bottom: 2px; }
+.pd-info-item span { font-size: 15px; font-weight: 600; }
+.pd-notes { font-size: 14px; color: var(--text-muted); line-height: 1.5;
+  padding: 12px; background: var(--bg); border-radius: 8px; margin-bottom: 20px; }
+.pd-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.pd-source { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; }
+.pd-source a { color: var(--accent); text-decoration: none; }
+
+/* ── CLICKABLE TABLE ROWS ── */
+table.products-table tbody tr { cursor: pointer; }
+table.products-table tbody tr:hover td { background: var(--hover); }
+
 .products-table-wrap { overflow-x: auto; }
 table.products-table {
   width: 100%;
@@ -957,9 +1018,25 @@ html[data-theme="dark"] {
       <h2 class="section-title" style="margin:0">Products</h2>
       <button class="btn btn-primary" id="btn-add-product" data-i18n="btnAddProduct">+ Add Product</button>
     </div>
+    <div class="products-filter-bar">
+      <input type="text" id="product-search" placeholder="🔍 Search..." style="flex:1;min-width:140px">
+      <select id="filter-ptype">
+        <option value="">All Types</option>
+        <option value="flour">🌾 Flours</option>
+        <option value="fat">🧈 Fats & Oils</option>
+        <option value="seed">🌱 Seeds</option>
+        <option value="other">🫙 Other</option>
+      </select>
+      <select id="filter-brand"><option value="">All Brands</option></select>
+    </div>
     <div id="products-categories"></div>
   </section>
 </main>
+
+<!-- ══ PRODUCT DETAIL OVERLAY ══ -->
+<div id="product-detail-overlay">
+  <div class="product-detail-panel" id="product-detail-panel"></div>
+</div>
 
 <!-- ══ MODAL ══ -->
 <dialog id="modal">
@@ -1091,7 +1168,7 @@ async function cloudLoad() {
     if (re || pe) throw re || pe;
     if (recipes)  state.recipes  = recipes.map(r => ({ id: r.id, name: r.name, description: r.description||'', notes: r.notes||'', createdAt: r.created_at, updatedAt: r.updated_at, calculator: r.calculator, isPublic: r.is_public||false }));
     if (products) {
-      const custom = products.map(p => ({ id: p.id, name: p.name, type: p.type, proteinPct: p.protein_pct, notes: p.notes||'', builtIn: p.built_in, imageUrl: p.image_url||'', sourceUrl: p.source_url||'' }));
+      const custom = products.map(p => ({ id: p.id, name: p.name, type: p.type, proteinPct: p.protein_pct, notes: p.notes||'', builtIn: p.built_in, imageUrl: p.image_url||'', sourceUrl: p.source_url||'', brand: p.brand||'' }));
       // merge: keep built-ins from DEFAULT_PRODUCTS, replace/add custom
       const builtIns = DEFAULT_PRODUCTS.filter(p => p.builtIn);
       const customNonBuiltIn = custom.filter(p => !p.builtIn);
@@ -1130,7 +1207,8 @@ async function cloudSaveProduct(product) {
     protein_pct: product.proteinPct ?? null, notes: product.notes||'',
     built_in: false, user_id: currentUser.id,
     image_url: product.imageUrl || null,
-    source_url: product.sourceUrl || null
+    source_url: product.sourceUrl || null,
+    brand: product.brand || null
   });
   if (error) { console.error('cloudSaveProduct', error); showCloudStatus('☁ save failed', false); }
   else showCloudStatus('☁ saved', true);
@@ -1762,23 +1840,44 @@ function renderProductsTab() {
     return;
   }
 
-  // Category definitions: key, label, icon, column headers
+  // Build brand filter options
+  const brandSel = document.getElementById('filter-brand');
+  const currentBrand = brandSel?.value || '';
+  const brands = [...new Set(state.products.map(p => p.brand||'').filter(Boolean))].sort();
+  if (brandSel) {
+    brandSel.innerHTML = `<option value="">All Brands</option>` +
+      brands.map(b => `<option value="${esc(b)}" ${currentBrand===b?'selected':''}>${esc(b)}</option>`).join('');
+  }
+
+  // Get filter values
+  const searchQ   = (document.getElementById('product-search')?.value || '').toLowerCase();
+  const typeFilter = document.getElementById('filter-ptype')?.value || '';
+  const brandFilter = brandSel?.value || '';
+
   const CATS = [
-    { type: 'flour',  label: 'Flours',       icon: '🌾', showProtein: true  },
-    { type: 'fat',    label: 'Fats & Oils',   icon: '🧈', showProtein: false },
-    { type: 'seed',   label: 'Seeds & Grains',icon: '🌱', showProtein: false },
-    { type: 'other',  label: 'Other',         icon: '🫙', showProtein: false },
+    { type: 'flour', label: 'Flours',        icon: '🌾', showProtein: true  },
+    { type: 'fat',   label: 'Fats & Oils',   icon: '🧈', showProtein: false },
+    { type: 'seed',  label: 'Seeds & Grains',icon: '🌱', showProtein: false },
+    { type: 'other', label: 'Other',          icon: '🫙', showProtein: false },
   ];
 
-  // Group products by type
+  // Filter + group
   const grouped = {};
   CATS.forEach(c => grouped[c.type] = []);
-  state.products.forEach(p => {
-    if (grouped[p.type] !== undefined) grouped[p.type].push(p);
-    else grouped['other'] = (grouped['other'] || []).concat(p);
-  });
+  state.products
+    .filter(p => {
+      if (searchQ   && !p.name.toLowerCase().includes(searchQ) &&
+                       !(p.brand||'').toLowerCase().includes(searchQ) &&
+                       !(p.notes||'').toLowerCase().includes(searchQ)) return false;
+      if (typeFilter  && p.type !== typeFilter)   return false;
+      if (brandFilter && (p.brand||'') !== brandFilter) return false;
+      return true;
+    })
+    .forEach(p => {
+      const key = grouped[p.type] !== undefined ? p.type : 'other';
+      grouped[key].push(p);
+    });
 
-  // Remember collapsed state
   const prevCollapsed = {};
   container.querySelectorAll('.product-category').forEach(el => {
     prevCollapsed[el.dataset.catType] = el.classList.contains('collapsed');
@@ -1790,16 +1889,16 @@ function renderProductsTab() {
     const isCollapsed = prevCollapsed[cat.type] === true;
 
     const rows = products.map(p => `
-      <tr>
+      <tr data-action="view-product" data-id="${p.id}" title="Click for details">
         <td>
           ${p.imageUrl ? `<img class="prod-thumb" src="${esc(p.imageUrl)}" onerror="this.style.display='none'" alt="">` : ''}
-          ${esc(p.name)}
+          <span style="font-weight:500">${esc(p.name)}</span>
           ${p.builtIn ? `<span class="builtin-tag">${t('builtInTag')}</span>` : ''}
-          ${p.sourceUrl ? `<a href="${esc(p.sourceUrl)}" target="_blank" style="font-size:11px;color:var(--text-muted);margin-left:6px">↗</a>` : ''}
         </td>
-        ${cat.showProtein ? `<td>${p.proteinPct != null ? p.proteinPct + '%' : '—'}</td>` : ''}
-        <td class="text-muted">${esc(p.notes||'')}</td>
-        <td style="white-space:nowrap;text-align:right">
+        <td class="text-muted" style="font-size:13px">${esc(p.brand||'—')}</td>
+        ${cat.showProtein ? `<td>${p.proteinPct != null ? `<strong>${p.proteinPct}%</strong>` : '—'}</td>` : ''}
+        <td class="text-muted" style="font-size:13px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.notes||'')}</td>
+        <td style="white-space:nowrap;text-align:right" onclick="event.stopPropagation()">
           <button class="btn btn-secondary btn-sm" data-action="edit-product" data-id="${p.id}">${t('btnEdit')}</button>
           ${!p.builtIn ? `<button class="btn btn-danger btn-sm" data-action="del-product" data-id="${p.id}" style="margin-left:4px">${t('btnDelete')}</button>` : ''}
         </td>
@@ -1817,14 +1916,13 @@ function renderProductsTab() {
         <div class="product-category-body">
           <div class="products-table-wrap">
             <table class="products-table">
-              <thead>
-                <tr>
-                  <th>${t('colName')}</th>
-                  ${cat.showProtein ? `<th>${t('colProtein')}</th>` : ''}
-                  <th>${t('colNotes')}</th>
-                  <th></th>
-                </tr>
-              </thead>
+              <thead><tr>
+                <th>${t('colName')}</th>
+                <th>Brand</th>
+                ${cat.showProtein ? `<th>${t('colProtein')}</th>` : ''}
+                <th>${t('colNotes')}</th>
+                <th></th>
+              </tr></thead>
               <tbody>${rows}</tbody>
             </table>
           </div>
@@ -1832,11 +1930,8 @@ function renderProductsTab() {
       </div>`;
   }).join('');
 
-  // Toggle collapse
   container.querySelectorAll('[data-toggle-cat]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      btn.closest('.product-category').classList.toggle('collapsed');
-    });
+    btn.addEventListener('click', () => btn.closest('.product-category').classList.toggle('collapsed'));
   });
 }
 
@@ -1921,6 +2016,61 @@ function openSaveRecipeModal(existingId) {
   setTimeout(() => document.getElementById('m-name')?.focus(), 50);
 }
 
+function openProductDetail(id) {
+  const p = state.products.find(x => x.id === id);
+  if (!p) return;
+  const overlay = document.getElementById('product-detail-overlay');
+  const panel   = document.getElementById('product-detail-panel');
+  if (!overlay || !panel) return;
+
+  const typeIcon = { flour:'🌾', fat:'🧈', seed:'🌱', other:'🫙' }[p.type] || '📦';
+
+  panel.innerHTML = `
+    <div class="pd-hero">
+      ${p.imageUrl
+        ? `<img src="${esc(p.imageUrl)}" onerror="this.outerHTML='<div class=pd-hero-placeholder>${typeIcon}</div>'" alt="${esc(p.name)}">`
+        : `<div class="pd-hero-placeholder">${typeIcon}</div>`}
+      <button class="pd-close" id="pd-close-btn">✕</button>
+    </div>
+    <div class="pd-body">
+      <div class="pd-title">${esc(p.name)}</div>
+      ${p.brand ? `<div class="pd-brand">🏭 ${esc(p.brand)}</div>` : ''}
+      <div class="pd-badges">
+        <span class="pd-badge accent">${typeIcon} ${p.type.charAt(0).toUpperCase()+p.type.slice(1)}</span>
+        ${p.proteinPct != null ? `<span class="pd-badge">Protein ${p.proteinPct}%</span>` : ''}
+        ${p.builtIn ? `<span class="pd-badge">Built-in</span>` : ''}
+      </div>
+      <div class="pd-info-grid">
+        ${p.proteinPct != null ? `
+        <div class="pd-info-item">
+          <label>Protein</label>
+          <span>${p.proteinPct}%</span>
+        </div>` : ''}
+        <div class="pd-info-item">
+          <label>Type</label>
+          <span>${p.type.charAt(0).toUpperCase()+p.type.slice(1)}</span>
+        </div>
+        ${p.brand ? `<div class="pd-info-item"><label>Brand</label><span>${esc(p.brand)}</span></div>` : ''}
+      </div>
+      ${p.notes ? `<div class="pd-notes">💬 ${esc(p.notes)}</div>` : ''}
+      ${p.sourceUrl ? `<div class="pd-source">🔗 Source: <a href="${esc(p.sourceUrl)}" target="_blank">${esc(p.sourceUrl)}</a></div>` : ''}
+      <div class="pd-actions">
+        <button class="btn btn-primary" id="pd-edit-btn" data-id="${p.id}">✏️ Edit</button>
+        ${!p.builtIn ? `<button class="btn btn-danger" id="pd-del-btn" data-id="${p.id}">🗑 Delete</button>` : ''}
+        <button class="btn btn-secondary" id="pd-close-btn2">Close</button>
+      </div>
+    </div>`;
+
+  overlay.classList.add('open');
+
+  const close = () => overlay.classList.remove('open');
+  overlay.addEventListener('click', e => { if (e.target === overlay) close(); }, { once: true });
+  panel.querySelector('#pd-close-btn')?.addEventListener('click', close);
+  panel.querySelector('#pd-close-btn2')?.addEventListener('click', close);
+  panel.querySelector('#pd-edit-btn')?.addEventListener('click', () => { close(); openProductModal(id); });
+  panel.querySelector('#pd-del-btn')?.addEventListener('click', () => { close(); deleteProduct(id); });
+}
+
 function loadRecipe(id) {
   const r = state.recipes.find(r => r.id === id);
   if (!r) return;
@@ -2003,6 +2153,8 @@ function openProductModal(id) {
       <select id="m-ptype">${typeOpts}</select></div>
      <div class="field"><label>${t('productProteinLabel')}</label>
       <input type="number" id="m-pprot" value="${p?.proteinPct??''}" min="0" max="30" step="0.1" placeholder="e.g. 12.7"></div>
+     <div class="field"><label>Brand / Manufacturer</label>
+      <input type="text" id="m-pbrand" value="${esc(p?.brand||'')}" placeholder="e.g. Shufaf, Kemah HaAretz"></div>
      <div class="field"><label>${t('productNotesLabel')}</label>
       <input type="text" id="m-pnotes" value="${esc(p?.notes||'')}" placeholder="${t('productNotesPlaceholder')}"></div>
      <input type="hidden" id="m-pimage" value="${esc(p?.imageUrl||'')}">
@@ -2013,14 +2165,15 @@ function openProductModal(id) {
       const type      = document.getElementById('m-ptype').value;
       const prot      = document.getElementById('m-pprot').value;
       const notes     = document.getElementById('m-pnotes').value.trim();
+      const brand     = document.getElementById('m-pbrand').value.trim();
       const imageUrl  = document.getElementById('m-pimage').value.trim();
       const sourceUrl = document.getElementById('m-psource').value.trim();
       const proteinPct = prot !== '' ? parseFloat(prot) : null;
       if (p) {
-        Object.assign(p, { name, type, proteinPct, notes, imageUrl, sourceUrl });
+        Object.assign(p, { name, type, proteinPct, notes, brand, imageUrl, sourceUrl });
         saveState(); renderProductsTab(); cloudSaveProduct(p);
       } else {
-        const prod = { id: uid(), name, type, proteinPct, notes, imageUrl, sourceUrl, builtIn: false };
+        const prod = { id: uid(), name, type, proteinPct, notes, brand, imageUrl, sourceUrl, builtIn: false };
         state.products.push(prod);
         saveState(); renderProductsTab(); cloudSaveProduct(prod);
       }
@@ -2055,10 +2208,11 @@ function openProductModal(id) {
         // Fill form fields
         // Support both old (proteinPct) and new (protein) field names from edge function
         const proteinVal = data.proteinPct || (data.protein ? parseFloat(data.protein) : null);
-        if (data.name)   document.getElementById('m-pname').value = data.name;
-        if (proteinVal)  document.getElementById('m-pprot').value = proteinVal;
+        if (data.name)        document.getElementById('m-pname').value  = data.name;
+        if (proteinVal)       document.getElementById('m-pprot').value  = proteinVal;
         if (data.description) document.getElementById('m-pnotes').value = data.description.slice(0, 120);
-        if (data.image)  document.getElementById('m-pimage').value = data.image;
+        if (data.image)       document.getElementById('m-pimage').value = data.image;
+        if (data.brand)       document.getElementById('m-pbrand').value = data.brand;
         document.getElementById('m-psource').value = url;
 
         // Show preview
@@ -2349,8 +2503,15 @@ document.getElementById('tab-products').addEventListener('click', e => {
   const btn = e.target.closest('[data-action]');
   if (!btn) return;
   const { action, id } = btn.dataset;
+  if (action === 'view-product') openProductDetail(id);
   if (action === 'edit-product') openProductModal(id);
   if (action === 'del-product')  deleteProduct(id);
+});
+
+// Product filters
+['product-search','filter-ptype','filter-brand'].forEach(id => {
+  document.getElementById(id)?.addEventListener('input', () => renderProductsTab());
+  document.getElementById(id)?.addEventListener('change', () => renderProductsTab());
 });
 
 // ════════════════════════════════════════════════
