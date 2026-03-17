@@ -959,6 +959,59 @@ html[data-theme="dark"] {
           </div>
         </div>
 
+        <!-- Dough Temperature Calculator -->
+        <div class="card collapsed" id="card-temp">
+          <div class="card-header" data-collapse="card-temp">
+            <h3>🌡 מחשבון טמפרטורת מים</h3>
+            <span class="card-toggle">▾</span>
+          </div>
+          <div class="card-body">
+            <div class="pct-grid">
+              <div class="pct-field">
+                <label>טמפ' בצק רצויה (DDT)</label>
+                <div class="input-wrap">
+                  <input type="number" id="temp-ddt" value="24" min="18" max="30" step="0.5">
+                  <span class="input-suffix">°C</span>
+                </div>
+              </div>
+              <div class="pct-field">
+                <label>טמפ' חדר</label>
+                <div class="input-wrap">
+                  <input type="number" id="temp-room" value="22" min="0" max="40" step="0.5">
+                  <span class="input-suffix">°C</span>
+                </div>
+              </div>
+              <div class="pct-field">
+                <label>טמפ' קמח</label>
+                <div class="input-wrap">
+                  <input type="number" id="temp-flour" value="22" min="0" max="40" step="0.5">
+                  <span class="input-suffix">°C</span>
+                </div>
+              </div>
+              <div class="pct-field">
+                <label>טמפ' מחמצת</label>
+                <div class="input-wrap">
+                  <input type="number" id="temp-levain" value="22" min="0" max="40" step="0.5">
+                  <span class="input-suffix">°C</span>
+                </div>
+              </div>
+              <div class="pct-field">
+                <label>חיכוך (ידני≈5, מיקסר≈20)</label>
+                <div class="input-wrap">
+                  <input type="number" id="temp-friction" value="5" min="0" max="30" step="1">
+                  <span class="input-suffix">°C</span>
+                </div>
+              </div>
+            </div>
+            <div id="temp-result" style="margin-top:12px;padding:12px;background:var(--bg);border-radius:8px;text-align:center;font-size:18px;font-weight:700;color:var(--accent)">
+              טמפ' מים: — °C
+            </div>
+            <p class="text-sm text-muted" style="margin-top:8px;text-align:center">
+              נוסחה: (DDT × 4) − (חדר + קמח + מחמצת + חיכוך)
+            </p>
+          </div>
+        </div>
+
         <!-- Add-ins -->
         <div class="card collapsed" id="card-addins">
           <div class="card-header" data-collapse="card-addins">
@@ -2755,6 +2808,31 @@ document.addEventListener('keydown', e => {
   if (e.key === '3') { e.preventDefault(); switchTab('community'); }
   if (e.key === '4') { e.preventDefault(); switchTab('products'); }
 });
+
+// ════════════════════════════════════════════════
+// WATER TEMPERATURE CALCULATOR
+// ════════════════════════════════════════════════
+function calcWaterTemp() {
+  const ddt      = parseFloat(document.getElementById('temp-ddt')?.value)     || 0;
+  const room     = parseFloat(document.getElementById('temp-room')?.value)    || 0;
+  const flour    = parseFloat(document.getElementById('temp-flour')?.value)   || 0;
+  const levain   = parseFloat(document.getElementById('temp-levain')?.value)  || 0;
+  const friction = parseFloat(document.getElementById('temp-friction')?.value)|| 0;
+  const waterTemp = (ddt * 4) - (room + flour + levain + friction);
+  const el = document.getElementById('temp-result');
+  if (!el) return;
+  const color = waterTemp < 5 ? '#ef4444' : waterTemp > 35 ? '#f97316' : 'var(--accent)';
+  const note  = waterTemp < 5  ? ' ❄️ קר מאוד — שקול להשתמש בקרח'
+              : waterTemp > 35 ? ' 🔥 חם מאוד — הוסף קרח למים'
+              : '';
+  el.style.color = color;
+  el.textContent = `טמפ' מים: ${waterTemp.toFixed(1)}°C${note}`;
+}
+
+['temp-ddt','temp-room','temp-flour','temp-levain','temp-friction'].forEach(id => {
+  document.getElementById(id)?.addEventListener('input', calcWaterTemp);
+});
+calcWaterTemp();
 
 initAuth();
 
