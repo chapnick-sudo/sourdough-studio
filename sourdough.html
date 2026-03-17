@@ -581,6 +581,51 @@ select { min-width: 140px; }
 .pd-source { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; }
 .pd-source a { color: var(--accent); text-decoration: none; }
 
+/* ── RECIPE DETAIL OVERLAY ── */
+#recipe-detail-overlay {
+  display: none; position: fixed; inset: 0; z-index: 3000;
+  background: rgba(0,0,0,.45); backdrop-filter: blur(3px);
+  animation: fadeIn .15s ease;
+}
+#recipe-detail-overlay.open { display: flex; align-items: center; justify-content: center; }
+.recipe-detail-panel {
+  background: var(--surface); border-radius: 16px;
+  width: min(640px, 95vw); max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,.3);
+  animation: slideUp .2s ease;
+}
+.rd-hero {
+  position: relative; background: var(--bg);
+  border-radius: 16px 16px 0 0; overflow: hidden;
+  min-height: 120px; display: flex; align-items: center; justify-content: center;
+}
+.rd-hero img { width: 100%; max-height: 280px; object-fit: cover; }
+.rd-hero-placeholder { font-size: 80px; padding: 32px; }
+.rd-photo-btn {
+  position: absolute; bottom: 12px; right: 12px;
+  background: rgba(0,0,0,.55); color: #fff; border: none;
+  border-radius: 20px; padding: 6px 14px; cursor: pointer;
+  font-size: 13px; font-weight: 600;
+}
+.rd-photo-btn:hover { background: rgba(0,0,0,.75); }
+.rd-body { padding: 24px; }
+.rd-title { font-size: 22px; font-weight: 700; margin: 0 0 4px; }
+.rd-desc { font-size: 14px; color: var(--text-muted); margin-bottom: 16px; }
+.rd-ingredients { background: var(--bg); border-radius: 10px; padding: 16px; margin-bottom: 20px; }
+.rd-ingredients table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.rd-ingredients td { padding: 4px 8px; }
+.rd-ingredients td:last-child { text-align: right; font-weight: 600; }
+.rd-ingredients tr:not(:last-child) td { border-bottom: 1px solid var(--border); }
+.rd-notes { font-size: 14px; color: var(--text-muted); line-height: 1.5;
+  padding: 12px; background: var(--bg); border-radius: 8px; margin-bottom: 20px; }
+.rd-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.rd-close {
+  position: absolute; top: 12px; right: 12px;
+  background: rgba(0,0,0,.4); color: #fff; border: none;
+  border-radius: 50%; width: 32px; height: 32px;
+  cursor: pointer; font-size: 16px; line-height: 32px; text-align: center;
+}
+
 /* ── CLICKABLE TABLE ROWS ── */
 table.products-table tbody tr { cursor: pointer; }
 table.products-table tbody tr:hover td { background: var(--hover); }
@@ -839,6 +884,10 @@ html[data-theme="dark"] {
 <main style="display:none">
   <!-- ══ CALCULATOR TAB ══ -->
   <section class="tab-section active" id="tab-calculator">
+    <div id="active-recipe-banner" style="display:none;background:var(--accent);color:#fff;padding:8px 16px;border-radius:8px;margin-bottom:12px;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:space-between">
+      <span id="active-recipe-name"></span>
+      <button onclick="state.activeRecipeId=null;this.parentElement.style.display='none'" style="background:none;border:none;color:#fff;cursor:pointer;font-size:16px">✕</button>
+    </div>
     <div class="calc-layout">
       <div class="calc-main">
 
@@ -1088,6 +1137,10 @@ html[data-theme="dark"] {
 </main>
 
 <!-- ══ PRODUCT DETAIL OVERLAY ══ -->
+<div id="recipe-detail-overlay">
+  <div class="recipe-detail-panel" id="recipe-detail-panel"></div>
+</div>
+
 <div id="product-detail-overlay">
   <div class="product-detail-panel" id="product-detail-panel"></div>
 </div>
@@ -1872,21 +1925,17 @@ function renderRecipesTab() {
     const locale = state.lang === 'he' ? 'he-IL' : 'en-US';
     const date = new Date(r.updatedAt).toLocaleDateString(locale, {month:'short',day:'numeric',year:'numeric'});
     return `
-    <div class="recipe-card">
+    <div class="recipe-card" style="cursor:pointer" data-action="view-recipe" data-id="${r.id}">
       ${r.imageUrl ? `<img src="${esc(r.imageUrl)}" class="recipe-card-img" onerror="this.style.display='none'" alt="${esc(r.name)}">` : ''}
       <h3>${esc(r.name)}</h3>
       ${r.description ? `<div class="desc">${esc(r.description)}</div>` : ''}
       <div class="summary">${esc(recipeSummary(r.calculator))}</div>
       <div class="meta">${t('savedDate', date)}</div>
-      <div class="recipe-card-actions">
-        <button class="btn btn-primary btn-sm" data-action="load-recipe" data-id="${r.id}">${t('btnLoad')}</button>
+      <div class="recipe-card-actions" onclick="event.stopPropagation()">
+        <button class="btn btn-primary btn-sm" data-action="view-recipe" data-id="${r.id}">👁 פתח</button>
+        <button class="btn btn-secondary btn-sm" data-action="edit-recipe" data-id="${r.id}">✏️ ${t('btnEdit')}</button>
         <button class="btn btn-secondary btn-sm" data-action="dup-recipe" data-id="${r.id}">${t('btnDuplicate')}</button>
-        <button class="btn btn-secondary btn-sm" data-action="pdf-recipe" data-id="${r.id}">PDF</button>
         <button class="btn btn-danger btn-sm" data-action="del-recipe" data-id="${r.id}">${t('btnDelete')}</button>
-      </div>
-      <div class="recipe-card-share">
-        <span>${r.isPublic ? '<span class="badge-public">🌐 Public</span>' : '<span style="font-size:12px;color:var(--text-muted)">🔒 Private</span>'}</span>
-        <button class="btn btn-ghost btn-sm" data-action="share-recipe" data-id="${r.id}">${r.isPublic ? 'Make Private' : 'Share'}</button>
       </div>
     </div>`;
   }).join('');
@@ -2047,7 +2096,9 @@ document.getElementById('btn-theme')?.addEventListener('click', () => {
 // ════════════════════════════════════════════════
 
 function openSaveRecipeModal(existingId) {
-  const existing = existingId ? state.recipes.find(r => r.id === existingId) : null;
+  // If editing from calculator with an active recipe, default to updating that recipe
+  const resolvedId = existingId || state.activeRecipeId || null;
+  const existing = resolvedId ? state.recipes.find(r => r.id === resolvedId) : null;
   openModal(
     existing ? t('updateRecipeTitle') : t('saveRecipeTitle'),
     `<div class="field"><label>${t('recipeNameLabel')}</label>
@@ -2155,13 +2206,94 @@ function openProductDetail(id) {
   panel.querySelector('#pd-del-btn')?.addEventListener('click', () => { close(); deleteProduct(id); });
 }
 
+function openRecipeDetail(id) {
+  const r = state.recipes.find(x => x.id === id);
+  if (!r) return;
+  const overlay = document.getElementById('recipe-detail-overlay');
+  const panel   = document.getElementById('recipe-detail-panel');
+  if (!overlay || !panel) return;
+
+  const c = computeIngredients(r.calculator);
+  const rows = [
+    ['קמח כולל', `${Math.round(c.flourWeight)} g`],
+    ['מים כולל', `${Math.round(c.totalWater || (c.flourWeight * (r.calculator.totalHydrationPct||75)/100))} g`],
+    ['מחמצת', `${Math.round(c.levainTotal)} g`],
+    ['מלח', `${Math.round(c.salt)} g`],
+    ...(c.basinage > 0 ? [['בסינאז׳', `${Math.round(c.basinage)} g`]] : []),
+    ...(c.addIns||[]).map(a => [a.name, `${Math.round(a.weight)} g`]),
+    ['<strong>סה"כ</strong>', `<strong>${Math.round(c.totalDoughWeight)} g</strong>`],
+  ];
+
+  const date = new Date(r.updatedAt).toLocaleDateString('he-IL', {month:'short',day:'numeric',year:'numeric'});
+
+  panel.innerHTML = `
+    <div class="rd-hero">
+      ${r.imageUrl
+        ? `<img src="${esc(r.imageUrl)}" onerror="this.outerHTML='<div class=rd-hero-placeholder>🍞</div>'" alt="${esc(r.name)}">`
+        : `<div class="rd-hero-placeholder">🍞</div>`}
+      <button class="rd-close" id="rd-close-btn">✕</button>
+      <label class="rd-photo-btn" for="rd-photo-input">📸 ${r.imageUrl ? 'החלף תמונה' : 'הוסף תמונה'}</label>
+      <input type="file" id="rd-photo-input" accept="image/*" capture="environment" style="display:none">
+    </div>
+    <div class="rd-body">
+      <div class="rd-title">${esc(r.name)}</div>
+      ${r.description ? `<div class="rd-desc">${esc(r.description)}</div>` : ''}
+      <div class="rd-ingredients">
+        <div style="font-size:12px;font-weight:700;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px">
+          ${r.calculator?.loaves||1} כיכרות × ${r.calculator?.gPerLoaf||900}g · הידרציה ${r.calculator?.totalHydrationPct||75}%
+        </div>
+        <table>${rows.map(([k,v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join('')}</table>
+      </div>
+      ${r.notes ? `<div class="rd-notes">💬 ${esc(r.notes)}</div>` : ''}
+      <div class="meta" style="font-size:12px;color:var(--text-muted);margin-bottom:16px">${date}</div>
+      <div class="rd-actions">
+        <button class="btn btn-primary" id="rd-edit-btn" data-id="${r.id}">✏️ ערוך במחשבון</button>
+        <button class="btn btn-secondary" id="rd-pdf-btn" data-id="${r.id}">PDF</button>
+        <button class="btn btn-secondary" id="rd-dup-btn" data-id="${r.id}">${t('btnDuplicate')}</button>
+        <button class="btn btn-ghost" id="rd-share-btn" data-id="${r.id}">${r.isPublic ? '🔒 הפוך לפרטי' : '🌐 שתף'}</button>
+        <button class="btn btn-danger" id="rd-del-btn" data-id="${r.id}">${t('btnDelete')}</button>
+      </div>
+    </div>`;
+
+  overlay.classList.add('open');
+
+  // Photo upload
+  document.getElementById('rd-photo-input')?.addEventListener('change', async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    showCloudStatus('☁ uploading...', true);
+    const url = await uploadRecipeImage(r.id, file);
+    if (url) {
+      r.imageUrl = url;
+      saveState(); cloudSaveRecipe(r); renderRecipesTab();
+      openRecipeDetail(id); // refresh panel
+    }
+  });
+
+  document.getElementById('rd-close-btn')?.addEventListener('click', () => overlay.classList.remove('open'));
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
+  document.getElementById('rd-edit-btn')?.addEventListener('click', () => { overlay.classList.remove('open'); loadRecipe(id); });
+  document.getElementById('rd-pdf-btn')?.addEventListener('click',  () => { const rec = state.recipes.find(x=>x.id===id); if(rec) printRecipePDF(rec.calculator, rec.name, rec.notes); });
+  document.getElementById('rd-dup-btn')?.addEventListener('click',  () => { overlay.classList.remove('open'); duplicateRecipe(id); });
+  document.getElementById('rd-share-btn')?.addEventListener('click',() => { toggleShareRecipe(id); overlay.classList.remove('open'); });
+  document.getElementById('rd-del-btn')?.addEventListener('click',  () => {
+    overlay.classList.remove('open');
+    confirmDeleteRecipe(id);
+  });
+}
+
 function loadRecipe(id) {
   const r = state.recipes.find(r => r.id === id);
   if (!r) return;
   state.calculator = deepClone(r.calculator);
+  state.activeRecipeId = id;
   saveState();
   switchTab('calculator');
   renderCalculatorTab();
+  // Show active recipe banner
+  const banner = document.getElementById('active-recipe-banner');
+  const nameEl = document.getElementById('active-recipe-name');
+  if (banner && nameEl) { nameEl.textContent = `✏️ עורך: ${r.name}`; banner.style.display = 'flex'; }
 }
 
 function duplicateRecipe(id) {
@@ -2560,10 +2692,11 @@ document.getElementById('tab-recipes').addEventListener('click', e => {
   const btn = e.target.closest('[data-action]');
   if (!btn) return;
   const { action, id } = btn.dataset;
-  if (action === 'load-recipe')   loadRecipe(id);
-  if (action === 'dup-recipe')    duplicateRecipe(id);
-  if (action === 'del-recipe')    deleteRecipe(id);
-  if (action === 'share-recipe')  toggleShareRecipe(id);
+  if (action === 'view-recipe')  openRecipeDetail(id);
+  if (action === 'edit-recipe')  loadRecipe(id);
+  if (action === 'dup-recipe')   duplicateRecipe(id);
+  if (action === 'del-recipe')   deleteRecipe(id);
+  if (action === 'share-recipe') toggleShareRecipe(id);
   if (action === 'pdf-recipe') {
     const r = state.recipes.find(x => x.id === id);
     if (r) printRecipePDF(r.calculator, r.name, r.notes);
