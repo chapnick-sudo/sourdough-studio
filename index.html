@@ -1091,7 +1091,7 @@ async function cloudLoad() {
     if (re || pe) throw re || pe;
     if (recipes)  state.recipes  = recipes.map(r => ({ id: r.id, name: r.name, description: r.description||'', notes: r.notes||'', createdAt: r.created_at, updatedAt: r.updated_at, calculator: r.calculator, isPublic: r.is_public||false }));
     if (products) {
-      const custom = products.map(p => ({ id: p.id, name: p.name, type: p.type, proteinPct: p.protein_pct, notes: p.notes||'', builtIn: p.built_in }));
+      const custom = products.map(p => ({ id: p.id, name: p.name, type: p.type, proteinPct: p.protein_pct, notes: p.notes||'', builtIn: p.built_in, imageUrl: p.image_url||'', sourceUrl: p.source_url||'' }));
       // merge: keep built-ins from DEFAULT_PRODUCTS, replace/add custom
       const builtIns = DEFAULT_PRODUCTS.filter(p => p.builtIn);
       const customNonBuiltIn = custom.filter(p => !p.builtIn);
@@ -1128,7 +1128,9 @@ async function cloudSaveProduct(product) {
   const { error } = await sb.from('products').upsert({
     id: product.id, name: product.name, type: product.type,
     protein_pct: product.proteinPct ?? null, notes: product.notes||'',
-    built_in: false, user_id: currentUser.id
+    built_in: false, user_id: currentUser.id,
+    image_url: product.imageUrl || null,
+    source_url: product.sourceUrl || null
   });
   if (error) { console.error('cloudSaveProduct', error); showCloudStatus('☁ save failed', false); }
   else showCloudStatus('☁ saved', true);
