@@ -2051,10 +2051,12 @@ function openProductModal(id) {
         if (data.error) throw new Error(data.error);
 
         // Fill form fields
-        if (data.name)        document.getElementById('m-pname').value = data.name;
-        if (data.proteinPct)  document.getElementById('m-pprot').value = data.proteinPct;
+        // Support both old (proteinPct) and new (protein) field names from edge function
+        const proteinVal = data.proteinPct || (data.protein ? parseFloat(data.protein) : null);
+        if (data.name)   document.getElementById('m-pname').value = data.name;
+        if (proteinVal)  document.getElementById('m-pprot').value = proteinVal;
         if (data.description) document.getElementById('m-pnotes').value = data.description.slice(0, 120);
-        if (data.image)       document.getElementById('m-pimage').value = data.image;
+        if (data.image)  document.getElementById('m-pimage').value = data.image;
         document.getElementById('m-psource').value = url;
 
         // Show preview
@@ -2066,7 +2068,7 @@ function openProductModal(id) {
           ${data.image ? `<img src="${esc(data.image)}" onerror="this.style.display='none'" alt="">` : ''}
           <div class="fetch-info">
             <strong>${esc(data.name || '—')}</strong>
-            <span>${data.proteinPct ? `Protein: ${data.proteinPct}%` : ''}${data.brand ? ` · ${esc(data.brand)}` : ''}</span>
+            <span>${proteinVal ? `Protein: ${proteinVal}` : ''}${data.brand ? ` · ${esc(data.brand)}` : ''}</span>
             ${data.description ? `<span style="display:block;margin-top:2px;font-size:11px">${esc(data.description.slice(0,80))}…</span>` : ''}
           </div>`;
       } catch(e) {
