@@ -1963,9 +1963,12 @@ function deleteRecipe(id) {
 async function fetchProductFromUrl(url) {
   const SUPABASE_URL = 'https://wzyfiazxqubkrtgiszsh.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_rd0y1evNyaHYgpCz5xtMDw_u_RanBVA';
+  // Use logged-in user's JWT — fallback to anon key
+  const { data: { session } } = await sb.auth.getSession();
+  const token = session?.access_token || SUPABASE_KEY;
   const res = await fetch(`${SUPABASE_URL}/functions/v1/fetch-product`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
     body: JSON.stringify({ url })
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
