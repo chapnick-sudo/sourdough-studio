@@ -31,6 +31,7 @@
   --shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { max-width: 100%; overflow-x: hidden; }
 body {
   font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
   background: var(--bg);
@@ -286,8 +287,64 @@ select { min-width: 140px; }
   gap: 20px;
   align-items: start;
 }
+/* ══ RESPONSIVE — MOBILE ══ */
 @media (max-width: 700px) {
+  /* Calculator layout */
   .calc-layout { grid-template-columns: 1fr; }
+
+  /* Header */
+  .header-inner {
+    flex-wrap: wrap;
+    gap: 0;
+    padding: 0 12px;
+  }
+  .logo { padding: 10px 0; font-size: 16px; flex: 1; }
+  .header-controls { order: 3; width: 100%; justify-content: flex-end; padding: 4px 0 6px; border-top: 1px solid var(--border); }
+  nav.tabs {
+    order: 2;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    border-top: 1px solid var(--border);
+  }
+  nav.tabs::-webkit-scrollbar { display: none; }
+  nav.tabs button { padding: 12px 14px 9px; font-size: 13px; }
+
+  /* Main padding */
+  main { padding: 16px 12px 60px; }
+
+  /* Cards */
+  .card-body { padding: 12px 14px; }
+  .card-header { padding: 12px 14px; }
+
+  /* Inputs */
+  select { min-width: 0; width: 100%; }
+  label { white-space: normal; }
+  input[type=number] { width: 80px; }
+
+  /* pct-grid — stack on very small screens */
+  .pct-grid { grid-template-columns: 1fr 1fr; }
+
+  /* Results actions — wrap */
+  .results-actions { flex-wrap: wrap; }
+  .results-actions .btn { flex: 1; justify-content: center; }
+
+  /* Flour rows */
+  .flour-row { flex-wrap: wrap; }
+  .flour-row select { min-width: 0; flex: 1 1 100%; }
+
+  /* Recipe cards grid */
+  .recipe-grid { grid-template-columns: 1fr; }
+
+  /* Auth card */
+  .auth-card { padding: 28px 20px; }
+
+  /* User chip */
+  #user-email { max-width: 80px !important; }
+
+  /* Cloud status */
+  #cloud-status { display: none; }
 }
 .calc-sidebar { position: sticky; top: 72px; }
 /* ── Base Weight Card ── */
