@@ -441,6 +441,49 @@ select { min-width: 140px; }
   margin-bottom: 20px;
   flex-wrap: wrap;
 }
+/* ── Product Categories ── */
+.product-category { margin-bottom: 20px; }
+.product-category-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius) var(--radius) 0 0;
+  cursor: pointer;
+  user-select: none;
+}
+.product-category-header h3 {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  flex: 1;
+}
+.product-category-header .cat-icon { font-size: 18px; }
+.product-category-header .cat-count {
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--border);
+  color: var(--text-muted);
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+.product-category-header .cat-toggle {
+  color: var(--text-muted);
+  font-size: 14px;
+  transition: transform 0.2s;
+}
+.product-category.collapsed .cat-toggle { transform: rotate(-90deg); }
+.product-category.collapsed .product-category-body { display: none; }
+.product-category-body {
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 var(--radius) var(--radius);
+  overflow: hidden;
+}
 .products-table-wrap { overflow-x: auto; }
 table.products-table {
   width: 100%;
@@ -875,20 +918,7 @@ html[data-theme="dark"] {
       <h2 class="section-title" style="margin:0">Products</h2>
       <button class="btn btn-primary" id="btn-add-product" data-i18n="btnAddProduct">+ Add Product</button>
     </div>
-    <div class="products-table-wrap">
-      <table class="products-table">
-        <thead>
-          <tr>
-            <th data-i18n="colName">Name</th>
-            <th data-i18n="colType">Type</th>
-            <th data-i18n="colProtein">Protein %</th>
-            <th data-i18n="colNotes">Notes</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="products-tbody"></tbody>
-      </table>
-    </div>
+    <div id="products-categories"></div>
   </section>
 </main>
 
@@ -1683,29 +1713,88 @@ function renderRecipesTab() {
 // ════════════════════════════════════════════════
 
 function renderProductsTab() {
-  const tbody = document.getElementById('products-tbody');
-  if (!tbody) return;
+  const container = document.getElementById('products-categories');
+  if (!container) return;
 
   if (state.products.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" class="empty-state" style="text-align:center;padding:40px;color:var(--text-muted)">${t('noProductsMsg')}</td></tr>`;
+    container.innerHTML = `<div class="empty-state" style="text-align:center;padding:60px;color:var(--text-muted)">${t('noProductsMsg')}</div>`;
     return;
   }
 
-  tbody.innerHTML = state.products.map(p => `
-    <tr>
-      <td>
-        ${esc(p.name)}
-        ${p.builtIn ? `<span class="builtin-tag">${t('builtInTag')}</span>` : ''}
-      </td>
-      <td style="text-transform:capitalize">${esc(p.type)}</td>
-      <td>${p.proteinPct != null ? p.proteinPct + '%' : '—'}</td>
-      <td class="text-muted">${esc(p.notes||'')}</td>
-      <td style="white-space:nowrap;text-align:right">
-        <button class="btn btn-secondary btn-sm" data-action="edit-product" data-id="${p.id}">${t('btnEdit')}</button>
-        ${!p.builtIn ? `<button class="btn btn-danger btn-sm" data-action="del-product" data-id="${p.id}" style="margin-left:4px">${t('btnDelete')}</button>` : ''}
-      </td>
-    </tr>
-  `).join('');
+  // Category definitions: key, label, icon, column headers
+  const CATS = [
+    { type: 'flour',  label: 'Flours',       icon: '🌾', showProtein: true  },
+    { type: 'fat',    label: 'Fats & Oils',   icon: '🧈', showProtein: false },
+    { type: 'seed',   label: 'Seeds & Grains',icon: '🌱', showProtein: false },
+    { type: 'other',  label: 'Other',         icon: '🫙', showProtein: false },
+  ];
+
+  // Group products by type
+  const grouped = {};
+  CATS.forEach(c => grouped[c.type] = []);
+  state.products.forEach(p => {
+    if (grouped[p.type] !== undefined) grouped[p.type].push(p);
+    else grouped['other'] = (grouped['other'] || []).concat(p);
+  });
+
+  // Remember collapsed state
+  const prevCollapsed = {};
+  container.querySelectorAll('.product-category').forEach(el => {
+    prevCollapsed[el.dataset.catType] = el.classList.contains('collapsed');
+  });
+
+  container.innerHTML = CATS.map(cat => {
+    const products = grouped[cat.type] || [];
+    if (products.length === 0) return '';
+    const isCollapsed = prevCollapsed[cat.type] === true;
+
+    const rows = products.map(p => `
+      <tr>
+        <td>
+          ${esc(p.name)}
+          ${p.builtIn ? `<span class="builtin-tag">${t('builtInTag')}</span>` : ''}
+        </td>
+        ${cat.showProtein ? `<td>${p.proteinPct != null ? p.proteinPct + '%' : '—'}</td>` : ''}
+        <td class="text-muted">${esc(p.notes||'')}</td>
+        <td style="white-space:nowrap;text-align:right">
+          <button class="btn btn-secondary btn-sm" data-action="edit-product" data-id="${p.id}">${t('btnEdit')}</button>
+          ${!p.builtIn ? `<button class="btn btn-danger btn-sm" data-action="del-product" data-id="${p.id}" style="margin-left:4px">${t('btnDelete')}</button>` : ''}
+        </td>
+      </tr>
+    `).join('');
+
+    return `
+      <div class="product-category${isCollapsed ? ' collapsed' : ''}" data-cat-type="${cat.type}">
+        <div class="product-category-header" data-toggle-cat="${cat.type}">
+          <span class="cat-icon">${cat.icon}</span>
+          <h3>${cat.label}</h3>
+          <span class="cat-count">${products.length}</span>
+          <span class="cat-toggle">▾</span>
+        </div>
+        <div class="product-category-body">
+          <div class="products-table-wrap">
+            <table class="products-table">
+              <thead>
+                <tr>
+                  <th>${t('colName')}</th>
+                  ${cat.showProtein ? `<th>${t('colProtein')}</th>` : ''}
+                  <th>${t('colNotes')}</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+
+  // Toggle collapse
+  container.querySelectorAll('[data-toggle-cat]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.closest('.product-category').classList.toggle('collapsed');
+    });
+  });
 }
 
 // ════════════════════════════════════════════════
