@@ -1775,6 +1775,13 @@ function productName(id) {
   return p ? p.name : '(unknown)';
 }
 
+function productNameWithBrand(id) {
+  const p = state.products.find(p => p.id === id);
+  if (!p) return '(unknown)';
+  if (p.brand) return `${p.name}<br><span style="font-size:11px;color:var(--text-muted);font-weight:400">${p.brand}</span>`;
+  return p.name;
+}
+
 function flourProducts() {
   return state.products.filter(p => p.type === 'flour');
 }
@@ -2305,11 +2312,13 @@ function openRecipeDetail(id) {
 
   // Build flour breakdown rows
   const flourRows = (c.flourBreakdown||[]).length > 1
-    ? c.flourBreakdown.map(f => [`↳ ${productName(f.productId)} (${Math.round(f.pct)}%)`, `${Math.round(f.weight)} g`])
+    ? c.flourBreakdown.map(f => [`↳ ${productNameWithBrand(f.productId)} (${Math.round(f.pct)}%)`, `${Math.round(f.weight)} g`])
     : [];
 
   // Build levain flour breakdown
-  const levainFlourRows = [];
+  const levainFlourRows = (c.levainFlourBreakdown||[]).length > 1
+    ? c.levainFlourBreakdown.map(f => [`  ↳ ${productNameWithBrand(f.productId)}`, `${Math.round(f.weight)} g`])
+    : [];
 
   const rows = [
     ['<strong>קמח בצק</strong>', `<strong>${Math.round(c.flourWeight)} g</strong>`],
@@ -2320,7 +2329,7 @@ function openRecipeDetail(id) {
     ...levainFlourRows,
     ['  ↳ מים', `${Math.round(c.levainWater)} g`],
     ['מלח', `${Math.round(c.salt)} g`],
-    ...(c.addIns||[]).map(a => [productName(a.productId), `${Math.round(a.weight)} g`]),
+    ...(c.addIns||[]).map(a => [productNameWithBrand(a.productId), `${Math.round(a.weight)} g`]),
     ['<strong>סה"כ בצק</strong>', `<strong>${Math.round(c.totalDoughWeight)} g</strong>`],
   ];
 
