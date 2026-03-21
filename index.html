@@ -3397,9 +3397,9 @@ document.getElementById('rw-load-btn')?.addEventListener('click', () => {
       splitPct: total > 0 ? parseFloat((r.splitPct / total * 100).toFixed(1)) : 0
     }));
   }
+  calc.loaves = d.loaves;
   setCalcMode('pct');
-  updateCalcDOM();
-  renderFlourRows('main-flour-rows', calc.flourRows, 'main', 'flour');
+  renderCalculatorTab();
   renderResults();
   showCloudStatus('✅ Loaded to Calculator!', true);
 });
