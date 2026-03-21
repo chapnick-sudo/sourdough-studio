@@ -900,6 +900,57 @@ html[data-theme="dark"] {
       <span id="active-recipe-name"></span>
       <button onclick="state.activeRecipeId=null;saveState();this.parentElement.style.display='none'" style="background:none;border:none;color:#fff;cursor:pointer;font-size:16px">✕</button>
     </div>
+    <!-- Mode Toggle -->
+    <div style="display:flex;gap:8px;margin-bottom:12px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:4px;width:fit-content">
+      <button id="mode-pct" class="btn btn-primary btn-sm" onclick="setCalcMode('pct')" style="min-width:130px">📊 Baker's %</button>
+      <button id="mode-weight" class="btn btn-secondary btn-sm" onclick="setCalcMode('weight')" style="min-width:130px">⚖️ By Weight</button>
+    </div>
+
+    <!-- ══ BY-WEIGHT MODE ══ -->
+    <div id="calc-weight-mode" style="display:none">
+      <div class="card">
+        <div class="card-header"><h3>⚖️ Reverse Calculator — Weights → Baker's %</h3></div>
+        <div class="card-body">
+          <div class="pct-grid">
+            <div class="pct-field">
+              <label>Main Flour (total)</label>
+              <div class="input-wrap"><input type="number" id="rw-flour" value="500" min="1" step="1"><span class="input-suffix">g</span></div>
+            </div>
+            <div class="pct-field">
+              <label>Main Dough Water</label>
+              <div class="input-wrap"><input type="number" id="rw-water" value="300" min="0" step="1"><span class="input-suffix">g</span></div>
+            </div>
+            <div class="pct-field">
+              <label>Levain Weight</label>
+              <div class="input-wrap"><input type="number" id="rw-levain" value="150" min="0" step="1"><span class="input-suffix">g</span></div>
+            </div>
+            <div class="pct-field">
+              <label>Levain Hydration</label>
+              <div class="input-wrap"><input type="number" id="rw-levain-hyd" value="100" min="1" max="300" step="1"><span class="input-suffix">%</span></div>
+            </div>
+            <div class="pct-field">
+              <label>Salt</label>
+              <div class="input-wrap"><input type="number" id="rw-salt" value="10" min="0" step="0.5"><span class="input-suffix">g</span></div>
+            </div>
+            <div class="pct-field">
+              <label>Basinage</label>
+              <div class="input-wrap"><input type="number" id="rw-basinage" value="0" min="0" step="1"><span class="input-suffix">g</span></div>
+            </div>
+          </div>
+
+          <!-- Results -->
+          <div id="rw-results" style="margin-top:16px;background:var(--bg);border-radius:10px;padding:14px 16px;border:1px solid var(--border)">
+            <div style="font-weight:700;margin-bottom:10px;font-size:14px">📊 Baker's Percentages</div>
+            <div id="rw-results-body" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px"></div>
+          </div>
+
+          <div style="margin-top:12px;display:flex;gap:8px">
+            <button class="btn btn-primary" id="rw-load-btn">← Load to Calculator</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="calc-layout">
       <div class="calc-main">
 
@@ -3117,6 +3168,97 @@ function calcWaterTemp() {
   document.getElementById(id)?.addEventListener('input', calcWaterTemp);
 });
 calcWaterTemp();
+
+// ════════════════════════════════════════════════
+// REVERSE CALCULATOR (Weights → Baker's %)
+// ════════════════════════════════════════════════
+let _calcMode = 'pct';
+
+function setCalcMode(mode) {
+  _calcMode = mode;
+  document.getElementById('calc-weight-mode').style.display = mode === 'weight' ? 'block' : 'none';
+  document.querySelector('.calc-layout').style.display = mode === 'pct' ? '' : 'none';
+  document.getElementById('mode-pct').className    = mode === 'pct'    ? 'btn btn-primary btn-sm'   : 'btn btn-secondary btn-sm';
+  document.getElementById('mode-weight').className = mode === 'weight' ? 'btn btn-primary btn-sm'   : 'btn btn-secondary btn-sm';
+  if (mode === 'weight') computeReverseCalc();
+}
+
+function computeReverseCalc() {
+  const flour      = parseFloat(document.getElementById('rw-flour')?.value)      || 0;
+  const water      = parseFloat(document.getElementById('rw-water')?.value)      || 0;
+  const levain     = parseFloat(document.getElementById('rw-levain')?.value)     || 0;
+  const levainHyd  = parseFloat(document.getElementById('rw-levain-hyd')?.value) || 100;
+  const salt       = parseFloat(document.getElementById('rw-salt')?.value)       || 0;
+  const basinage   = parseFloat(document.getElementById('rw-basinage')?.value)   || 0;
+
+  if (flour <= 0) return;
+
+  // Split levain into flour + water
+  const levainFlour = levain / (1 + levainHyd / 100);
+  const levainWater = levain - levainFlour;
+
+  const totalFlour  = flour + levainFlour;
+  const totalWater  = water + levainWater + basinage;
+
+  const pct = (val) => totalFlour > 0 ? (val / totalFlour * 100).toFixed(1) + '%' : '—';
+
+  const hydrationPct  = totalFlour > 0 ? (totalWater / totalFlour * 100).toFixed(1) : 0;
+  const levainPct     = totalFlour > 0 ? (levainFlour / totalFlour * 100).toFixed(1) : 0;
+  const saltPct       = totalFlour > 0 ? (salt / totalFlour * 100).toFixed(1) : 0;
+  const basinagePct   = totalFlour > 0 ? (basinage / totalFlour * 100).toFixed(1) : 0;
+  const totalDough    = flour + water + levain + salt + basinage;
+  const loaves        = state.calculator?.loaves || 1;
+
+  const tiles = [
+    { label: 'Total Hydration', value: hydrationPct + '%', color: '#3b82f6' },
+    { label: 'Levain %',        value: levainPct + '%',    color: '#8b5cf6' },
+    { label: 'Salt %',          value: saltPct + '%',      color: '#f59e0b' },
+    { label: 'Basinage %',      value: basinagePct + '%',  color: '#10b981' },
+    { label: 'Total Flour',     value: Math.round(totalFlour) + ' g', color: '#c2440e' },
+    { label: 'Total Dough',     value: Math.round(totalDough) + ' g', color: '#374151' },
+  ];
+
+  const body = document.getElementById('rw-results-body');
+  if (body) body.innerHTML = tiles.map(t => `
+    <div style="background:${t.color}15;border:1px solid ${t.color}30;border-radius:8px;padding:10px;text-align:center">
+      <div style="font-size:18px;font-weight:700;color:${t.color}">${t.value}</div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:2px">${t.label}</div>
+    </div>`).join('');
+
+  // Store for "Load to Calculator"
+  document._rwCalc = {
+    hydrationPct: parseFloat(hydrationPct),
+    levainPct:    parseFloat(levainPct),
+    saltPct:      parseFloat(saltPct),
+    basinagePct:  parseFloat(basinagePct),
+    levainHydPct: levainHyd,
+    totalDough,
+    loaves,
+    gPerLoaf:     Math.round(totalDough / loaves),
+  };
+}
+
+// Live update
+['rw-flour','rw-water','rw-levain','rw-levain-hyd','rw-salt','rw-basinage'].forEach(id => {
+  document.getElementById(id)?.addEventListener('input', computeReverseCalc);
+});
+
+// Load to Calculator button
+document.getElementById('rw-load-btn')?.addEventListener('click', () => {
+  const d = document._rwCalc;
+  if (!d) return;
+  const calc = state.calculator;
+  calc.totalHydrationPct   = d.hydrationPct;
+  calc.levain.flourPct     = d.levainPct;
+  calc.levain.hydrationPct = d.levainHydPct;
+  calc.saltPct             = d.saltPct;
+  calc.basinagePct         = d.basinagePct;
+  calc.gPerLoaf            = d.gPerLoaf;
+  setCalcMode('pct');
+  updateCalcDOM();
+  renderResults();
+  showCloudStatus('✅ Loaded!', true);
+});
 
 initAuth();
 
