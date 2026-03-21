@@ -2339,19 +2339,36 @@ function deleteRecipe(id) {
 // 12. PRODUCT CRUD
 // ════════════════════════════════════════════════
 
-async function fetchProductFromUrl(url) {
+async function callEdgeFunction(body) {
   const SUPABASE_URL = 'https://wzyfiazxqubkrtgiszsh.supabase.co';
-  const SUPABASE_KEY = 'sb_publishable_rd0y1evNyaHYgpCz5xtMDw_u_RanBVA';
-  // Use logged-in user's JWT — fallback to anon key
   const { data: { session } } = await sb.auth.getSession();
-  const token = session?.access_token || SUPABASE_KEY;
+  const token = session?.access_token || 'sb_publishable_rd0y1evNyaHYgpCz5xtMDw_u_RanBVA';
   const res = await fetch(`${SUPABASE_URL}/functions/v1/fetch-product`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-    body: JSON.stringify({ url })
+    body: JSON.stringify(body)
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
+}
+
+async function fetchProductFromUrl(url) { return callEdgeFunction({ url }); }
+
+async function analyzeProductImage(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = async e => {
+      try {
+        const dataUrl = e.target.result;
+        const base64 = dataUrl.split(',')[1];
+        const mediaType = file.type || 'image/jpeg';
+        const data = await callEdgeFunction({ imageBase64: base64, mediaType });
+        resolve(data);
+      } catch(err) { reject(err); }
+    };
+    reader.onerror = () => reject(new Error('Failed to read file'));
+    reader.readAsDataURL(file);
+  });
 }
 
 function openProductModal(id) {
@@ -2362,10 +2379,12 @@ function openProductModal(id) {
 
   const fetchBox = !p ? `
     <div class="fetch-url-box">
-      <label>🔍 Smart Import — Fetch from Manufacturer's Website</label>
+      <label>🔍 Smart Import</label>
       <div class="fetch-row">
         <input type="url" id="m-fetch-url" placeholder="https://example.com/product/bread-flour">
         <button type="button" class="btn btn-secondary btn-sm" id="m-fetch-btn">Fetch</button>
+        <button type="button" class="btn btn-secondary btn-sm" id="m-image-btn" title="זהה מתמונה">📸</button>
+        <input type="file" id="m-image-input" accept="image/*" capture="environment" style="display:none">
       </div>
       <div class="fetch-status" id="m-fetch-status"></div>
       <div id="m-fetch-preview" style="display:none"></div>
@@ -2464,6 +2483,61 @@ function openProductModal(id) {
 
     // Allow Enter key in URL field
     fetchUrl.addEventListener('keydown', e => { if (e.key === 'Enter') fetchBtn.click(); });
+
+    // 📸 Image recognition
+    const imageBtn   = document.getElementById('m-image-btn');
+    const imageInput = document.getElementById('m-image-input');
+    if (imageBtn && imageInput) {
+      imageBtn.addEventListener('click', () => imageInput.click());
+      imageInput.addEventListener('change', async () => {
+        const file = imageInput.files?.[0];
+        if (!file) return;
+        const status  = document.getElementById('m-fetch-status');
+        const preview = document.getElementById('m-fetch-preview');
+        status.textContent = '⏳ מנתח תמונה עם AI...';
+        status.className = 'fetch-status loading';
+        preview.style.display = 'none';
+        imageBtn.disabled = true;
+
+        try {
+          const data = await analyzeProductImage(file);
+          if (data.error) throw new Error(data.error);
+
+          const proteinVal = data.proteinPct ?? null;
+          if (data.name)        document.getElementById('m-pname').value  = data.name;
+          if (proteinVal)       document.getElementById('m-pprot').value  = proteinVal;
+          if (data.description) document.getElementById('m-pnotes').value = data.description.slice(0, 120);
+          if (data.brand)       document.getElementById('m-pbrand').value = data.brand;
+          if (data.type) {
+            const sel = document.getElementById('m-ptype');
+            if ([...sel.options].some(o => o.value === data.type)) sel.value = data.type;
+          }
+
+          // Show image preview from uploaded file
+          const imgUrl = URL.createObjectURL(file);
+          document.getElementById('m-pimage').value = imgUrl;
+
+          status.textContent = '✓ זוהה בהצלחה!';
+          status.className = 'fetch-status ok';
+          preview.style.display = 'flex';
+          preview.className = 'fetch-preview';
+          preview.innerHTML = `
+            <img src="${imgUrl}" style="width:64px;height:64px;object-fit:cover;border-radius:6px" alt="">
+            <div class="fetch-info">
+              <strong>${esc(data.name || '—')}</strong>
+              <span>${proteinVal ? `חלבון: ${proteinVal}%` : ''}${data.brand ? ` · ${esc(data.brand)}` : ''}</span>
+              ${data.type ? `<span style="font-size:11px;color:var(--text-muted)">${data.type}</span>` : ''}
+            </div>`;
+        } catch(e) {
+          status.textContent = `✗ שגיאה: ${e.message}`;
+          status.className = 'fetch-status error';
+        } finally {
+          imageBtn.disabled = false;
+          imageInput.value = '';
+        }
+      });
+    }
+
     fetchUrl.focus();
   }, 50);
 }
