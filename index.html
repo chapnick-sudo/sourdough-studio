@@ -979,6 +979,7 @@ html[data-theme="dark"] {
                 <div class="input-wrap">
                   <input type="number" id="basinage" value="5" min="0" max="50" step="0.5">
                   <span class="input-suffix">%</span>
+                  <span id="basinage-weight-display" style="margin-left:8px;font-size:13px;font-weight:600;color:var(--text-muted)"></span>
                 </div>
                 <span class="text-sm text-muted" data-i18n="hintBasinage">% of total flour, added during final mix</span>
               </div>
@@ -1762,6 +1763,10 @@ function renderResults() {
       mwd.textContent = fmt(c.mainWater) + pct;
     }
   }
+
+  // Basinage weight next to input
+  const bwd = document.getElementById('basinage-weight-display');
+  if (bwd) bwd.textContent = c.basinage > 0 ? `= ${fmt(c.basinage)}` : '';
 
   // Update batch total display
   const btd = document.getElementById('batch-total-display');
