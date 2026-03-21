@@ -1471,14 +1471,15 @@ async function renderCommunityTab() {
   grid.innerHTML = filtered.map(r => {
     const summary = (() => { try { return recipeSummary(r.calculator); } catch(e) { return ''; } })();
     const isOwn = r.author_email === currentUser?.email;
-    return `<div class="community-card">
+    const recJson = JSON.stringify(r).replace(/'/g,"&#39;");
+    return `<div class="community-card" style="cursor:pointer" data-action="view-community" data-recipe='${recJson}'>
       <div class="author">👤 ${esc(r.author_email || 'Anonymous')}</div>
       <h3>${esc(r.name)}</h3>
       ${r.description ? `<div style="font-size:13px;color:var(--text-muted);margin-bottom:6px">${esc(r.description)}</div>` : ''}
       <div class="summary">${esc(summary)}</div>
       <div style="display:flex;gap:8px;margin-top:12px">
-        <button class="btn btn-secondary btn-sm" data-action="view-community" data-recipe='${JSON.stringify(r).replace(/'/g,"&#39;")}'>👁 View</button>
-        ${!isOwn ? `<button class="btn btn-primary btn-sm" data-action="copy-community" data-recipe='${JSON.stringify(r).replace(/'/g,"&#39;")}'>Copy to my recipes</button>` : '<span style="font-size:12px;color:var(--text-muted)">Your recipe</span>'}
+        <button class="btn btn-secondary btn-sm" data-action="view-community" data-recipe='${recJson}'>👁 View</button>
+        ${!isOwn ? `<button class="btn btn-primary btn-sm" data-action="copy-community" data-recipe='${recJson}'>Copy to my recipes</button>` : '<span style="font-size:12px;color:var(--text-muted)">Your recipe</span>'}
       </div>
     </div>`;
   }).join('');
@@ -1794,10 +1795,13 @@ function productName(id) {
   return p ? p.name : '(unknown)';
 }
 
-function productNameWithBrand(id) {
+function productNameWithBrand(id, forPDF) {
   const p = state.products.find(p => p.id === id);
   if (!p) return '(unknown)';
-  if (p.brand) return `${p.name}<br><span style="font-size:11px;color:var(--text-muted);font-weight:400">${p.brand}</span>`;
+  if (p.brand) {
+    const color = forPDF ? '#7a6e5f' : 'var(--text-muted)';
+    return `${p.name}<br><span style="font-size:11px;color:${color};font-weight:400">${p.brand}</span>`;
+  }
   return p.name;
 }
 
@@ -2413,13 +2417,13 @@ function openRecipeDetail(id) {
     }
   });
 
-  document.getElementById('rd-close-btn')?.addEventListener('click', () => overlay.classList.remove('open'));
+  panel.querySelector('#rd-close-btn')?.addEventListener('click', () => overlay.classList.remove('open'));
   overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
-  document.getElementById('rd-edit-btn')?.addEventListener('click', () => { overlay.classList.remove('open'); loadRecipe(id); });
-  document.getElementById('rd-pdf-btn')?.addEventListener('click',  () => { const rec = state.recipes.find(x=>x.id===id); if(rec) printRecipePDF(rec.calculator, rec.name, rec.notes); });
-  document.getElementById('rd-dup-btn')?.addEventListener('click',  () => { overlay.classList.remove('open'); duplicateRecipe(id); });
-  document.getElementById('rd-share-btn')?.addEventListener('click',() => { toggleShareRecipe(id); overlay.classList.remove('open'); });
-  document.getElementById('rd-del-btn')?.addEventListener('click',  () => {
+  panel.querySelector('#rd-edit-btn')?.addEventListener('click', () => { overlay.classList.remove('open'); loadRecipe(id); });
+  panel.querySelector('#rd-pdf-btn')?.addEventListener('click',  () => { const rec = state.recipes.find(x=>x.id===id); if(rec) printRecipePDF(rec.calculator, rec.name, rec.notes); });
+  panel.querySelector('#rd-dup-btn')?.addEventListener('click',  () => { overlay.classList.remove('open'); duplicateRecipe(id); });
+  panel.querySelector('#rd-share-btn')?.addEventListener('click',() => { toggleShareRecipe(id); overlay.classList.remove('open'); });
+  panel.querySelector('#rd-del-btn')?.addEventListener('click',  () => {
     overlay.classList.remove('open');
     deleteRecipe(id);
   });
@@ -2999,13 +3003,13 @@ function printRecipePDF(calc, name, notes) {
   ingredientRows += divider();
   ingredientRows += row('<strong>Total Flour</strong>', fmt(c.flourWeight));
   c.flourBreakdown.forEach(f => {
-    if (f.productId) ingredientRows += row(`↳ ${productNameWithBrand(f.productId)} (${fmtPct(f.pct)})`, fmt(f.weight), true);
+    if (f.productId) ingredientRows += row(`↳ ${productNameWithBrand(f.productId, true)} (${fmtPct(f.pct)})`, fmt(f.weight), true);
   });
   // Levain
   ingredientRows += divider();
   ingredientRows += row('<strong>Levain</strong>', fmt(c.levainTotal));
   c.levainFlourBreakdown.forEach(f => {
-    if (f.productId) ingredientRows += row(`↳ ${productNameWithBrand(f.productId)} (${fmtPct(f.pct)})`, fmt(f.weight), true);
+    if (f.productId) ingredientRows += row(`↳ ${productNameWithBrand(f.productId, true)} (${fmtPct(f.pct)})`, fmt(f.weight), true);
   });
   ingredientRows += row(`↳ ${t('pdfLevainWater')}`, fmt(c.levainWater), true);
   // Water
