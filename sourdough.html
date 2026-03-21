@@ -1477,6 +1477,7 @@ async function renderCommunityTab() {
       ${r.description ? `<div style="font-size:13px;color:var(--text-muted);margin-bottom:6px">${esc(r.description)}</div>` : ''}
       <div class="summary">${esc(summary)}</div>
       <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="btn btn-secondary btn-sm" data-action="view-community" data-recipe='${JSON.stringify(r).replace(/'/g,"&#39;")}'>👁 View</button>
         ${!isOwn ? `<button class="btn btn-primary btn-sm" data-action="copy-community" data-recipe='${JSON.stringify(r).replace(/'/g,"&#39;")}'>Copy to my recipes</button>` : '<span style="font-size:12px;color:var(--text-muted)">Your recipe</span>'}
       </div>
     </div>`;
@@ -2916,7 +2917,7 @@ document.getElementById('tab-recipes').addEventListener('click', e => {
   if (!btn) return;
   const { action, id } = btn.dataset;
   if (action === 'view-recipe')  openRecipeDetail(id);
-  if (action === 'edit-recipe')  loadRecipe(id);
+  if (action === 'edit-recipe')  { e.stopPropagation(); loadRecipe(id); }
   if (action === 'dup-recipe')   duplicateRecipe(id);
   if (action === 'del-recipe')   deleteRecipe(id);
   if (action === 'share-recipe') toggleShareRecipe(id);
@@ -2933,6 +2934,25 @@ document.getElementById('tab-community').addEventListener('click', e => {
   if (!btn) return;
   if (btn.dataset.action === 'copy-community') {
     try { copyPublicRecipe(JSON.parse(btn.dataset.recipe)); } catch(err) { console.error(err); }
+  }
+  if (btn.dataset.action === 'view-community') {
+    try {
+      const r = JSON.parse(btn.dataset.recipe);
+      // Open detail panel with community recipe data (read-only)
+      const existing = state.recipes.find(x => x.id === r.id);
+      if (existing) {
+        openRecipeDetail(r.id);
+      } else {
+        // Temporarily add to state for display, then remove
+        const temp = { ...r, notes: r.notes||'', description: r.description||'',
+          isPublic: true, createdAt: r.updated_at, updatedAt: r.updated_at,
+          calculator: r.calculator };
+        state.recipes.push(temp);
+        openRecipeDetail(r.id);
+        // Remove after display is set up
+        state.recipes = state.recipes.filter(x => x.id !== r.id);
+      }
+    } catch(err) { console.error(err); }
   }
 });
 document.getElementById('community-search')?.addEventListener('input', () => renderCommunityTab());
@@ -2979,13 +2999,13 @@ function printRecipePDF(calc, name, notes) {
   ingredientRows += divider();
   ingredientRows += row('<strong>Total Flour</strong>', fmt(c.flourWeight));
   c.flourBreakdown.forEach(f => {
-    if (f.productId) ingredientRows += row(`↳ ${productName(f.productId)} (${fmtPct(f.pct)})`, fmt(f.weight), true);
+    if (f.productId) ingredientRows += row(`↳ ${productNameWithBrand(f.productId)} (${fmtPct(f.pct)})`, fmt(f.weight), true);
   });
   // Levain
   ingredientRows += divider();
   ingredientRows += row('<strong>Levain</strong>', fmt(c.levainTotal));
   c.levainFlourBreakdown.forEach(f => {
-    if (f.productId) ingredientRows += row(`↳ ${productName(f.productId)} flour (${fmtPct(f.pct)})`, fmt(f.weight), true);
+    if (f.productId) ingredientRows += row(`↳ ${productNameWithBrand(f.productId)} (${fmtPct(f.pct)})`, fmt(f.weight), true);
   });
   ingredientRows += row(`↳ ${t('pdfLevainWater')}`, fmt(c.levainWater), true);
   // Water
