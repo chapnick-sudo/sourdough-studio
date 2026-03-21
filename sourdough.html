@@ -830,6 +830,69 @@ html[data-theme="dark"] {
 .community-card .author { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
 .community-card h3 { margin: 0 0 6px; font-size: 16px; }
 .community-card .summary { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; }
+
+/* ── BAKE LOG TAB ── */
+.bl-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.bl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.bl-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px; cursor: pointer; transition: box-shadow .15s; }
+.bl-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.1); }
+.bl-card-date { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+.bl-card h3 { margin: 0 0 4px; font-size: 16px; }
+.bl-card-recipe { font-size: 12px; color: var(--accent); margin-bottom: 8px; }
+.bl-card-stars { font-size: 16px; margin-bottom: 8px; }
+.bl-card-notes { font-size: 13px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bl-card-actions { display: flex; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+
+/* Form */
+#bl-form-view { max-width: 720px; }
+.bl-back { display: flex; align-items: center; gap: 8px; color: var(--accent); cursor: pointer; font-size: 14px; margin-bottom: 20px; background: none; border: none; padding: 0; }
+.bl-section { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 20px; overflow: hidden; }
+.bl-section-header { padding: 14px 18px; font-weight: 700; font-size: 15px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+.bl-section-body { padding: 16px 18px; }
+.bl-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.bl-row.three { grid-template-columns: 1fr 1fr 1fr; }
+.bl-row.full { grid-template-columns: 1fr; }
+.bl-label { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .04em; }
+.bl-input { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-size: 14px; box-sizing: border-box; }
+.bl-input:focus { outline: none; border-color: var(--accent); }
+textarea.bl-input { resize: vertical; min-height: 70px; }
+.bl-stars { display: flex; gap: 4px; margin-top: 2px; }
+.bl-star { font-size: 24px; cursor: pointer; transition: transform .1s; line-height: 1; }
+.bl-star:hover { transform: scale(1.15); }
+/* Duration presets */
+.bl-duration-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+.bl-dur-btn { padding: 5px 14px; border: 1px solid var(--border); border-radius: 20px; background: var(--bg); color: var(--text); font-size: 13px; cursor: pointer; }
+.bl-dur-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+/* Ingredient table */
+.bl-ing-table { width: 100%; border-collapse: collapse; }
+.bl-ing-table th { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; padding: 0 6px 8px; text-align: left; }
+.bl-ing-table th:last-child { width: 32px; }
+.bl-ing-table td { padding: 4px 4px; }
+.bl-ing-table input { width: 100%; padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font-size: 13px; box-sizing: border-box; }
+.bl-ing-table .rm-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 16px; padding: 0 4px; }
+/* Process timeline */
+.bl-process-table { width: 100%; border-collapse: collapse; }
+.bl-process-table th { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; padding: 0 8px 10px; text-align: left; white-space: nowrap; }
+.bl-process-table td { padding: 5px 4px; border-top: 1px solid var(--border); vertical-align: middle; }
+.bl-process-table tr:first-child td { border-top: none; }
+.bl-step-name { font-size: 13px; font-weight: 600; white-space: nowrap; padding: 0 8px; }
+.bl-process-table input[type="time"],
+.bl-process-table input[type="text"],
+.bl-process-table input[type="number"] { padding: 5px 7px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font-size: 13px; width: 100%; box-sizing: border-box; }
+.bl-special-cell { font-size: 12px; color: var(--text-muted); white-space: nowrap; padding: 0 6px; }
+.bl-special-cell label { display: flex; align-items: center; gap: 4px; cursor: pointer; }
+.bl-bake-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.bl-bake-step { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+.bl-bake-step h4 { margin: 0 0 12px; font-size: 14px; display: flex; align-items: center; gap: 6px; }
+.bl-form-actions { display: flex; gap: 12px; margin-top: 8px; }
+.bl-empty { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+.bl-empty .icon { font-size: 48px; margin-bottom: 12px; }
+@media (max-width: 600px) {
+  .bl-row { grid-template-columns: 1fr; }
+  .bl-row.three { grid-template-columns: 1fr; }
+  .bl-bake-grid { grid-template-columns: 1fr; }
+  .bl-process-table { font-size: 12px; }
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
@@ -879,6 +942,7 @@ html[data-theme="dark"] {
       <button data-tab="recipes" data-i18n="tabRecipes">Recipes</button>
       <button data-tab="products" data-i18n="tabProducts">Products</button>
       <button data-tab="community">🌐 Community</button>
+      <button data-tab="bakelog" data-i18n="tabBakelog">📋 Bake Log</button>
     </nav>
     <div class="header-controls">
       <span id="cloud-status" style="font-size:12px;transition:opacity 1s;opacity:0;"></span>
@@ -1217,6 +1281,171 @@ html[data-theme="dark"] {
     <div class="community-grid" id="community-grid">
       <div class="empty-state"><div class="icon">🌐</div><p id="community-loading-msg">Loading shared recipes…</p></div>
     </div>
+  </section>
+
+  <!-- ══ BAKE LOG TAB ══ -->
+  <section class="tab-section" id="tab-bakelog">
+
+    <!-- List view -->
+    <div id="bl-list-view">
+      <div class="bl-toolbar">
+        <h2 class="section-title" style="margin:0" data-i18n="blTitle">📋 Bake Log</h2>
+        <button class="btn btn-primary" id="btn-new-bake" data-i18n="blNewBake">+ New Bake</button>
+      </div>
+      <div id="bl-grid">
+        <div class="bl-empty"><div class="icon">📋</div><p data-i18n="blEmpty">No bake logs yet. Record your first bake!</p></div>
+      </div>
+    </div>
+
+    <!-- Form view -->
+    <div id="bl-form-view" style="display:none">
+      <button class="bl-back" id="bl-back-btn">← <span data-i18n="blBack">Back to Bake Log</span></button>
+      <h2 class="section-title" id="bl-form-title" style="margin-bottom:20px"></h2>
+
+      <!-- ① Header -->
+      <div class="bl-section">
+        <div class="bl-section-header">📝 <span data-i18n="blSectionHeader">Bake Details</span></div>
+        <div class="bl-section-body">
+          <div class="bl-row">
+            <div>
+              <div class="bl-label" data-i18n="blDate">Date</div>
+              <input type="date" class="bl-input" id="bl-date">
+            </div>
+            <div>
+              <div class="bl-label" data-i18n="blBaker">Baker</div>
+              <input type="text" class="bl-input" id="bl-baker" data-i18n-placeholder="blBakerPh">
+            </div>
+          </div>
+          <div class="bl-row">
+            <div>
+              <div class="bl-label" data-i18n="blLinkedRecipe">Linked Recipe</div>
+              <select class="bl-input" id="bl-recipe-select">
+                <option value="">— <span data-i18n="blNoRecipe">none</span> —</option>
+              </select>
+            </div>
+            <div>
+              <div class="bl-label" data-i18n="blDDT">Desired Dough Temp</div>
+              <input type="text" class="bl-input" id="bl-ddt" placeholder="e.g. 24°C">
+            </div>
+          </div>
+          <div class="bl-row">
+            <div>
+              <div class="bl-label" data-i18n="blRating">Rating</div>
+              <div class="bl-stars" id="bl-stars">
+                <span class="bl-star" data-star="1">☆</span>
+                <span class="bl-star" data-star="2">☆</span>
+                <span class="bl-star" data-star="3">☆</span>
+                <span class="bl-star" data-star="4">☆</span>
+                <span class="bl-star" data-star="5">☆</span>
+              </div>
+            </div>
+          </div>
+          <div class="bl-row full">
+            <div>
+              <div class="bl-label" data-i18n="blNotes">Notes</div>
+              <textarea class="bl-input" id="bl-notes" data-i18n-placeholder="blNotesPh"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ② Levain -->
+      <div class="bl-section">
+        <div class="bl-section-header">🌱 <span data-i18n="blLevain">Levain</span></div>
+        <div class="bl-section-body">
+          <div class="bl-label" data-i18n="blDuration">Duration</div>
+          <div class="bl-duration-row" id="bl-levain-dur-row">
+            <button class="bl-dur-btn" data-dur="3">3h</button>
+            <button class="bl-dur-btn" data-dur="5">5h</button>
+            <button class="bl-dur-btn" data-dur="12">12h</button>
+            <input type="number" id="bl-levain-dur-custom" class="bl-input" style="width:80px" min="1" max="48" placeholder="h">
+          </div>
+          <div class="bl-row">
+            <div>
+              <div class="bl-label" data-i18n="blFDT">FDT (Final Dough Temp)</div>
+              <input type="text" class="bl-input" id="bl-levain-fdt" placeholder="e.g. 24°C">
+            </div>
+          </div>
+          <table class="bl-ing-table" id="bl-levain-ing-table">
+            <thead><tr>
+              <th data-i18n="blIngName">Ingredient</th>
+              <th style="width:80px" data-i18n="blIngG">Grams</th>
+              <th style="width:32px"></th>
+            </tr></thead>
+            <tbody id="bl-levain-ing-body"></tbody>
+          </table>
+          <button class="btn btn-sm" id="bl-add-levain-ing" style="margin-top:8px" data-i18n="blAddIng">+ Add</button>
+        </div>
+      </div>
+
+      <!-- ③ Final Dough -->
+      <div class="bl-section">
+        <div class="bl-section-header">🍞 <span data-i18n="blFinalDough">Final Dough</span></div>
+        <div class="bl-section-body">
+          <table class="bl-ing-table" id="bl-dough-ing-table">
+            <thead><tr>
+              <th data-i18n="blIngName">Ingredient</th>
+              <th style="width:80px" data-i18n="blIngG">Grams</th>
+              <th style="width:32px"></th>
+            </tr></thead>
+            <tbody id="bl-dough-ing-body"></tbody>
+          </table>
+          <button class="btn btn-sm" id="bl-add-dough-ing" style="margin-top:8px" data-i18n="blAddIng">+ Add</button>
+        </div>
+      </div>
+
+      <!-- ④ Process Timeline -->
+      <div class="bl-section">
+        <div class="bl-section-header">⏱ <span data-i18n="blProcess">Process Timeline</span></div>
+        <div class="bl-section-body" style="overflow-x:auto">
+          <table class="bl-process-table" id="bl-process-table">
+            <thead><tr>
+              <th data-i18n="blPTime">Time</th>
+              <th data-i18n="blPStep">Step</th>
+              <th data-i18n="blPSpecial">Special</th>
+              <th data-i18n="blPDuration">Duration</th>
+              <th data-i18n="blPNotes">Notes</th>
+            </tr></thead>
+            <tbody id="bl-process-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ⑤ Bake -->
+      <div class="bl-section">
+        <div class="bl-section-header">🔥 <span data-i18n="blBake">Bake</span></div>
+        <div class="bl-section-body">
+          <div class="bl-bake-grid">
+            <div class="bl-bake-step">
+              <h4>♨️ <span data-i18n="blSteam">Steam</span></h4>
+              <div class="bl-label" data-i18n="blTemp">Temp</div>
+              <input type="text" class="bl-input" id="bl-steam-temp" placeholder="e.g. 250°C" style="margin-bottom:8px">
+              <div class="bl-label" data-i18n="blDuration">Duration</div>
+              <input type="text" class="bl-input" id="bl-steam-dur" placeholder="e.g. 20 min" style="margin-bottom:8px">
+              <div class="bl-label" data-i18n="blNotes">Notes</div>
+              <input type="text" class="bl-input" id="bl-steam-notes">
+            </div>
+            <div class="bl-bake-step">
+              <h4>💨 <span data-i18n="blVent">Vent</span></h4>
+              <div class="bl-label" data-i18n="blTemp">Temp</div>
+              <input type="text" class="bl-input" id="bl-vent-temp" placeholder="e.g. 230°C" style="margin-bottom:8px">
+              <div class="bl-label" data-i18n="blDuration">Duration</div>
+              <input type="text" class="bl-input" id="bl-vent-dur" placeholder="e.g. 25 min" style="margin-bottom:8px">
+              <div class="bl-label" data-i18n="blNotes">Notes</div>
+              <input type="text" class="bl-input" id="bl-vent-notes">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="bl-form-actions">
+        <button class="btn btn-primary" id="bl-save-btn" data-i18n="blSave">Save Bake Log</button>
+        <button class="btn" id="bl-cancel-btn" data-i18n="btnCancel">Cancel</button>
+        <button class="btn btn-danger" id="bl-delete-btn" style="margin-left:auto;display:none" data-i18n="btnDelete">Delete</button>
+      </div>
+    </div>
+
   </section>
 
   <!-- ══ PRODUCTS TAB ══ -->
@@ -1598,6 +1827,30 @@ const TRANSLATIONS = {
     // Misc
     removeTitle:'Remove', selectPlaceholder:'— select —',
     popupBlocked:'Please allow popups for PDF export',
+    // Bake Log
+    tabBakelog:'📋 Bake Log',
+    blTitle:'📋 Bake Log', blNewBake:'+ New Bake', blBack:'Back to Bake Log',
+    blEmpty:'No bake logs yet. Record your first bake!',
+    blFormNew:'New Bake Log', blFormEdit:'Edit Bake Log',
+    blSectionHeader:'Bake Details',
+    blDate:'Date', blBaker:'Baker', blBakerPh:'Your name',
+    blLinkedRecipe:'Linked Recipe', blNoRecipe:'none',
+    blDDT:'Desired Dough Temp', blRating:'Rating',
+    blNotes:'Notes', blNotesPh:'Observations, crumb, crust, flavour…',
+    blLevain:'Levain', blDuration:'Duration', blFDT:'FDT (Final Dough Temp)',
+    blFinalDough:'Final Dough',
+    blIngName:'Ingredient', blIngG:'Grams', blAddIng:'+ Add',
+    blProcess:'Process Timeline',
+    blPTime:'Time', blPStep:'Step', blPSpecial:'Special', blPDuration:'Duration', blPNotes:'Notes',
+    blBake:'Bake', blSteam:'Steam', blVent:'Vent', blTemp:'Temp',
+    blSave:'Save Bake Log',
+    blStepLevain:'Levain', blStepMixins:'Mix-ins', blStepAutolyse:'Autolyse',
+    blStepMix:'Mix', blStepBulk:'Bulk',
+    blStepSF1:'S&F #1', blStepSF2:'S&F #2', blStepSF3:'S&F #3', blStepSF4:'S&F #4', blStepSF5:'S&F #5',
+    blStepDivide:'Divide & Rest', blStepShape:'Shape', blStepProof:'Proof',
+    blSpecFDT:'FDT', blSpecSoak:'Soak', blSpecPlusLevain:'+ Levain', blSpecRetard:'Retard',
+    blDeleteConfirm:'Delete this bake log? This cannot be undone.',
+    blRatingLabel: r => r ? '★'.repeat(r) + '☆'.repeat(5-r) : '☆☆☆☆☆',
   },
   he: {
     tabCalculator:'מחשבון', tabRecipes:'מתכונים', tabProducts:'מוצרים',
@@ -1696,6 +1949,30 @@ const TRANSLATIONS = {
     // Misc
     removeTitle:'הסר', selectPlaceholder:'— בחר —',
     popupBlocked:'אנא אפשר חלונות קופצים לייצוא PDF',
+    // Bake Log
+    tabBakelog:'📋 יומן אפייה',
+    blTitle:'📋 יומן אפייה', blNewBake:'+ אפייה חדשה', blBack:'חזרה ליומן',
+    blEmpty:'אין עדיין יומני אפייה. תעד את האפייה הראשונה שלך!',
+    blFormNew:'יומן אפייה חדש', blFormEdit:'עריכת יומן אפייה',
+    blSectionHeader:'פרטי האפייה',
+    blDate:'תאריך', blBaker:'אופה', blBakerPh:'שמך',
+    blLinkedRecipe:'מתכון מקושר', blNoRecipe:'ללא',
+    blDDT:'טמפ׳ בצק רצויה', blRating:'דירוג',
+    blNotes:'הערות', blNotesPh:'תצפיות, פירור, קרום, טעם…',
+    blLevain:'מחמצת', blDuration:'משך', blFDT:'טמפ׳ סופית של הבצק',
+    blFinalDough:'הבצק הסופי',
+    blIngName:'מרכיב', blIngG:'גרמים', blAddIng:'+ הוסף',
+    blProcess:'ציר זמן התהליך',
+    blPTime:'שעה', blPStep:'שלב', blPSpecial:'מיוחד', blPDuration:'משך', blPNotes:'הערות',
+    blBake:'אפייה', blSteam:'אדים', blVent:'פתיחה', blTemp:'טמפ׳',
+    blSave:'שמור יומן אפייה',
+    blStepLevain:'מחמצת', blStepMixins:'תוספות', blStepAutolyse:'אוטוליז',
+    blStepMix:'ערבוב', blStepBulk:'תפיחה ראשונה',
+    blStepSF1:'קיפול #1', blStepSF2:'קיפול #2', blStepSF3:'קיפול #3', blStepSF4:'קיפול #4', blStepSF5:'קיפול #5',
+    blStepDivide:'חלוקה ומנוחה', blStepShape:'עיצוב', blStepProof:'תפיחה שנייה',
+    blSpecFDT:'FDT', blSpecSoak:'השריה', blSpecPlusLevain:'+ מחמצת', blSpecRetard:'קירור',
+    blDeleteConfirm:'למחוק יומן אפייה זה? פעולה זו אינה ניתנת לביטול.',
+    blRatingLabel: r => r ? '★'.repeat(r) + '☆'.repeat(5-r) : '☆☆☆☆☆',
   }
 };
 
@@ -2869,6 +3146,7 @@ function switchTab(tab) {
   if (tab === 'recipes') renderRecipesTab();
   if (tab === 'products') renderProductsTab();
   if (tab === 'community') renderCommunityTab();
+  if (tab === 'bakelog') renderBakelogTab();
   saveState();
 }
 
@@ -3320,6 +3598,7 @@ document.addEventListener('keydown', e => {
   if (e.key === '2') { e.preventDefault(); switchTab('recipes'); }
   if (e.key === '3') { e.preventDefault(); switchTab('community'); }
   if (e.key === '4') { e.preventDefault(); switchTab('products'); }
+  if (e.key === '5') { e.preventDefault(); switchTab('bakelog'); }
 });
 
 // ════════════════════════════════════════════════
@@ -3533,6 +3812,354 @@ document.getElementById('rw-load-btn')?.addEventListener('click', () => {
   renderResults();
   showCloudStatus(t('cloudLoaded'), true);
 });
+
+// ════════════════════════════════════════════════
+// BAKE LOG
+// ════════════════════════════════════════════════
+
+const BAKE_STEPS = [
+  { id:'levain',   special:'FDT' },
+  { id:'mixins',   special:'Soak' },
+  { id:'autolyse', special:'+Levain' },
+  { id:'mix',      special:'FDT' },
+  { id:'bulk',     special:null },
+  { id:'sf1',      special:null },
+  { id:'sf2',      special:null },
+  { id:'sf3',      special:null },
+  { id:'sf4',      special:null },
+  { id:'sf5',      special:null },
+  { id:'divide',   special:null },
+  { id:'shape',    special:null },
+  { id:'proof',    special:'Retard' },
+];
+
+function blStepLabel(id) {
+  const map = {
+    levain:t('blStepLevain'), mixins:t('blStepMixins'), autolyse:t('blStepAutolyse'),
+    mix:t('blStepMix'), bulk:t('blStepBulk'), sf1:t('blStepSF1'), sf2:t('blStepSF2'),
+    sf3:t('blStepSF3'), sf4:t('blStepSF4'), sf5:t('blStepSF5'),
+    divide:t('blStepDivide'), shape:t('blStepShape'), proof:t('blStepProof'),
+  };
+  return map[id] || id;
+}
+
+function blSpecialLabel(key) {
+  const map = { FDT:t('blSpecFDT'), Soak:t('blSpecSoak'), '+Levain':t('blSpecPlusLevain'), Retard:t('blSpecRetard') };
+  return map[key] || key;
+}
+
+let _bakeLogs = [];
+let _blEditId = null;
+let _blRating = 0;
+let _blLevainIng = [];   // [{name, g}]
+let _blDoughIng  = [];   // [{name, g}]
+let _blProcess   = {};   // {stepId: {time, specialChecked, duration, notes}}
+
+// ── Cloud ──
+async function cloudLoadBakeLogs() {
+  if (!currentUser) return;
+  const { data, error } = await sb.from('bake_logs').select('*').eq('user_id', currentUser.id).order('bake_date', { ascending: false });
+  if (!error && data) _bakeLogs = data.map(r => ({ ...r, levain: r.levain||{}, final_dough: r.final_dough||[], process: r.process||[], bake: r.bake||{} }));
+  renderBakeLogList();
+}
+
+async function cloudSaveBakeLog(log) {
+  if (!currentUser) return;
+  showCloudStatus(t('cloudSyncing'));
+  const payload = { ...log, user_id: currentUser.id, updated_at: new Date().toISOString() };
+  if (log.id && !log.id.startsWith('local-')) {
+    const { error } = await sb.from('bake_logs').update(payload).eq('id', log.id);
+    if (error) { showCloudStatus(t('cloudSaveFail')); return; }
+  } else {
+    delete payload.id;
+    const { data, error } = await sb.from('bake_logs').insert(payload).select().single();
+    if (error) { showCloudStatus(t('cloudSaveFail')); return; }
+    const idx = _bakeLogs.findIndex(x => x.id === log.id);
+    if (idx !== -1) _bakeLogs[idx] = data;
+  }
+  showCloudStatus(t('cloudSynced'), true);
+}
+
+async function cloudDeleteBakeLog(id) {
+  if (!currentUser || id.startsWith('local-')) return;
+  showCloudStatus(t('cloudSyncing'));
+  const { error } = await sb.from('bake_logs').delete().eq('id', id);
+  if (error) showCloudStatus(t('cloudDeleteFail'));
+  else showCloudStatus(t('cloudSynced'), true);
+}
+
+// ── Render List ──
+function renderBakeLogList() {
+  const grid = document.getElementById('bl-grid');
+  if (!grid) return;
+  if (!_bakeLogs.length) {
+    grid.innerHTML = `<div class="bl-empty"><div class="icon">📋</div><p>${t('blEmpty')}</p></div>`;
+    return;
+  }
+  grid.innerHTML = _bakeLogs.map(log => {
+    const stars = log.rating ? '★'.repeat(log.rating) + '☆'.repeat(5 - log.rating) : '☆☆☆☆☆';
+    const dateStr = log.bake_date ? new Date(log.bake_date + 'T12:00:00').toLocaleDateString(state.lang === 'he' ? 'he-IL' : 'en-US', { year:'numeric', month:'short', day:'numeric' }) : '';
+    const recipeLine = log.recipe_name ? `<div class="bl-card-recipe">📎 ${log.recipe_name}</div>` : '';
+    return `<div class="bl-card" data-blid="${log.id}">
+      <div class="bl-card-date">${dateStr}</div>
+      <h3>${log.baker || '—'}</h3>
+      ${recipeLine}
+      <div class="bl-card-stars">${stars}</div>
+      ${log.notes ? `<div class="bl-card-notes">${log.notes}</div>` : ''}
+      <div class="bl-card-actions">
+        <button class="btn btn-sm" data-action="bl-edit" data-blid="${log.id}" data-i18n="btnEdit">${t('btnEdit')}</button>
+        <button class="btn btn-sm btn-danger" data-action="bl-delete" data-blid="${log.id}" data-i18n="btnDelete">${t('btnDelete')}</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Process table ──
+function renderBLProcessTable() {
+  const tbody = document.getElementById('bl-process-body');
+  if (!tbody) return;
+  tbody.innerHTML = BAKE_STEPS.map(step => {
+    const d = _blProcess[step.id] || {};
+    const specialHtml = step.special
+      ? `<label><input type="checkbox" class="bl-ps-chk" data-stepid="${step.id}" ${d.specialChecked?'checked':''}> ${blSpecialLabel(step.special)}</label>`
+      : '';
+    return `<tr>
+      <td style="width:100px"><input type="time" class="bl-pt-time" data-stepid="${step.id}" value="${d.time||''}"></td>
+      <td><span class="bl-step-name">${blStepLabel(step.id)}</span></td>
+      <td class="bl-special-cell">${specialHtml}</td>
+      <td style="width:90px"><input type="text" class="bl-pt-dur" data-stepid="${step.id}" value="${d.duration||''}" placeholder="e.g. 4h"></td>
+      <td><input type="text" class="bl-pt-notes" data-stepid="${step.id}" value="${d.notes||''}" placeholder="—"></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Ingredient rows ──
+function renderBLIngRows(targetId, arr) {
+  const tbody = document.getElementById(targetId);
+  if (!tbody) return;
+  tbody.innerHTML = arr.map((row, i) => `
+    <tr>
+      <td><input class="bl-ing-name" data-i="${i}" value="${row.name||''}" placeholder="${t('blIngName')}"></td>
+      <td><input type="number" class="bl-ing-g" data-i="${i}" value="${row.g||''}" placeholder="g" min="0"></td>
+      <td><button class="rm-btn" data-i="${i}">✕</button></td>
+    </tr>`).join('');
+}
+
+// ── Load form ──
+function blLoadForm(log) {
+  _blRating     = log?.rating     || 0;
+  _blLevainIng  = log?.levain?.ingredients ? [...log.levain.ingredients] : [{ name:'', g:'' }];
+  _blDoughIng   = log?.final_dough?.length ? [...log.final_dough]        : [{ name:'', g:'' }];
+  _blProcess    = {};
+  (log?.process || []).forEach(p => { _blProcess[p.step] = { time: p.time||'', specialChecked: p.specialChecked||false, duration: p.duration||'', notes: p.notes||'' }; });
+
+  // Header fields
+  document.getElementById('bl-date').value  = log?.bake_date || new Date().toISOString().split('T')[0];
+  document.getElementById('bl-baker').value = log?.baker || (currentUser?.user_metadata?.full_name || '');
+  document.getElementById('bl-ddt').value   = log?.ddt   || '';
+  document.getElementById('bl-notes').value = log?.notes || '';
+
+  // Recipe dropdown
+  const sel = document.getElementById('bl-recipe-select');
+  sel.innerHTML = `<option value="">— ${t('blNoRecipe')} —</option>` +
+    state.recipes.map(r => `<option value="${r.id}" ${log?.recipe_id === r.id ? 'selected' : ''}>${r.name}</option>`).join('');
+
+  // Stars
+  blSetStars(_blRating);
+
+  // Levain duration
+  const dur = log?.levain?.duration || '';
+  document.getElementById('bl-levain-dur-custom').value = dur;
+  document.querySelectorAll('#bl-levain-dur-row .bl-dur-btn').forEach(btn => {
+    btn.classList.toggle('active', String(btn.dataset.dur) === String(dur));
+  });
+  document.getElementById('bl-levain-fdt').value = log?.levain?.fdt || '';
+
+  // Ingredient rows
+  renderBLIngRows('bl-levain-ing-body', _blLevainIng);
+  renderBLIngRows('bl-dough-ing-body', _blDoughIng);
+
+  // Process
+  renderBLProcessTable();
+
+  // Bake section
+  document.getElementById('bl-steam-temp').value  = log?.bake?.steam?.temp  || '';
+  document.getElementById('bl-steam-dur').value   = log?.bake?.steam?.dur   || '';
+  document.getElementById('bl-steam-notes').value = log?.bake?.steam?.notes || '';
+  document.getElementById('bl-vent-temp').value   = log?.bake?.vent?.temp   || '';
+  document.getElementById('bl-vent-dur').value    = log?.bake?.vent?.dur    || '';
+  document.getElementById('bl-vent-notes').value  = log?.bake?.vent?.notes  || '';
+
+  // Delete button visibility
+  document.getElementById('bl-delete-btn').style.display = _blEditId ? '' : 'none';
+  document.getElementById('bl-form-title').textContent = _blEditId ? t('blFormEdit') : t('blFormNew');
+}
+
+function blSetStars(rating) {
+  _blRating = rating;
+  document.querySelectorAll('.bl-star').forEach(s => {
+    s.textContent = parseInt(s.dataset.star) <= rating ? '★' : '☆';
+  });
+}
+
+// ── Collect form data ──
+function blCollectForm() {
+  // Sync ingredient rows
+  document.querySelectorAll('#bl-levain-ing-body .bl-ing-name').forEach(inp => { _blLevainIng[+inp.dataset.i].name = inp.value; });
+  document.querySelectorAll('#bl-levain-ing-body .bl-ing-g').forEach(inp => { _blLevainIng[+inp.dataset.i].g = inp.value; });
+  document.querySelectorAll('#bl-dough-ing-body .bl-ing-name').forEach(inp => { _blDoughIng[+inp.dataset.i].name = inp.value; });
+  document.querySelectorAll('#bl-dough-ing-body .bl-ing-g').forEach(inp => { _blDoughIng[+inp.dataset.i].g = inp.value; });
+  // Sync process rows
+  document.querySelectorAll('.bl-pt-time').forEach(inp => { if (!_blProcess[inp.dataset.stepid]) _blProcess[inp.dataset.stepid] = {}; _blProcess[inp.dataset.stepid].time = inp.value; });
+  document.querySelectorAll('.bl-pt-dur').forEach(inp => { if (!_blProcess[inp.dataset.stepid]) _blProcess[inp.dataset.stepid] = {}; _blProcess[inp.dataset.stepid].duration = inp.value; });
+  document.querySelectorAll('.bl-pt-notes').forEach(inp => { if (!_blProcess[inp.dataset.stepid]) _blProcess[inp.dataset.stepid] = {}; _blProcess[inp.dataset.stepid].notes = inp.value; });
+  document.querySelectorAll('.bl-ps-chk').forEach(inp => { if (!_blProcess[inp.dataset.stepid]) _blProcess[inp.dataset.stepid] = {}; _blProcess[inp.dataset.stepid].specialChecked = inp.checked; });
+
+  const recipeSel = document.getElementById('bl-recipe-select');
+  const recipeId  = recipeSel.value;
+  const recipeName = recipeId ? (state.recipes.find(r => r.id === recipeId)?.name || '') : '';
+  const dur = document.getElementById('bl-levain-dur-custom').value;
+
+  return {
+    bake_date:   document.getElementById('bl-date').value,
+    baker:       document.getElementById('bl-baker').value.trim(),
+    recipe_id:   recipeId || null,
+    recipe_name: recipeName,
+    ddt:         document.getElementById('bl-ddt').value.trim(),
+    rating:      _blRating,
+    notes:       document.getElementById('bl-notes').value.trim(),
+    levain: {
+      duration: dur,
+      fdt:      document.getElementById('bl-levain-fdt').value.trim(),
+      ingredients: _blLevainIng.filter(x => x.name || x.g),
+    },
+    final_dough: _blDoughIng.filter(x => x.name || x.g),
+    process: BAKE_STEPS.map(s => ({
+      step:           s.id,
+      time:           _blProcess[s.id]?.time || '',
+      specialChecked: _blProcess[s.id]?.specialChecked || false,
+      duration:       _blProcess[s.id]?.duration || '',
+      notes:          _blProcess[s.id]?.notes || '',
+    })),
+    bake: {
+      steam: { temp: document.getElementById('bl-steam-temp').value.trim(), dur: document.getElementById('bl-steam-dur').value.trim(), notes: document.getElementById('bl-steam-notes').value.trim() },
+      vent:  { temp: document.getElementById('bl-vent-temp').value.trim(),  dur: document.getElementById('bl-vent-dur').value.trim(),  notes: document.getElementById('bl-vent-notes').value.trim() },
+    },
+  };
+}
+
+// ── Show/hide views ──
+function blShowList() {
+  document.getElementById('bl-list-view').style.display = '';
+  document.getElementById('bl-form-view').style.display = 'none';
+  _blEditId = null;
+  renderBakeLogList();
+}
+
+function blShowForm(logId) {
+  _blEditId = logId || null;
+  const log = logId ? _bakeLogs.find(l => l.id === logId) : null;
+  document.getElementById('bl-list-view').style.display = 'none';
+  document.getElementById('bl-form-view').style.display = '';
+  blLoadForm(log);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Event wiring ──
+document.getElementById('btn-new-bake')?.addEventListener('click', () => blShowForm(null));
+document.getElementById('bl-back-btn')?.addEventListener('click', blShowList);
+document.getElementById('bl-cancel-btn')?.addEventListener('click', blShowList);
+
+document.getElementById('bl-save-btn')?.addEventListener('click', async () => {
+  const data = blCollectForm();
+  if (_blEditId) {
+    data.id = _blEditId;
+    const idx = _bakeLogs.findIndex(l => l.id === _blEditId);
+    if (idx !== -1) _bakeLogs[idx] = { ..._bakeLogs[idx], ...data };
+  } else {
+    data.id = 'local-' + uid();
+    data.created_at = new Date().toISOString();
+    _bakeLogs.unshift(data);
+  }
+  await cloudSaveBakeLog(data);
+  await cloudLoadBakeLogs();
+  blShowList();
+});
+
+document.getElementById('bl-delete-btn')?.addEventListener('click', async () => {
+  if (!_blEditId) return;
+  if (!confirm(t('blDeleteConfirm'))) return;
+  await cloudDeleteBakeLog(_blEditId);
+  _bakeLogs = _bakeLogs.filter(l => l.id !== _blEditId);
+  blShowList();
+});
+
+// Stars
+document.getElementById('bl-stars')?.addEventListener('click', e => {
+  const star = e.target.closest('.bl-star');
+  if (!star) return;
+  const val = parseInt(star.dataset.star);
+  blSetStars(_blRating === val ? 0 : val); // click same star = clear
+});
+
+// Levain duration presets
+document.getElementById('bl-levain-dur-row')?.addEventListener('click', e => {
+  const btn = e.target.closest('.bl-dur-btn');
+  if (!btn) return;
+  const dur = btn.dataset.dur;
+  document.getElementById('bl-levain-dur-custom').value = dur;
+  document.querySelectorAll('#bl-levain-dur-row .bl-dur-btn').forEach(b => b.classList.toggle('active', b.dataset.dur === dur));
+});
+
+document.getElementById('bl-levain-dur-custom')?.addEventListener('input', e => {
+  document.querySelectorAll('#bl-levain-dur-row .bl-dur-btn').forEach(b => b.classList.toggle('active', b.dataset.dur === e.target.value));
+});
+
+// Add ingredient buttons
+document.getElementById('bl-add-levain-ing')?.addEventListener('click', () => {
+  _blLevainIng.push({ name:'', g:'' });
+  renderBLIngRows('bl-levain-ing-body', _blLevainIng);
+});
+
+document.getElementById('bl-add-dough-ing')?.addEventListener('click', () => {
+  _blDoughIng.push({ name:'', g:'' });
+  renderBLIngRows('bl-dough-ing-body', _blDoughIng);
+});
+
+// Remove ingredient
+document.getElementById('bl-levain-ing-body')?.addEventListener('click', e => {
+  const btn = e.target.closest('.rm-btn');
+  if (!btn) return;
+  _blLevainIng.splice(+btn.dataset.i, 1);
+  if (!_blLevainIng.length) _blLevainIng.push({ name:'', g:'' });
+  renderBLIngRows('bl-levain-ing-body', _blLevainIng);
+});
+
+document.getElementById('bl-dough-ing-body')?.addEventListener('click', e => {
+  const btn = e.target.closest('.rm-btn');
+  if (!btn) return;
+  _blDoughIng.splice(+btn.dataset.i, 1);
+  if (!_blDoughIng.length) _blDoughIng.push({ name:'', g:'' });
+  renderBLIngRows('bl-dough-ing-body', _blDoughIng);
+});
+
+// List actions (edit / delete)
+document.getElementById('bl-grid')?.addEventListener('click', e => {
+  const editBtn   = e.target.closest('[data-action="bl-edit"]');
+  const deleteBtn = e.target.closest('[data-action="bl-delete"]');
+  if (editBtn)   { blShowForm(editBtn.dataset.blid); return; }
+  if (deleteBtn) {
+    if (!confirm(t('blDeleteConfirm'))) return;
+    const id = deleteBtn.dataset.blid;
+    cloudDeleteBakeLog(id);
+    _bakeLogs = _bakeLogs.filter(l => l.id !== id);
+    renderBakeLogList();
+  }
+});
+
+function renderBakelogTab() {
+  cloudLoadBakeLogs();
+}
 
 initAuth();
 
