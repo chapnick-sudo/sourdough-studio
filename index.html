@@ -2685,6 +2685,18 @@ document.getElementById('tab-calculator').addEventListener('click', e => {
   // Save recipe
   if (e.target.id === 'btn-save-recipe') {
     readCalcFromDOM();
+    const calc = state.calculator;
+    const mainSum   = (calc.flourRows||[]).reduce((s,r) => s + (parseFloat(r.splitPct)||0), 0);
+    const levainSum = (calc.levain?.flourRows||[]).reduce((s,r) => s + (parseFloat(r.splitPct)||0), 0);
+    const mainOk   = Math.abs(mainSum   - 100) < 0.05;
+    const levainOk = Math.abs(levainSum - 100) < 0.05;
+    if (!mainOk || !levainOk) {
+      const msgs = [];
+      if (!mainOk)   msgs.push(`קמח בצק: ${mainSum.toFixed(1)}%`);
+      if (!levainOk) msgs.push(`קמח מחמצת: ${levainSum.toFixed(1)}%`);
+      alert(`⚠️ סך הקמחים חייב להיות 100%\n${msgs.join('\n')}`);
+      return;
+    }
     openSaveRecipeModal(); return;
   }
 
