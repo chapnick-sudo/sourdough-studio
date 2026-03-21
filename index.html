@@ -902,8 +902,8 @@ html[data-theme="dark"] {
     </div>
     <!-- Mode Toggle -->
     <div style="display:flex;gap:8px;margin-bottom:12px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:4px;width:fit-content">
-      <button id="mode-pct" class="btn btn-primary btn-sm" onclick="setCalcMode('pct')" style="min-width:130px">📊 Baker's %</button>
-      <button id="mode-weight" class="btn btn-secondary btn-sm" onclick="setCalcMode('weight')" style="min-width:130px">⚖️ By Weight</button>
+      <button id="mode-pct" class="btn btn-primary btn-sm" onclick="setCalcMode('pct')" style="min-width:130px" data-i18n="modePct">📊 Baker's %</button>
+      <button id="mode-weight" class="btn btn-secondary btn-sm" onclick="setCalcMode('weight')" style="min-width:130px" data-i18n="modeWeight">⚖️ By Weight</button>
     </div>
 
     <!-- ══ BY-WEIGHT MODE ══ -->
@@ -913,15 +913,15 @@ html[data-theme="dark"] {
 
           <!-- Batch -->
           <div class="card">
-            <div class="card-header"><h3>🍞 Batch</h3></div>
+            <div class="card-header"><h3>🍞 <span data-i18n="rwBatch">Batch</span></h3></div>
             <div class="card-body">
               <div class="pct-grid">
                 <div class="pct-field">
-                  <label>Number of Loaves</label>
+                  <label data-i18n="rwNumLoaves">Number of Loaves</label>
                   <div class="input-wrap"><input type="number" id="rw-loaves" value="1" min="1" max="99" step="1"></div>
                 </div>
                 <div class="pct-field">
-                  <label>Dough Weight / Loaf</label>
+                  <label data-i18n="rwDoughPerLoaf">Dough Weight / Loaf</label>
                   <div class="input-wrap"><input type="number" id="rw-gperloaf" value="900" min="100" step="10"><span class="input-suffix">g</span></div>
                 </div>
               </div>
@@ -931,25 +931,25 @@ html[data-theme="dark"] {
 
           <!-- Flour rows -->
           <div class="card">
-            <div class="card-header"><h3>🌾 Main Flour (grams)</h3></div>
+            <div class="card-header"><h3>🌾 <span data-i18n="rwMainFlour">Main Flour (grams)</span></h3></div>
             <div class="card-body">
               <div class="flour-rows" id="rw-flour-rows"></div>
               <div id="rw-flour-total" style="font-size:13px;color:var(--text-muted);margin-bottom:8px"></div>
-              <button class="btn btn-ghost btn-sm" id="rw-add-flour">+ Add Flour</button>
+              <button class="btn btn-ghost btn-sm" id="rw-add-flour" data-i18n="btnAddFlour">+ Add Flour</button>
             </div>
           </div>
 
           <!-- Levain -->
           <div class="card">
-            <div class="card-header"><h3>🧫 Levain / Starter</h3></div>
+            <div class="card-header"><h3>🧫 <span data-i18n="rwLevainStarter">Levain / Starter</span></h3></div>
             <div class="card-body">
               <div class="pct-grid">
                 <div class="pct-field">
-                  <label>Levain Weight</label>
+                  <label data-i18n="rwLevainWeight">Levain Weight</label>
                   <div class="input-wrap"><input type="number" id="rw-levain" value="150" min="0" step="1"><span class="input-suffix">g</span></div>
                 </div>
                 <div class="pct-field">
-                  <label>Levain Hydration</label>
+                  <label data-i18n="labelLevainHydration">Levain Hydration</label>
                   <div class="input-wrap"><input type="number" id="rw-levain-hyd" value="100" min="1" max="300" step="1"><span class="input-suffix">%</span></div>
                 </div>
               </div>
@@ -958,19 +958,19 @@ html[data-theme="dark"] {
 
           <!-- Water + Salt + Basinage -->
           <div class="card">
-            <div class="card-header"><h3>💧 Water & Salt</h3></div>
+            <div class="card-header"><h3>💧 <span data-i18n="rwWaterSalt">Water & Salt</span></h3></div>
             <div class="card-body">
               <div class="pct-grid">
                 <div class="pct-field">
-                  <label>Main Dough Water</label>
+                  <label data-i18n="rowMainWater">Main Dough Water</label>
                   <div class="input-wrap"><input type="number" id="rw-water" value="300" min="0" step="1"><span class="input-suffix">g</span></div>
                 </div>
                 <div class="pct-field">
-                  <label>Basinage</label>
+                  <label data-i18n="labelBasinage">Basinage</label>
                   <div class="input-wrap"><input type="number" id="rw-basinage" value="0" min="0" step="1"><span class="input-suffix">g</span></div>
                 </div>
                 <div class="pct-field">
-                  <label>Salt</label>
+                  <label data-i18n="cardSalt">Salt</label>
                   <div class="input-wrap"><input type="number" id="rw-salt" value="10" min="0" step="0.5"><span class="input-suffix">g</span></div>
                 </div>
               </div>
@@ -982,11 +982,11 @@ html[data-theme="dark"] {
         <!-- Results panel -->
         <div class="calc-results">
           <div class="card">
-            <div class="card-header"><h3>📊 Baker's Percentages</h3></div>
+            <div class="card-header"><h3>📊 <span data-i18n="rwBakersPct">Baker's Percentages</span></h3></div>
             <div class="card-body">
               <div id="rw-results-body"></div>
               <div style="margin-top:14px">
-                <button class="btn btn-primary" id="rw-load-btn" style="width:100%">← Load to Calculator</button>
+                <button class="btn btn-primary" id="rw-load-btn" style="width:100%" data-i18n="rwLoadBtn">← Load to Calculator</button>
               </div>
             </div>
           </div>
@@ -1513,6 +1513,12 @@ const TRANSLATIONS = {
     labelMainWater:'Main Dough Water', hintMainWater:'Derived from total hydration',
     labelBasinage:'Basinage (held back)', hintBasinage:'% of total flour, added during final mix',
     labelSalt:'Salt',
+    modePct:"📊 Baker's %", modeWeight:'⚖️ By Weight',
+    rwBatch:'Batch', rwNumLoaves:'Number of Loaves', rwDoughPerLoaf:'Dough Weight / Loaf',
+    rwMainFlour:'Main Flour (grams)', rwLevainStarter:'Levain / Starter',
+    rwLevainWeight:'Levain Weight', rwWaterSalt:'Water & Salt',
+    rwBakersPct:"Baker's Percentages", rwLoadBtn:'← Load to Calculator',
+    rwTotalFlour:'Total main flour', rwTotalDough:'Total Dough',
     btnAddFlour:'+ Add Flour', btnAddLevainFlour:'+ Add Levain Flour', btnAddAddin:'+ Add Ingredient',
     btnSaveRecipe:'Save Recipe', btnCopy:'Copy', btnAddProduct:'+ Add Product',
     btnCancel:'Cancel', btnConfirm:'Confirm',
@@ -1563,6 +1569,12 @@ const TRANSLATIONS = {
     labelMainWater:'מי בצק ראשי', hintMainWater:'מחושב מהידרציה הכוללת',
     labelBasinage:'בסינאז׳ (מים שמורים)', hintBasinage:'% מסך הקמח, מוסף בערבוב הסופי',
     labelSalt:'מלח',
+    modePct:'📊 אחוזי אופה', modeWeight:'⚖️ לפי משקל',
+    rwBatch:'אצווה', rwNumLoaves:'מספר כיכרות', rwDoughPerLoaf:'משקל בצק לכיכר',
+    rwMainFlour:'קמח ראשי (גרמים)', rwLevainStarter:'מחמצת / סטארטר',
+    rwLevainWeight:'משקל מחמצת', rwWaterSalt:'מים ומלח',
+    rwBakersPct:'אחוזי אופה', rwLoadBtn:'← העבר למחשבון',
+    rwTotalFlour:'סך קמח ראשי', rwTotalDough:'סך בצק',
     btnAddFlour:'+ הוסף קמח', btnAddLevainFlour:'+ הוסף קמח למחמצת', btnAddAddin:'+ הוסף מרכיב',
     btnSaveRecipe:'שמור מתכון', btnCopy:'העתק', btnAddProduct:'+ הוסף מוצר',
     btnCancel:'ביטול', btnConfirm:'אישור',
@@ -3306,7 +3318,7 @@ function computeReverseCalc() {
 
   // Update total display
   const totalEl = document.getElementById('rw-flour-total');
-  if (totalEl) totalEl.textContent = `Total main flour: ${Math.round(mainFlour)} g`;
+  if (totalEl) totalEl.textContent = `${t('rwTotalFlour')}: ${Math.round(mainFlour)} g`;
 
   if (mainFlour <= 0) return;
 
@@ -3365,7 +3377,7 @@ function computeReverseCalc() {
       ${tile('Total Hydration', hydrationPct.toFixed(1)+'%', `${Math.round(totalWater)}g water / ${Math.round(totalFlour)}g flour`, '#3b82f6')}
       ${tile('Levain %', levainPct.toFixed(1)+'%', `${Math.round(levainFlour)}g levain flour`, '#8b5cf6')}
       ${tile('Salt %', saltPct.toFixed(1)+'%', `${Math.round(salt)}g`, '#f59e0b')}
-      ${basinagePct > 0 ? tile('Basinage %', basinagePct.toFixed(1)+'%', `${Math.round(basinage)}g`, '#10b981') : ''}
+      ${basinagePct > 0 ? tile(t('labelBasinage'), basinagePct.toFixed(1)+'%', `${Math.round(basinage)}g`, '#10b981') : ''}
     </div>
     ${flourBreakdown.length > 1 ? `
     <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px">
@@ -3377,7 +3389,7 @@ function computeReverseCalc() {
         </div>`).join('')}
     </div>` : ''}
     <div style="display:flex;justify-content:space-between;font-size:13px;padding:8px 0;font-weight:600">
-      <span>Total Dough</span><span>${Math.round(totalDough)} g</span>
+      <span>${t('rwTotalDough')}</span><span>${Math.round(totalDough)} g</span>
     </div>`;
 
   document._rwCalc = {
