@@ -612,6 +612,18 @@ select { min-width: 140px; }
 .rd-title { font-size: 22px; font-weight: 700; margin: 0 0 4px; }
 .rd-desc { font-size: 14px; color: var(--text-muted); margin-bottom: 16px; }
 .rd-ingredients { background: var(--bg); border-radius: 10px; padding: 16px; margin-bottom: 20px; }
+.rd-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:16px; }
+.rd-stat { border-radius:10px; padding:10px 8px; text-align:center; }
+.rd-stat-val { font-size:18px; font-weight:800; line-height:1.1; }
+.rd-stat-lbl { font-size:11px; font-weight:600; margin-top:3px; opacity:.75; text-transform:uppercase; letter-spacing:.3px; }
+.rd-stat-flour     { background:#fef3c7; color:#92400e; }
+.rd-stat-water     { background:#dbeafe; color:#1e40af; }
+.rd-stat-hydration { background:#d1fae5; color:#065f46; }
+.rd-stat-total     { background:#ede9fe; color:#5b21b6; }
+[data-theme=dark] .rd-stat-flour     { background:#451a03; color:#fcd34d; }
+[data-theme=dark] .rd-stat-water     { background:#1e3a5f; color:#93c5fd; }
+[data-theme=dark] .rd-stat-hydration { background:#064e3b; color:#6ee7b7; }
+[data-theme=dark] .rd-stat-total     { background:#2e1065; color:#c4b5fd; }
 .rd-ingredients table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .rd-ingredients td { padding: 4px 8px; }
 .rd-ingredients td:last-child { text-align: right; font-weight: 600; }
@@ -2249,10 +2261,25 @@ function openRecipeDetail(id) {
     <div class="rd-body">
       <div class="rd-title">${esc(r.name)}</div>
       ${r.description ? `<div class="rd-desc">${esc(r.description)}</div>` : ''}
-      <div class="rd-ingredients">
-        <div style="font-size:12px;font-weight:700;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px">
-          ${r.calculator?.loaves||1} כיכרות × ${r.calculator?.gPerLoaf||900}g · הידרציה ${r.calculator?.totalHydrationPct||75}%
+      <div class="rd-stats">
+        <div class="rd-stat rd-stat-flour">
+          <div class="rd-stat-val">${Math.round(c.flourWeight)}g</div>
+          <div class="rd-stat-lbl">סך קמח</div>
         </div>
+        <div class="rd-stat rd-stat-water">
+          <div class="rd-stat-val">${Math.round(c.mainWater + c.levainWater + (c.basinage||0))}g</div>
+          <div class="rd-stat-lbl">סך נוזלים</div>
+        </div>
+        <div class="rd-stat rd-stat-hydration">
+          <div class="rd-stat-val">${c.totalHydration}%</div>
+          <div class="rd-stat-lbl">הידרציה</div>
+        </div>
+        <div class="rd-stat rd-stat-total">
+          <div class="rd-stat-val">${Math.round(c.totalDoughWeight)}g</div>
+          <div class="rd-stat-lbl">${r.calculator?.loaves||1} כיכרות</div>
+        </div>
+      </div>
+      <div class="rd-ingredients">
         <table>${rows.map(([k,v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join('')}</table>
       </div>
       ${r.notes ? `<div class="rd-notes">💬 ${esc(r.notes)}</div>` : ''}
