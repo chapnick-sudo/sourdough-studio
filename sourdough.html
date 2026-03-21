@@ -3309,8 +3309,8 @@ function computeReverseCalc() {
   const base = mainFlour;
   const p = v => base > 0 ? (v / base * 100) : 0;
 
-  const hydrationPct = p(totalWater);   // total water / main flour
-  const levainPct    = p(levainFlour);  // levain flour / main flour
+  const hydrationPct = p(totalWater);  // total water / main flour
+  const levainPct    = p(levain);      // total levain weight / main flour (what user sees)
   const saltPct      = p(salt);
   const basinagePct  = p(basinage);
 
@@ -3387,7 +3387,9 @@ document.getElementById('rw-load-btn')?.addEventListener('click', () => {
   if (!d) return;
   const calc = state.calculator;
   calc.totalHydrationPct   = parseFloat(d.hydrationPct.toFixed(1));
-  calc.levain.flourPct     = parseFloat(d.levainPct.toFixed(1));
+  // Convert: levainPct is total levain / mainFlour
+  // Main calculator uses levain flour / mainFlour → divide by (1 + hydration/100)
+  calc.levain.flourPct     = parseFloat((d.levainPct / (1 + d.levainHydPct / 100)).toFixed(1));
   calc.levain.hydrationPct = d.levainHydPct;
   calc.saltPct             = parseFloat(d.saltPct.toFixed(1));
   calc.basinagePct         = parseFloat(d.basinagePct.toFixed(1));
