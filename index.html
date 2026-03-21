@@ -977,7 +977,7 @@ html[data-theme="dark"] {
       </div><!-- end calc-layout -->
     </div>
 
-    <div class="calc-layout">
+    <div class="calc-layout" id="calc-pct-mode">
       <div class="calc-main">
 
         <!-- Batch & Hydration -->
@@ -3204,7 +3204,7 @@ let _rwFlourRows = [{ id: uid(), productId: 'p-bf', weight: 500 }];
 function setCalcMode(mode) {
   _calcMode = mode;
   document.getElementById('calc-weight-mode').style.display = mode === 'weight' ? 'block' : 'none';
-  document.querySelector('.calc-layout').style.display = mode === 'pct' ? '' : 'none';
+  document.getElementById('calc-pct-mode').style.display    = mode === 'pct'    ? ''      : 'none';
   document.getElementById('mode-pct').className    = mode === 'pct'    ? 'btn btn-primary btn-sm' : 'btn btn-secondary btn-sm';
   document.getElementById('mode-weight').className = mode === 'weight' ? 'btn btn-primary btn-sm' : 'btn btn-secondary btn-sm';
   if (mode === 'weight') { renderRWFlourRows(); computeReverseCalc(); }
