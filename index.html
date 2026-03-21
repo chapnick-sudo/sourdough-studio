@@ -911,6 +911,24 @@ html[data-theme="dark"] {
       <div class="calc-layout">
         <div class="calc-main">
 
+          <!-- Batch -->
+          <div class="card">
+            <div class="card-header"><h3>🍞 Batch</h3></div>
+            <div class="card-body">
+              <div class="pct-grid">
+                <div class="pct-field">
+                  <label>Number of Loaves</label>
+                  <div class="input-wrap"><input type="number" id="rw-loaves" value="1" min="1" max="99" step="1"></div>
+                </div>
+                <div class="pct-field">
+                  <label>Dough Weight / Loaf</label>
+                  <div class="input-wrap"><input type="number" id="rw-gperloaf" value="900" min="100" step="10"><span class="input-suffix">g</span></div>
+                </div>
+              </div>
+              <div id="rw-batch-info" style="margin-top:8px;font-size:13px;color:var(--text-muted)"></div>
+            </div>
+          </div>
+
           <!-- Flour rows -->
           <div class="card">
             <div class="card-header"><h3>🌾 Main Flour (grams)</h3></div>
@@ -3267,7 +3285,24 @@ function computeReverseCalc() {
   const levainWater = levain - levainFlour;
   const totalFlour  = mainFlour + levainFlour;
   const totalWater  = water + levainWater + basinage;
+  const loaves    = parseFloat(document.getElementById('rw-loaves')?.value)   || 1;
+  const gPerLoaf  = parseFloat(document.getElementById('rw-gperloaf')?.value) || 0;
   const totalDough  = mainFlour + water + levain + salt + basinage;
+  const targetDough = loaves * gPerLoaf;
+
+  // Batch info
+  const batchEl = document.getElementById('rw-batch-info');
+  if (batchEl) {
+    const diff = Math.round(totalDough - targetDough);
+    if (targetDough > 0 && Math.abs(diff) > 5) {
+      const sign = diff > 0 ? '+' : '';
+      batchEl.innerHTML = `Ingredients total: <strong>${Math.round(totalDough)}g</strong> · Target: <strong>${Math.round(targetDough)}g</strong> · <span style="color:${Math.abs(diff)>20?'var(--danger)':'var(--warning)'}">${sign}${diff}g difference</span>`;
+    } else if (targetDough > 0) {
+      batchEl.innerHTML = `✅ Ingredients match target: <strong>${Math.round(totalDough)}g</strong>`;
+    } else {
+      batchEl.innerHTML = `Ingredients total: <strong>${Math.round(totalDough)}g</strong>`;
+    }
+  }
 
   const p = v => totalFlour > 0 ? (v / totalFlour * 100) : 0;
 
@@ -3316,8 +3351,8 @@ function computeReverseCalc() {
   document._rwCalc = {
     hydrationPct, levainPct, saltPct, basinagePct,
     levainHydPct: levainHyd, totalDough,
-    loaves: state.calculator?.loaves || 1,
-    gPerLoaf: Math.round(totalDough / (state.calculator?.loaves || 1)),
+    loaves,
+    gPerLoaf: gPerLoaf || Math.round(totalDough / loaves),
     flourRows: _rwFlourRows.map(r => ({ ...r, splitPct: totalFlour > 0 ? parseFloat((r.weight / totalFlour * 100).toFixed(1)) : 0 })),
   };
 }
@@ -3325,7 +3360,7 @@ function computeReverseCalc() {
 // Flour rows events (delegated)
 document.getElementById('calc-weight-mode')?.addEventListener('input', e => {
   if (e.target.classList.contains('rw-fr-weight') || e.target.classList.contains('rw-fr-product')
-    || ['rw-water','rw-levain','rw-levain-hyd','rw-salt','rw-basinage'].includes(e.target.id)) {
+    || ['rw-water','rw-levain','rw-levain-hyd','rw-salt','rw-basinage','rw-loaves','rw-gperloaf'].includes(e.target.id)) {
     computeReverseCalc();
   }
 });
