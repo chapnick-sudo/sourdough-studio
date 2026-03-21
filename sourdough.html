@@ -2126,7 +2126,7 @@ function renderProductsTab() {
         <td class="text-muted" style="font-size:13px">${esc(p.brand||'—')}</td>
         ${cat.showProtein ? `<td>${p.proteinPct != null ? `<strong>${p.proteinPct}%</strong>` : '—'}</td>` : ''}
         <td class="text-muted" style="font-size:13px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.notes||'')}</td>
-        <td style="white-space:nowrap;text-align:right" onclick="event.stopPropagation()">
+        <td style="white-space:nowrap;text-align:right">
           <button class="btn btn-secondary btn-sm" data-action="edit-product" data-id="${p.id}">${t('btnEdit')}</button>
           ${!p.builtIn ? `<button class="btn btn-danger btn-sm" data-action="del-product" data-id="${p.id}" style="margin-left:4px">${t('btnDelete')}</button>` : ''}
         </td>
