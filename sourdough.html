@@ -941,8 +941,8 @@ textarea.bl-input { resize: vertical; min-height: 70px; }
       <button data-tab="calculator" class="active" data-i18n="tabCalculator">Calculator</button>
       <button data-tab="recipes" data-i18n="tabRecipes">Recipes</button>
       <button data-tab="products" data-i18n="tabProducts">Products</button>
-      <button data-tab="community">🌐 Community</button>
       <button data-tab="bakelog" data-i18n="tabBakelog">📋 Bake Log</button>
+      <button data-tab="community">🌐 Community</button>
     </nav>
     <div class="header-controls">
       <span id="cloud-status" style="font-size:12px;transition:opacity 1s;opacity:0;"></span>
@@ -3596,9 +3596,9 @@ document.addEventListener('keydown', e => {
   // Ctrl/Cmd + 1/2/3 — Switch tabs
   if (e.key === '1') { e.preventDefault(); switchTab('calculator'); }
   if (e.key === '2') { e.preventDefault(); switchTab('recipes'); }
-  if (e.key === '3') { e.preventDefault(); switchTab('community'); }
-  if (e.key === '4') { e.preventDefault(); switchTab('products'); }
-  if (e.key === '5') { e.preventDefault(); switchTab('bakelog'); }
+  if (e.key === '3') { e.preventDefault(); switchTab('products'); }
+  if (e.key === '4') { e.preventDefault(); switchTab('bakelog'); }
+  if (e.key === '5') { e.preventDefault(); switchTab('community'); }
 });
 
 // ════════════════════════════════════════════════
