@@ -835,33 +835,33 @@ html[data-theme="dark"] {
 </head>
 <body>
 
-<div id="offline-banner">📵 You're offline — changes will sync when reconnected</div>
+<div id="offline-banner"></div>
 
 <!-- ══ AUTH OVERLAY ══ -->
 <div id="auth-overlay">
   <div class="auth-card">
     <div class="auth-logo">🍞 Sourdough <span>Studio</span></div>
     <div class="auth-mode-tabs">
-      <button class="auth-mode-tab active" data-auth-mode="login">Sign In</button>
-      <button class="auth-mode-tab" data-auth-mode="register">Create Account</button>
+      <button class="auth-mode-tab active" data-auth-mode="login" data-i18n="authSignIn">Sign In</button>
+      <button class="auth-mode-tab" data-auth-mode="register" data-i18n="authCreateAccount">Create Account</button>
     </div>
     <div class="field">
-      <label>Email</label>
+      <label data-i18n="authEmail">Email</label>
       <input type="email" id="auth-email" placeholder="your@email.com" autocomplete="email">
     </div>
     <div class="field" style="margin-top:12px">
-      <label>Password</label>
+      <label data-i18n="authPassword">Password</label>
       <input type="password" id="auth-password" placeholder="••••••••" autocomplete="current-password">
     </div>
     <div id="auth-error"></div>
     <div id="auth-success"></div>
-    <button class="btn btn-primary auth-submit" id="auth-submit">Sign In</button>
+    <button class="btn btn-primary auth-submit" id="auth-submit" data-i18n="authSignIn">Sign In</button>
     <div class="auth-forgot" id="auth-forgot-wrap">
-      <a id="auth-forgot-link">Forgot password?</a>
+      <a id="auth-forgot-link" data-i18n="authForgot">Forgot password?</a>
     </div>
     <div style="display:flex;align-items:center;gap:10px;margin:16px 0 4px">
       <div style="flex:1;height:1px;background:var(--border)"></div>
-      <span style="font-size:12px;color:var(--text-muted)">or</span>
+      <span style="font-size:12px;color:var(--text-muted)" data-i18n="authOr">or</span>
       <div style="flex:1;height:1px;background:var(--border)"></div>
     </div>
     <button id="btn-google-login" style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:11px;border:1px solid var(--border);border-radius:8px;background:var(--surface);cursor:pointer;font-size:14px;font-weight:600;color:var(--text);transition:background .15s">
@@ -886,7 +886,7 @@ html[data-theme="dark"] {
         <div class="user-avatar" id="user-avatar">?</div>
         <span id="user-email" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
       </div>
-      <button class="btn btn-ghost btn-sm" id="btn-logout" style="display:none">Logout</button>
+      <button class="btn btn-ghost btn-sm" id="btn-logout" style="display:none" data-i18n="authLogout">Logout</button>
       <button id="btn-lang" class="btn-toggle" title="Switch Language">עב</button>
       <button id="btn-theme" class="btn-toggle" title="Toggle Dark Mode">🌙</button>
     </div>
@@ -1215,7 +1215,7 @@ html[data-theme="dark"] {
       <input type="text" class="search-input" id="community-search" placeholder="Search shared recipes…">
     </div>
     <div class="community-grid" id="community-grid">
-      <div class="empty-state"><div class="icon">🌐</div><p>Loading shared recipes…</p></div>
+      <div class="empty-state"><div class="icon">🌐</div><p id="community-loading-msg">Loading shared recipes…</p></div>
     </div>
   </section>
 
@@ -1226,15 +1226,15 @@ html[data-theme="dark"] {
       <button class="btn btn-primary" id="btn-add-product" data-i18n="btnAddProduct">+ Add Product</button>
     </div>
     <div class="products-filter-bar">
-      <input type="text" id="product-search" placeholder="🔍 Search..." style="flex:1;min-width:140px">
+      <input type="text" id="product-search" data-i18n-placeholder="searchProductsPlaceholder" placeholder="🔍 Search..." style="flex:1;min-width:140px">
       <select id="filter-ptype">
-        <option value="">All Types</option>
-        <option value="flour">🌾 Flours</option>
-        <option value="fat">🧈 Fats & Oils</option>
-        <option value="seed">🌱 Seeds</option>
-        <option value="other">🫙 Other</option>
+        <option value="" data-i18n="filterAllTypes">All Types</option>
+        <option value="flour" data-i18n="filterFlours">🌾 Flours</option>
+        <option value="fat" data-i18n="filterFats">🧈 Fats & Oils</option>
+        <option value="seed" data-i18n="filterSeeds">🌱 Seeds</option>
+        <option value="other" data-i18n="filterOther">🫙 Other</option>
       </select>
-      <select id="filter-brand"><option value="">All Brands</option></select>
+      <select id="filter-brand"><option value="" data-i18n="filterAllBrands">All Brands</option></select>
     </div>
     <div id="products-categories"></div>
   </section>
@@ -1298,7 +1298,7 @@ document.querySelectorAll('.auth-mode-tab').forEach(btn => {
   btn.addEventListener('click', () => {
     _authMode = btn.dataset.authMode;
     document.querySelectorAll('.auth-mode-tab').forEach(b => b.classList.toggle('active', b.dataset.authMode === _authMode));
-    document.getElementById('auth-submit').textContent = _authMode === 'login' ? 'Sign In' : 'Create Account';
+    document.getElementById('auth-submit').textContent = _authMode === 'login' ? t('authSignIn') : t('authCreateAccount');
     document.getElementById('auth-error').textContent = '';
     document.getElementById('auth-success').textContent = '';
   });
@@ -1310,7 +1310,7 @@ document.getElementById('auth-submit').addEventListener('click', async () => {
   const errEl    = document.getElementById('auth-error');
   const okEl     = document.getElementById('auth-success');
   errEl.textContent = ''; okEl.textContent = '';
-  if (!email || !password) { errEl.textContent = 'Please enter email and password.'; return; }
+  if (!email || !password) { errEl.textContent = t('authPleaseEnter'); return; }
   const btn = document.getElementById('auth-submit');
   btn.disabled = true; btn.textContent = '…';
   try {
@@ -1320,10 +1320,10 @@ document.getElementById('auth-submit').addEventListener('click', async () => {
     } else {
       const { error } = await sb.auth.signUp({ email, password });
       if (error) errEl.textContent = error.message;
-      else okEl.textContent = 'Account created! Check your email to confirm, then sign in.';
+      else okEl.textContent = t('authCreated');
     }
   } catch(e) { errEl.textContent = e.message; }
-  finally { btn.disabled = false; btn.textContent = _authMode === 'login' ? 'Sign In' : 'Create Account'; }
+  finally { btn.disabled = false; btn.textContent = _authMode === 'login' ? t('authSignIn') : t('authCreateAccount'); }
 });
 
 document.getElementById('auth-email').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('auth-password').focus(); });
@@ -1371,7 +1371,7 @@ function showCloudStatus(msg, ok = true) {
 
 async function cloudLoad() {
   try {
-    showCloudStatus('☁ syncing…', true);
+    showCloudStatus(t('cloudSyncing'), true);
     const [{ data: recipes, error: re }, { data: products, error: pe }] = await Promise.all([
       sb.from('recipes').select('*').order('created_at', { ascending: true }),
       sb.from('products').select('*')
@@ -1385,10 +1385,10 @@ async function cloudLoad() {
       const customNonBuiltIn = custom.filter(p => !p.builtIn);
       state.products = [...builtIns, ...customNonBuiltIn];
     }
-    showCloudStatus('☁ synced', true);
+    showCloudStatus(t('cloudSynced'), true);
   } catch(e) {
     console.error('cloudLoad error', e);
-    showCloudStatus('☁ offline', false);
+    showCloudStatus(t('cloudOffline'), false);
   }
 }
 
@@ -1411,14 +1411,14 @@ async function cloudSaveRecipe(recipe) {
     is_public: recipe.isPublic || false,
     image_url: recipe.imageUrl || null
   });
-  if (error) { console.error('cloudSaveRecipe', error); showCloudStatus('☁ save failed', false); }
-  else showCloudStatus('☁ saved', true);
+  if (error) { console.error('cloudSaveRecipe', error); showCloudStatus(t('cloudSaveFail'), false); }
+  else showCloudStatus(t('cloudSynced'), true);
 }
 
 async function cloudDeleteRecipe(id) {
   const { error } = await sb.from('recipes').delete().eq('id', id);
-  if (error) { console.error('cloudDeleteRecipe', error); showCloudStatus('☁ delete failed', false); }
-  else showCloudStatus('☁ deleted', true);
+  if (error) { console.error('cloudDeleteRecipe', error); showCloudStatus(t('cloudDeleteFail'), false); }
+  else showCloudStatus(t('cloudSynced'), true);
 }
 
 async function cloudSaveProduct(product) {
@@ -1431,14 +1431,14 @@ async function cloudSaveProduct(product) {
     source_url: product.sourceUrl || null,
     brand: product.brand || null
   });
-  if (error) { console.error('cloudSaveProduct', error); showCloudStatus('☁ save failed', false); }
-  else showCloudStatus('☁ saved', true);
+  if (error) { console.error('cloudSaveProduct', error); showCloudStatus(t('cloudSaveFail'), false); }
+  else showCloudStatus(t('cloudSynced'), true);
 }
 
 async function cloudDeleteProduct(id) {
   const { error } = await sb.from('products').delete().eq('id', id);
-  if (error) { console.error('cloudDeleteProduct', error); showCloudStatus('☁ delete failed', false); }
-  else showCloudStatus('☁ deleted', true);
+  if (error) { console.error('cloudDeleteProduct', error); showCloudStatus(t('cloudDeleteFail'), false); }
+  else showCloudStatus(t('cloudSynced'), true);
 }
 
 async function toggleShareRecipe(id) {
@@ -1450,8 +1450,8 @@ async function toggleShareRecipe(id) {
   const { error } = await sb.from('recipes').update({
     is_public: r.isPublic, author_email: currentUser?.email
   }).eq('id', id);
-  if (error) { console.error('toggleShare', error); showCloudStatus('☁ share failed', false); }
-  else showCloudStatus(r.isPublic ? '🌐 shared!' : '🔒 made private', true);
+  if (error) { console.error('toggleShare', error); showCloudStatus(t('cloudSaveFail'), false); }
+  else showCloudStatus(r.isPublic ? t('cloudShared') : t('cloudMadePrivate'), true);
 }
 
 async function renderCommunityTab() {
@@ -1464,7 +1464,7 @@ async function renderCommunityTab() {
     .eq('is_public', true)
     .order('updated_at', { ascending: false });
   if (error || !recipes?.length) {
-    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="icon">🌐</div><p>No shared recipes yet. Be the first!</p></div>';
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="icon">🌐</div><p>${t('communityEmpty')}</p></div>`;
     return;
   }
   const filtered = q ? recipes.filter(r => r.name.toLowerCase().includes(q) || (r.description||'').toLowerCase().includes(q)) : recipes;
@@ -1478,8 +1478,8 @@ async function renderCommunityTab() {
       ${r.description ? `<div style="font-size:13px;color:var(--text-muted);margin-bottom:6px">${esc(r.description)}</div>` : ''}
       <div class="summary">${esc(summary)}</div>
       <div style="display:flex;gap:8px;margin-top:12px">
-        <button class="btn btn-secondary btn-sm" data-action="view-community" data-recipe='${recJson}'>👁 View</button>
-        ${!isOwn ? `<button class="btn btn-primary btn-sm" data-action="copy-community" data-recipe='${recJson}'>Copy to my recipes</button>` : '<span style="font-size:12px;color:var(--text-muted)">Your recipe</span>'}
+        <button class="btn btn-secondary btn-sm" data-action="view-community" data-recipe='${recJson}'>${t('communityView')}</button>
+        ${!isOwn ? `<button class="btn btn-primary btn-sm" data-action="copy-community" data-recipe='${recJson}'>${t('communityCopy')}</button>` : `<span style="font-size:12px;color:var(--text-muted)">${t('communityYours')}</span>`}
       </div>
     </div>`;
   }).join('');
@@ -1496,7 +1496,7 @@ async function copyPublicRecipe(recipeData) {
   await cloudSaveRecipe(copy);
   switchTab('recipes');
   renderRecipesTab();
-  showCloudStatus('✓ copied to your recipes!', true);
+  showCloudStatus(t('cloudSynced'), true);
 }
 
 // ── Translations ──
@@ -1556,6 +1556,48 @@ const TRANSLATIONS = {
     pdfLevainWater:'Levain water', pdfMainWater:'Main Dough Water',
     pdfBasinage:'Basinage (held back)', pdfSalt:'Salt', pdfTotalDoughRow:'Total Dough',
     pdfPerLoaf:n=>`Per loaf (÷${n})`, pdfNegative:'⚠ negative',
+    // Auth
+    authSignIn:'Sign In', authCreateAccount:'Create Account', authEmail:'Email',
+    authPassword:'Password', authForgot:'Forgot password?', authLogout:'Logout',
+    authOr:'or', authContinueGoogle:'Continue with Google',
+    authPleaseEnter:'Please enter email and password.',
+    authCreated:'Account created! Sign in to continue.',
+    authResetSent:'✓ Check your email for a reset link!',
+    // Products filter
+    filterAllTypes:'All Types', filterFlours:'🌾 Flours', filterFats:'🧈 Fats & Oils',
+    filterSeeds:'🌱 Seeds', filterOther:'🫙 Other', filterAllBrands:'All Brands',
+    searchProductsPlaceholder:'🔍 Search...',
+    // Product categories
+    catFlour:'Flours', catFat:'Fats & Oils', catSeed:'Seeds & Grains', catOther:'Other',
+    // Product detail
+    pdProtein:'Protein', pdType:'Type', pdBrand:'Brand', pdBuiltIn:'Built-in',
+    pdClose:'Close',
+    // Product modal
+    brandLabel:'Brand / Manufacturer', brandPlaceholder:'e.g. Shufaf, Kemah HaAretz',
+    fetchBtn:'Fetch', fetchingMsg:'⏳ Fetching product data...', fetchOk:'✓ Data imported!',
+    fetchFail:'✗ Could not fetch. Fill in manually.',
+    analyzingImg:'⏳ Analyzing image with AI...', analyzeOk:'✓ Identified!',
+    // Community
+    communitySearchPlaceholder:'Search shared recipes…',
+    communityLoading:'Loading shared recipes…', communityEmpty:'No shared recipes yet. Be the first!',
+    communityView:'👁 View', communityCopy:'Copy to my recipes', communityYours:'Your recipe',
+    // Cloud status
+    cloudSyncing:'☁ syncing…', cloudSynced:'☁ synced', cloudOffline:'☁ offline',
+    cloudSaveFail:'☁ save failed', cloudDeleteFail:'☁ delete failed',
+    cloudUploading:'☁ uploading...', cloudUploadFail:'☁ upload failed',
+    cloudShared:'🌐 shared!', cloudMadePrivate:'🔒 made private', cloudQueued:'📵 queued',
+    cloudLoaded:'✅ Loaded to Calculator!',
+    // Offline
+    offlineMsg:(n)=> n ? `📵 You're offline — ${n} changes pending sync` : `📵 You're offline — changes will sync when reconnected`,
+    // Reverse calc
+    rwIngTotal:(tot,tgt,diff,sign)=> diff===0
+      ? `✅ Ingredients match target: <strong>${tot}g</strong>`
+      : `Ingredients total: <strong>${tot}g</strong> · Target: <strong>${tgt}g</strong> · <span style="color:var(--warning)">${sign}${diff}g difference</span>`,
+    rwFlourSplit:"🌾 Flour Split (baker's %)",
+    rwTotalHydration:'Total Hydration', rwLevainPct:'Levain %', rwSaltPct:'Salt %',
+    // Misc
+    removeTitle:'Remove', selectPlaceholder:'— select —',
+    popupBlocked:'Please allow popups for PDF export',
   },
   he: {
     tabCalculator:'מחשבון', tabRecipes:'מתכונים', tabProducts:'מוצרים',
@@ -1612,6 +1654,48 @@ const TRANSLATIONS = {
     pdfLevainWater:'מים במחמצת', pdfMainWater:'מי בצק ראשי',
     pdfBasinage:'בסינאז׳ (מים שמורים)', pdfSalt:'מלח', pdfTotalDoughRow:'סך בצק',
     pdfPerLoaf:n=>`לכיכר (÷${n})`, pdfNegative:'⚠ שלילי',
+    // Auth
+    authSignIn:'כניסה', authCreateAccount:'הרשמה', authEmail:'אימייל',
+    authPassword:'סיסמה', authForgot:'שכחתי סיסמה', authLogout:'יציאה',
+    authOr:'או', authContinueGoogle:'כניסה עם Google',
+    authPleaseEnter:'נא להזין אימייל וסיסמה.',
+    authCreated:'החשבון נוצר! כנס כדי להמשיך.',
+    authResetSent:'✓ בדוק את המייל לקישור לאיפוס סיסמה!',
+    // Products filter
+    filterAllTypes:'כל הסוגים', filterFlours:'🌾 קמחים', filterFats:'🧈 שמנים ושומנים',
+    filterSeeds:'🌱 זרעים', filterOther:'🫙 אחר', filterAllBrands:'כל היצרנים',
+    searchProductsPlaceholder:'🔍 חיפוש...',
+    // Product categories
+    catFlour:'קמחים', catFat:'שמנים ושומנים', catSeed:'זרעים ודגנים', catOther:'אחר',
+    // Product detail
+    pdProtein:'חלבון', pdType:'סוג', pdBrand:'יצרן', pdBuiltIn:'מובנה',
+    pdClose:'סגור',
+    // Product modal
+    brandLabel:'יצרן / מותג', brandPlaceholder:'לדוגמה: שופרסל, קמח הארץ',
+    fetchBtn:'שלוף', fetchingMsg:'⏳ מביא נתוני מוצר...', fetchOk:'✓ יובא בהצלחה!',
+    fetchFail:'✗ לא הצלחתי לשלוף. מלא ידנית.',
+    analyzingImg:'⏳ מנתח תמונה עם AI...', analyzeOk:'✓ זוהה בהצלחה!',
+    // Community
+    communitySearchPlaceholder:'חפש מתכונים משותפים…',
+    communityLoading:'טוען מתכונים משותפים…', communityEmpty:'אין מתכונים משותפים עדיין. היה הראשון!',
+    communityView:'👁 צפה', communityCopy:'העתק למתכונים שלי', communityYours:'המתכון שלך',
+    // Cloud status
+    cloudSyncing:'☁ מסנכרן…', cloudSynced:'☁ מסונכרן', cloudOffline:'☁ לא מחובר',
+    cloudSaveFail:'☁ שמירה נכשלה', cloudDeleteFail:'☁ מחיקה נכשלה',
+    cloudUploading:'☁ מעלה...', cloudUploadFail:'☁ העלאה נכשלה',
+    cloudShared:'🌐 שותף!', cloudMadePrivate:'🔒 הפך לפרטי', cloudQueued:'📵 בתור',
+    cloudLoaded:'✅ נטען למחשבון!',
+    // Offline
+    offlineMsg:(n)=> n ? `📵 אין חיבור — ${n} שינויים ממתינים לסנכרון` : `📵 אין חיבור — השינויים יסונכרנו בחזרת החיבור`,
+    // Reverse calc
+    rwIngTotal:(tot,tgt,diff,sign)=> diff===0
+      ? `✅ הכמויות תואמות את היעד: <strong>${tot}g</strong>`
+      : `סך מרכיבים: <strong>${tot}g</strong> · יעד: <strong>${tgt}g</strong> · <span style="color:var(--warning)">${sign}${diff}g הפרש</span>`,
+    rwFlourSplit:'🌾 פיצול קמחים (% אופה)',
+    rwTotalHydration:'הידרציה כוללת', rwLevainPct:'% מחמצת', rwSaltPct:'% מלח',
+    // Misc
+    removeTitle:'הסר', selectPlaceholder:'— בחר —',
+    popupBlocked:'אנא אפשר חלונות קופצים לייצוא PDF',
   }
 };
 
@@ -1823,7 +1907,7 @@ function flourProducts() {
 
 function buildProductOptions(selectedId, filterType) {
   const list = filterType ? state.products.filter(p => p.type === filterType) : state.products;
-  let html = '<option value="">— select —</option>';
+  let html = `<option value="">— ${t('selectPlaceholder')} —</option>`;
   for (const p of list) {
     html += `<option value="${p.id}" ${p.id === selectedId ? 'selected' : ''}>${esc(p.name)}</option>`;
   }
@@ -2089,7 +2173,7 @@ function renderProductsTab() {
   const currentBrand = brandSel?.value || '';
   const brands = [...new Set(state.products.map(p => p.brand||'').filter(Boolean))].sort();
   if (brandSel) {
-    brandSel.innerHTML = `<option value="">All Brands</option>` +
+    brandSel.innerHTML = `<option value="">${t('filterAllBrands')}</option>` +
       brands.map(b => `<option value="${esc(b)}" ${currentBrand===b?'selected':''}>${esc(b)}</option>`).join('');
   }
 
@@ -2099,10 +2183,10 @@ function renderProductsTab() {
   const brandFilter = brandSel?.value || '';
 
   const CATS = [
-    { type: 'flour', label: 'Flours',        icon: '🌾', showProtein: true  },
-    { type: 'fat',   label: 'Fats & Oils',   icon: '🧈', showProtein: false },
-    { type: 'seed',  label: 'Seeds & Grains',icon: '🌱', showProtein: false },
-    { type: 'other', label: 'Other',          icon: '🫙', showProtein: false },
+    { type: 'flour', label: ()=>t('catFlour'),  icon: '🌾', showProtein: true  },
+    { type: 'fat',   label: ()=>t('catFat'),   icon: '🧈', showProtein: false },
+    { type: 'seed',  label: ()=>t('catSeed'),  icon: '🌱', showProtein: false },
+    { type: 'other', label: ()=>t('catOther'), icon: '🫙', showProtein: false },
   ];
 
   // Filter + group
@@ -2153,7 +2237,7 @@ function renderProductsTab() {
       <div class="product-category${isCollapsed ? ' collapsed' : ''}" data-cat-type="${cat.type}">
         <div class="product-category-header" data-toggle-cat="${cat.type}">
           <span class="cat-icon">${cat.icon}</span>
-          <h3>${cat.label}</h3>
+          <h3>${typeof cat.label === 'function' ? cat.label() : cat.label}</h3>
           <span class="cat-count">${products.length}</span>
           <span class="cat-toggle">▾</span>
         </div>
@@ -2255,7 +2339,7 @@ function openSaveRecipeModal(existingId) {
         existing.calculator = deepClone(state.calculator);
         closeModal();
         if (imageFile) {
-          showCloudStatus('☁ uploading...', true);
+          showCloudStatus(t('cloudUploading'), true);
           const url = await uploadRecipeImage(existing.id, imageFile);
           if (url) existing.imageUrl = url;
         }
@@ -2267,7 +2351,7 @@ function openSaveRecipeModal(existingId) {
           calculator: deepClone(state.calculator) };
         closeModal();
         if (imageFile) {
-          showCloudStatus('☁ uploading...', true);
+          showCloudStatus(t('cloudUploading'), true);
           const url = await uploadRecipeImage(recipe.id, imageFile);
           if (url) recipe.imageUrl = url;
         }
@@ -2302,20 +2386,20 @@ function openProductDetail(id) {
       ${p.brand ? `<div class="pd-brand">🏭 ${esc(p.brand)}</div>` : ''}
       <div class="pd-badges">
         <span class="pd-badge accent">${typeIcon} ${p.type.charAt(0).toUpperCase()+p.type.slice(1)}</span>
-        ${p.proteinPct != null ? `<span class="pd-badge">Protein ${p.proteinPct}%</span>` : ''}
-        ${p.builtIn ? `<span class="pd-badge">Built-in</span>` : ''}
+        ${p.proteinPct != null ? `<span class="pd-badge">${t('pdProtein')} ${p.proteinPct}%</span>` : ''}
+        ${p.builtIn ? `<span class="pd-badge">${t('pdBuiltIn')}</span>` : ''}
       </div>
       <div class="pd-info-grid">
         ${p.proteinPct != null ? `
         <div class="pd-info-item">
-          <label>Protein</label>
+          <label>${t('pdProtein')}</label>
           <span>${p.proteinPct}%</span>
         </div>` : ''}
         <div class="pd-info-item">
-          <label>Type</label>
+          <label>${t('pdType')}</label>
           <span>${p.type.charAt(0).toUpperCase()+p.type.slice(1)}</span>
         </div>
-        ${p.brand ? `<div class="pd-info-item"><label>Brand</label><span>${esc(p.brand)}</span></div>` : ''}
+        ${p.brand ? `<div class="pd-info-item"><label>${t('pdBrand')}</label><span>${esc(p.brand)}</span></div>` : ''}
       </div>
       ${p.notes ? `<div class="pd-notes">💬 ${esc(p.notes)}</div>` : ''}
       ${p.sourceUrl ? `<div class="pd-source">🔗 Source: <a href="${esc(p.sourceUrl)}" target="_blank">${esc(p.sourceUrl)}</a></div>` : ''}
@@ -2422,14 +2506,14 @@ function openRecipeDetail(id) {
     if (!file) return;
     const photoBtn = panel.querySelector('.rd-photo-btn');
     if (photoBtn) photoBtn.textContent = '⏳ מעלה...';
-    showCloudStatus('☁ uploading...', true);
+    showCloudStatus(t('cloudUploading'), true);
     const url = await uploadRecipeImage(r.id, file);
     if (url) {
       r.imageUrl = url;
       saveState(); await cloudSaveRecipe(r); renderRecipesTab();
       openRecipeDetail(id); // refresh panel
     } else {
-      showCloudStatus('☁ upload failed', false);
+      showCloudStatus(t('cloudUploadFail'), false);
       if (photoBtn) photoBtn.textContent = '📸 נסה שוב';
     }
   });
@@ -2535,7 +2619,7 @@ function openProductModal(id) {
       <label>🔍 Smart Import</label>
       <div class="fetch-row">
         <input type="url" id="m-fetch-url" placeholder="https://example.com/product/bread-flour">
-        <button type="button" class="btn btn-secondary btn-sm" id="m-fetch-btn">Fetch</button>
+        <button type="button" class="btn btn-secondary btn-sm" id="m-fetch-btn" data-i18n="fetchBtn">Fetch</button>
         <button type="button" class="btn btn-secondary btn-sm" id="m-image-btn" title="זהה מתמונה">📸</button>
         <input type="file" id="m-image-input" accept="image/*" capture="environment" style="display:none">
       </div>
@@ -2552,8 +2636,8 @@ function openProductModal(id) {
       <select id="m-ptype">${typeOpts}</select></div>
      <div class="field"><label>${t('productProteinLabel')}</label>
       <input type="number" id="m-pprot" value="${p?.proteinPct??''}" min="0" max="30" step="0.1" placeholder="e.g. 12.7"></div>
-     <div class="field"><label>Brand / Manufacturer</label>
-      <input type="text" id="m-pbrand" value="${esc(p?.brand||'')}" placeholder="e.g. Shufaf, Kemah HaAretz" list="brand-datalist" autocomplete="off">
+     <div class="field"><label data-i18n="brandLabel">Brand / Manufacturer</label>
+      <input type="text" id="m-pbrand" value="${esc(p?.brand||'')}" placeholder="${t('brandPlaceholder')}" list="brand-datalist" autocomplete="off">
       <datalist id="brand-datalist">${[...new Set(state.products.map(p=>p.brand).filter(Boolean))].sort().map(b=>`<option value="${esc(b)}">`).join('')}</datalist></div>
      <div class="field"><label>${t('productNotesLabel')}</label>
       <input type="text" id="m-pnotes" value="${esc(p?.notes||'')}" placeholder="${t('productNotesPlaceholder')}"></div>
@@ -2596,7 +2680,7 @@ function openProductModal(id) {
       if (!url) return;
       const status  = document.getElementById('m-fetch-status');
       const preview = document.getElementById('m-fetch-preview');
-      status.textContent = '⏳ Fetching product data...';
+      status.textContent = t('fetchingMsg');
       status.className = 'fetch-status loading';
       preview.style.display = 'none';
       fetchBtn.disabled = true;
@@ -2616,7 +2700,7 @@ function openProductModal(id) {
         document.getElementById('m-psource').value = url;
 
         // Show preview
-        status.textContent = '✓ Data imported successfully!';
+        status.textContent = t('fetchOk');
         status.className = 'fetch-status ok';
         preview.style.display = 'flex';
         preview.className = 'fetch-preview';
@@ -2624,11 +2708,11 @@ function openProductModal(id) {
           ${data.image ? `<img src="${esc(data.image)}" onerror="this.style.display='none'" alt="">` : ''}
           <div class="fetch-info">
             <strong>${esc(data.name || '—')}</strong>
-            <span>${proteinVal ? `Protein: ${proteinVal}` : ''}${data.brand ? ` · ${esc(data.brand)}` : ''}</span>
+            <span>${proteinVal ? `${t('pdProtein')}: ${proteinVal}` : ''}${data.brand ? ` · ${esc(data.brand)}` : ''}</span>
             ${data.description ? `<span style="display:block;margin-top:2px;font-size:11px">${esc(data.description.slice(0,80))}…</span>` : ''}
           </div>`;
       } catch(e) {
-        status.textContent = `✗ Could not fetch: ${e.message}. Fill in manually.`;
+        status.textContent = t('fetchFail');
         status.className = 'fetch-status error';
       } finally {
         fetchBtn.disabled = false;
@@ -2648,7 +2732,7 @@ function openProductModal(id) {
         if (!file) return;
         const status  = document.getElementById('m-fetch-status');
         const preview = document.getElementById('m-fetch-preview');
-        status.textContent = '⏳ מנתח תמונה עם AI...';
+        status.textContent = t('analyzingImg');
         status.className = 'fetch-status loading';
         preview.style.display = 'none';
         imageBtn.disabled = true;
@@ -2671,7 +2755,7 @@ function openProductModal(id) {
           const imgUrl = URL.createObjectURL(file);
           document.getElementById('m-pimage').value = imgUrl;
 
-          status.textContent = '✓ זוהה בהצלחה!';
+          status.textContent = t('analyzeOk');
           status.className = 'fetch-status ok';
           preview.style.display = 'flex';
           preview.className = 'fetch-preview';
@@ -3083,7 +3167,7 @@ function printRecipePDF(calc, name, notes) {
   </body></html>`;
 
   const win = window.open('', '_blank');
-  if (!win) { alert('Please allow popups for PDF export'); return; }
+  if (!win) { alert(t('popupBlocked')); return; }
   win.document.write(html);
   win.document.close();
   win.onload = () => { win.focus(); win.print(); };
@@ -3159,7 +3243,7 @@ function updateOfflineBanner() {
   if (!banner) return;
   if (!navigator.onLine) {
     banner.classList.add('visible');
-    banner.textContent = `📵 You're offline — ${_pendingSync.length ? _pendingSync.length + ' changes pending sync' : 'changes will sync when reconnected'}`;
+    banner.textContent = t('offlineMsg')(_pendingSync.length);
   } else {
     banner.classList.remove('visible');
     if (_pendingSync.length > 0) syncPending();
@@ -3173,7 +3257,7 @@ updateOfflineBanner();
 // Override cloud functions to handle offline
 const _origSaveRecipe = cloudSaveRecipe;
 cloudSaveRecipe = async function(recipe) {
-  if (!navigator.onLine) { queuePendingRecipe(recipe); updateOfflineBanner(); showCloudStatus('📵 queued', false); return; }
+  if (!navigator.onLine) { queuePendingRecipe(recipe); updateOfflineBanner(); showCloudStatus(t('cloudQueued'), false); return; }
   return _origSaveRecipe(recipe);
 };
 
@@ -3374,14 +3458,14 @@ function computeReverseCalc() {
 
   body.innerHTML = `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px">
-      ${tile('Total Hydration', hydrationPct.toFixed(1)+'%', `${Math.round(totalWater)}g water / ${Math.round(totalFlour)}g flour`, '#3b82f6')}
-      ${tile('Levain %', levainPct.toFixed(1)+'%', `${Math.round(levainFlour)}g levain flour`, '#8b5cf6')}
-      ${tile('Salt %', saltPct.toFixed(1)+'%', `${Math.round(salt)}g`, '#f59e0b')}
+      ${tile(t('rwTotalHydration'), hydrationPct.toFixed(1)+'%', `${Math.round(totalWater)}g / ${Math.round(totalFlour)}g`, '#3b82f6')}
+      ${tile(t('rwLevainPct'), levainPct.toFixed(1)+'%', `${Math.round(levainFlour)}g`, '#8b5cf6')}
+      ${tile(t('rwSaltPct'), saltPct.toFixed(1)+'%', `${Math.round(salt)}g`, '#f59e0b')}
       ${basinagePct > 0 ? tile(t('labelBasinage'), basinagePct.toFixed(1)+'%', `${Math.round(basinage)}g`, '#10b981') : ''}
     </div>
     ${flourBreakdown.length > 1 ? `
     <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px">
-      <div style="font-size:12px;font-weight:700;margin-bottom:6px">🌾 Flour Split (baker's %)</div>
+      <div style="font-size:12px;font-weight:700;margin-bottom:6px">${t('rwFlourSplit')}</div>
       ${flourBreakdown.map(f => `
         <div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0;border-bottom:1px solid var(--border)">
           <span>${f.name}</span>
@@ -3447,7 +3531,7 @@ document.getElementById('rw-load-btn')?.addEventListener('click', () => {
   setCalcMode('pct');
   renderCalculatorTab();
   renderResults();
-  showCloudStatus('✅ Loaded to Calculator!', true);
+  showCloudStatus(t('cloudLoaded'), true);
 });
 
 initAuth();
