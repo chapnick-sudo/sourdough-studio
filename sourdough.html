@@ -2405,15 +2405,20 @@ function openRecipeDetail(id) {
   overlay.classList.add('open');
 
   // Photo upload
-  document.getElementById('rd-photo-input')?.addEventListener('change', async (e) => {
+  panel.querySelector('#rd-photo-input')?.addEventListener('change', async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    const photoBtn = panel.querySelector('.rd-photo-btn');
+    if (photoBtn) photoBtn.textContent = '⏳ מעלה...';
     showCloudStatus('☁ uploading...', true);
     const url = await uploadRecipeImage(r.id, file);
     if (url) {
       r.imageUrl = url;
-      saveState(); cloudSaveRecipe(r); renderRecipesTab();
+      saveState(); await cloudSaveRecipe(r); renderRecipesTab();
       openRecipeDetail(id); // refresh panel
+    } else {
+      showCloudStatus('☁ upload failed', false);
+      if (photoBtn) photoBtn.textContent = '📸 נסה שוב';
     }
   });
 
