@@ -3304,18 +3304,21 @@ function computeReverseCalc() {
     }
   }
 
-  const p = v => totalFlour > 0 ? (v / totalFlour * 100) : 0;
+  // Base = mainFlour only — matches main calculator baker's % convention
+  // (all % in main calc are relative to main flour, NOT total flour)
+  const base = mainFlour;
+  const p = v => base > 0 ? (v / base * 100) : 0;
 
-  const hydrationPct = p(totalWater);
-  const levainPct    = p(levainFlour);
+  const hydrationPct = p(totalWater);   // total water / main flour
+  const levainPct    = p(levainFlour);  // levain flour / main flour
   const saltPct      = p(salt);
   const basinagePct  = p(basinage);
 
-  // Flour breakdown per type
+  // Flour split — each type as % of main flour (sums to 100%)
   const flourBreakdown = _rwFlourRows.map(r => ({
     name: productName(r.productId),
     weight: r.weight,
-    pct: totalFlour > 0 ? (r.weight / totalFlour * 100) : 0,
+    pct: base > 0 ? (r.weight / base * 100) : 0,
   }));
 
   const body = document.getElementById('rw-results-body');
