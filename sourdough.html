@@ -941,10 +941,6 @@ html[data-theme="dark"] {
             <span class="card-toggle">▾</span>
           </div>
           <div class="card-body">
-            <div class="flour-rows" id="levain-flour-rows"></div>
-            <div id="levain-flour-sum" class="sum-indicator"></div>
-            <button class="btn btn-ghost btn-sm" id="add-levain-flour" data-i18n="btnAddLevainFlour">+ Add Levain Flour</button>
-            <hr class="divider">
             <div class="pct-grid">
               <div class="pct-field">
                 <label data-i18n-html="labelLevainPct">Levain % <span style="font-weight:400;color:var(--text-muted)">(baker's %)</span></label>
@@ -1839,7 +1835,6 @@ function renderResults() {
 
   // Sum indicators
   renderSumIndicator('main-flour-sum', c.mainFlourSum);
-  renderSumIndicator('levain-flour-sum', c.levainFlourSum);
 }
 
 // ════════════════════════════════════════════════
@@ -1858,7 +1853,6 @@ function renderCalculatorTab() {
   renderFlourRows('main-flour-rows', calc.flourRows || [], 'main', 'flour');
 
   // Levain
-  renderFlourRows('levain-flour-rows', calc.levain.flourRows || [], 'levain', 'flour');
   document.getElementById('levainFlourPct').value  = calc.levain.flourPct ?? 20;
   document.getElementById('levainHydration').value = calc.levain.hydrationPct ?? 100;
 
@@ -2221,9 +2215,7 @@ function openRecipeDetail(id) {
     : [];
 
   // Build levain flour breakdown
-  const levainFlourRows = (c.levainFlourBreakdown||[]).length > 1
-    ? c.levainFlourBreakdown.map(f => [`  ↳ ${productName(f.productId)}`, `${Math.round(f.weight)} g`])
-    : [];
+  const levainFlourRows = [];
 
   const rows = [
     ['<strong>קמח בצק</strong>', `<strong>${Math.round(c.flourWeight)} g</strong>`],
@@ -2686,15 +2678,9 @@ document.getElementById('tab-calculator').addEventListener('click', e => {
   if (e.target.id === 'btn-save-recipe') {
     readCalcFromDOM();
     const calc = state.calculator;
-    const mainSum   = (calc.flourRows||[]).reduce((s,r) => s + (parseFloat(r.splitPct)||0), 0);
-    const levainSum = (calc.levain?.flourRows||[]).reduce((s,r) => s + (parseFloat(r.splitPct)||0), 0);
-    const mainOk   = Math.abs(mainSum   - 100) < 0.05;
-    const levainOk = Math.abs(levainSum - 100) < 0.05;
-    if (!mainOk || !levainOk) {
-      const msgs = [];
-      if (!mainOk)   msgs.push(`קמח בצק: ${mainSum.toFixed(1)}%`);
-      if (!levainOk) msgs.push(`קמח מחמצת: ${levainSum.toFixed(1)}%`);
-      alert(`⚠️ סך הקמחים חייב להיות 100%\n${msgs.join('\n')}`);
+    const mainSum = (calc.flourRows||[]).reduce((s,r) => s + (parseFloat(r.splitPct)||0), 0);
+    if (Math.abs(mainSum - 100) >= 0.05) {
+      alert(`⚠️ סך הקמחים חייב להיות 100%\nכרגע: ${mainSum.toFixed(1)}%`);
       return;
     }
     openSaveRecipeModal(); return;
