@@ -2310,15 +2310,15 @@ function openRecipeDetail(id) {
 
   const c = computeIngredients(r.calculator);
 
-  // Build flour breakdown rows
-  const flourRows = (c.flourBreakdown||[]).length > 1
-    ? c.flourBreakdown.map(f => [`↳ ${productNameWithBrand(f.productId)} (${Math.round(f.pct)}%)`, `${Math.round(f.weight)} g`])
-    : [];
+  // Build flour breakdown rows — always show, even for single flour
+  const flourRows = (c.flourBreakdown||[]).map(f =>
+    [`↳ ${productNameWithBrand(f.productId)}${(c.flourBreakdown||[]).length > 1 ? ` (${Math.round(f.pct)}%)` : ''}`, `${Math.round(f.weight)} g`]
+  );
 
   // Build levain flour breakdown
-  const levainFlourRows = (c.levainFlourBreakdown||[]).length > 1
-    ? c.levainFlourBreakdown.map(f => [`  ↳ ${productNameWithBrand(f.productId)}`, `${Math.round(f.weight)} g`])
-    : [];
+  const levainFlourRows = (c.levainFlourBreakdown||[]).map(f =>
+    [`  ↳ ${productNameWithBrand(f.productId)}`, `${Math.round(f.weight)} g`]
+  );
 
   const rows = [
     ['<strong>קמח בצק</strong>', `<strong>${Math.round(c.flourWeight)} g</strong>`],
