@@ -832,7 +832,6 @@ html[data-theme="dark"] {
   padding: 9px 20px; font-size: 14px; font-weight: 800;
   cursor: pointer; gap: 6px; align-items: center;
   white-space: nowrap; letter-spacing: 0.01em;
-  box-shadow: 0 2px 8px rgba(0,0,0,.15);
 }
 #btn-signin-guest:hover { filter: brightness(1.1); }
 .auth-card {
@@ -995,7 +994,7 @@ textarea.bl-input { resize: vertical; min-height: 70px; }
         <div class="user-avatar" id="user-avatar">?</div>
         <span id="user-email" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
       </div>
-      <button id="btn-signin-guest" data-i18n="headerSignIn">🔐 Sign In / Register</button>
+      <button id="btn-signin-guest">🔐 <span data-i18n="headerSignIn">Sign In / Register</span></button>
       <button class="btn btn-ghost btn-sm" id="btn-logout" style="display:none" data-i18n="authLogout">Logout</button>
       <button id="btn-lang" class="btn-toggle" title="Switch Language">עב</button>
       <button id="btn-theme" class="btn-toggle" title="Toggle Dark Mode">🌙</button>
@@ -1936,7 +1935,7 @@ const TRANSLATIONS = {
     blDeleteConfirm:'Delete this bake log? This cannot be undone.',
     blRatingLabel: r => r ? '★'.repeat(r) + '☆'.repeat(5-r) : '☆☆☆☆☆',
     // Guest mode
-    headerSignIn:'🔐 Sign In / Register',
+    headerSignIn:'Sign In / Register',
     backupTitle:'⚠️ Recipe saved locally only',
     backupSub:'If you clear your browser, your recipes will be lost forever.',
     backupBtn:'Sign Up & Back Up Now →',
@@ -2065,7 +2064,7 @@ const TRANSLATIONS = {
     blDeleteConfirm:'למחוק יומן אפייה זה? פעולה זו אינה ניתנת לביטול.',
     blRatingLabel: r => r ? '★'.repeat(r) + '☆'.repeat(5-r) : '☆☆☆☆☆',
     // Guest mode
-    headerSignIn:'🔐 כניסה / הרשמה',
+    headerSignIn:'כניסה / הרשמה',
     backupTitle:'⚠️ המתכון נשמר מקומית בלבד',
     backupSub:'אם תנקה את הדפדפן — המתכונים שלך ייאבדו לצמיתות.',
     backupBtn:'הירשם וגבה עכשיו →',
