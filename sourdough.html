@@ -10,6 +10,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Sourdough">
 <link rel="apple-touch-icon" href="/icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg: #faf8f4;
@@ -27,13 +30,14 @@
   --warning-bg: #fef4e4;
   --danger: #b83232;
   --danger-bg: #fde8e8;
-  --radius: 8px;
-  --shadow: 0 1px 4px rgba(0,0,0,0.08);
+  --radius: 16px;
+  --radius-sm: 8px;
+  --shadow: 0 2px 8px rgba(0,0,0,0.07);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { max-width: 100%; overflow-x: hidden; }
 body {
-  font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+  font-family: 'Manrope', -apple-system, "Segoe UI", system-ui, sans-serif;
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
@@ -57,12 +61,13 @@ header {
   gap: 24px;
 }
 .logo {
+  font-family: 'Epilogue', sans-serif;
   font-size: 18px;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--accent);
   padding: 14px 0;
   white-space: nowrap;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.5px;
 }
 .logo span { color: var(--text-muted); font-weight: 400; }
 nav.tabs {
@@ -111,8 +116,9 @@ section.tab-section.active { display: block; }
   user-select: none;
 }
 .card-header h3 {
+  font-family: 'Epilogue', sans-serif;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--text-muted);
@@ -142,7 +148,7 @@ label {
 input[type=number], input[type=text], select, textarea {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   padding: 7px 10px;
   font-size: 14px;
   color: var(--text);
@@ -216,7 +222,7 @@ select { min-width: 140px; }
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  border-radius: 5px;
+  border-radius: var(--radius-sm);
   border: none;
   cursor: pointer;
   font-size: 13px;
@@ -252,8 +258,9 @@ select { min-width: 140px; }
   justify-content: space-between;
 }
 .results-header h3 {
+  font-family: 'Epilogue', sans-serif;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--text-muted);
@@ -738,9 +745,11 @@ dialog::backdrop { background: rgba(0,0,0,0.4); }
 .batch-total { font-size: 12px; color: var(--accent); font-weight: 600; margin-left: 2px; }
 /* ── Misc ── */
 .section-title {
+  font-family: 'Epilogue', sans-serif;
   font-size: 20px;
-  font-weight: 700;
+  font-weight: 800;
   margin-bottom: 20px;
+  letter-spacing: -0.3px;
 }
 .divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
 .text-muted { color: var(--text-muted); }
