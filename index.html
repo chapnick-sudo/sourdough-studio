@@ -967,7 +967,7 @@ textarea.bl-input { resize: vertical; min-height: 70px; }
     </nav>
     <div class="header-controls">
       <span id="cloud-status" style="font-size:12px;transition:opacity 1s;opacity:0;"></span>
-      <div class="user-chip">
+      <div class="user-chip" id="user-chip">
         <div class="user-avatar" id="user-avatar">?</div>
         <span id="user-email" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
       </div>
@@ -1633,7 +1633,7 @@ async function initAuth() {
       currentUser = null;
       updateHeaderForUser();
       // Stay in app as guest — keep local state
-      state.recipes = JSON.parse(localStorage.getItem('sd_state') ? JSON.parse(localStorage.getItem('sd_state')).recipes || '[]' : '[]');
+      state.recipes = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}').recipes || [];
       state.products = DEFAULT_PRODUCTS.map(p => ({...p}));
       renderRecipesTab();
       renderProductsTab();
