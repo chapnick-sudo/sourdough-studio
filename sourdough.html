@@ -805,12 +805,26 @@ html[data-theme="dark"] {
 }
 #auth-overlay .auth-dismiss:hover { opacity: 1; }
 #backup-banner {
-  display: none; background: var(--primary); color: #fff;
-  padding: 10px 16px; font-size: 13px; font-weight: 600;
-  text-align: center; position: relative;
+  display: none;
+  background: #dc2626; color: #fff;
+  padding: 14px 20px;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(220,38,38,0.35);
+  animation: bannerIn .3s ease;
 }
-#backup-banner a { color: #fff; text-decoration: underline; cursor: pointer; margin: 0 6px; }
-#backup-banner .banner-close { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; opacity: 0.8; }
+@keyframes bannerIn { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
+#backup-banner .banner-title { font-size: 15px; font-weight: 800; margin-bottom: 4px; }
+#backup-banner .banner-sub  { font-size: 13px; opacity: .9; margin-bottom: 10px; }
+#backup-banner .banner-btn  {
+  display: inline-block; background: #fff; color: #dc2626;
+  font-size: 14px; font-weight: 800; padding: 8px 22px;
+  border-radius: 8px; border: none; cursor: pointer;
+  text-decoration: none; transition: opacity .15s;
+}
+#backup-banner .banner-btn:hover { opacity: .85; }
+#backup-banner .banner-close { position: absolute; right: 14px; top: 12px; background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; opacity: 0.7; line-height:1; }
+#backup-banner .banner-close:hover { opacity: 1; }
 #btn-signin-guest { display: none; }
 .auth-card {
   background: var(--surface); border: 1px solid var(--border);
@@ -915,9 +929,10 @@ textarea.bl-input { resize: vertical; min-height: 70px; }
 
 <div id="offline-banner"></div>
 <div id="backup-banner">
-  <span id="backup-banner-msg"></span>
-  <a id="backup-banner-signin"></a>
   <button class="banner-close" id="backup-banner-close">×</button>
+  <div class="banner-title" id="backup-banner-title"></div>
+  <div class="banner-sub"   id="backup-banner-sub"></div>
+  <button class="banner-btn" id="backup-banner-signin"></button>
 </div>
 
 <!-- ══ AUTH OVERLAY ══ -->
@@ -1601,7 +1616,6 @@ document.getElementById('backup-banner-signin').addEventListener('click', () => 
 });
 document.getElementById('backup-banner-close').addEventListener('click', () => {
   document.getElementById('backup-banner').style.display = 'none';
-  localStorage.setItem('backup_banner_dismissed', '1');
 });
 
 document.getElementById('btn-google-login').addEventListener('click', async () => {
@@ -1642,11 +1656,11 @@ async function initAuth() {
 }
 
 function showBackupBanner() {
-  if (localStorage.getItem('backup_banner_dismissed')) return;
-  const banner = document.getElementById('backup-banner');
-  document.getElementById('backup-banner-msg').textContent = t('backupMsg');
-  document.getElementById('backup-banner-signin').textContent = t('backupSignIn');
-  banner.style.display = 'block';
+  if (currentUser) return;
+  document.getElementById('backup-banner-title').textContent  = t('backupTitle');
+  document.getElementById('backup-banner-sub').textContent    = t('backupSub');
+  document.getElementById('backup-banner-signin').textContent = t('backupBtn');
+  document.getElementById('backup-banner').style.display = 'block';
 }
 
 function showCloudStatus(msg, ok = true) {
@@ -1913,8 +1927,9 @@ const TRANSLATIONS = {
     blDeleteConfirm:'Delete this bake log? This cannot be undone.',
     blRatingLabel: r => r ? '★'.repeat(r) + '☆'.repeat(5-r) : '☆☆☆☆☆',
     // Guest mode
-    backupMsg:'Your recipes are saved locally only.',
-    backupSignIn:'Sign in to back them up →',
+    backupTitle:'⚠️ Recipe saved locally only',
+    backupSub:'If you clear your browser, your recipes will be lost forever.',
+    backupBtn:'Sign Up & Back Up Now →',
     shareRequiresLogin:'Sign in to share recipes',
     shareToShare:'Sign in to share',
   },
@@ -2040,8 +2055,9 @@ const TRANSLATIONS = {
     blDeleteConfirm:'למחוק יומן אפייה זה? פעולה זו אינה ניתנת לביטול.',
     blRatingLabel: r => r ? '★'.repeat(r) + '☆'.repeat(5-r) : '☆☆☆☆☆',
     // Guest mode
-    backupMsg:'המתכונים שלך נשמרים מקומית בלבד.',
-    backupSignIn:'הירשם כדי לגבות אותם ולא לאבד אותם →',
+    backupTitle:'⚠️ המתכון נשמר מקומית בלבד',
+    backupSub:'אם תנקה את הדפדפן — המתכונים שלך ייאבדו לצמיתות.',
+    backupBtn:'הירשם וגבה עכשיו →',
     shareRequiresLogin:'יש להתחבר כדי לשתף מתכונים',
     shareToShare:'התחבר לשיתוף',
   }
