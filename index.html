@@ -829,7 +829,7 @@ html[data-theme="dark"] {
   display: none;
   background: var(--accent); color: #fff;
   border: none; border-radius: 8px;
-  padding: 9px 20px; font-size: 14px; font-weight: 800;
+  padding: 6px 14px; font-size: 13px; font-weight: 700;
   cursor: pointer; align-items: center; gap: 6px;
   white-space: nowrap; text-decoration: none;
 }
@@ -1916,6 +1916,7 @@ const TRANSLATIONS = {
     // Misc
     removeTitle:'Remove', selectPlaceholder:'— select —',
     popupBlocked:'Please allow popups for PDF export',
+    headerSignIn:'🔐 Sign In / Register',
     // Bake Log
     tabBakelog:'📋 Bake Log',
     blTitle:'📋 Bake Log', blNewBake:'+ New Bake', blBack:'Back to Bake Log',
@@ -2045,6 +2046,7 @@ const TRANSLATIONS = {
     // Misc
     removeTitle:'הסר', selectPlaceholder:'— בחר —',
     popupBlocked:'אנא אפשר חלונות קופצים לייצוא PDF',
+    headerSignIn:'🔐 כניסה / הרשמה',
     // Bake Log
     tabBakelog:'📋 יומן אפייה',
     blTitle:'📋 יומן אפייה', blNewBake:'+ אפייה חדשה', blBack:'חזרה ליומן',
@@ -2186,6 +2188,8 @@ function applyLang() {
   });
   const btnLang = document.getElementById('btn-lang');
   if (btnLang) btnLang.textContent = lang === 'he' ? 'EN' : 'עב';
+  const guestBtn = document.getElementById('btn-signin-guest');
+  if (guestBtn) guestBtn.textContent = t('headerSignIn');
   renderResults();
   renderRecipesTab();
   renderProductsTab();
