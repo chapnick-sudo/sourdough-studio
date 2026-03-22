@@ -994,7 +994,7 @@ textarea.bl-input { resize: vertical; min-height: 70px; }
         <div class="user-avatar" id="user-avatar">?</div>
         <span id="user-email" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
       </div>
-      <button id="btn-signin-guest">🔐 <span data-i18n="headerSignIn">Sign In / Register</span></button>
+      <button id="btn-signin-guest">🔐 <span id="btn-signin-guest-label">Sign In / Register</span></button>
       <button class="btn btn-ghost btn-sm" id="btn-logout" style="display:none" data-i18n="authLogout">Logout</button>
       <button id="btn-lang" class="btn-toggle" title="Switch Language">עב</button>
       <button id="btn-theme" class="btn-toggle" title="Toggle Dark Mode">🌙</button>
@@ -1566,7 +1566,9 @@ function updateHeaderForUser() {
   document.getElementById('user-avatar').textContent = email ? (name || email).charAt(0).toUpperCase() : '?';
   document.getElementById('user-chip').style.display = currentUser ? 'flex' : 'none';
   document.getElementById('btn-logout').style.display = currentUser ? 'inline-flex' : 'none';
-  document.getElementById('btn-signin-guest').style.display = currentUser ? 'none' : 'inline-flex';
+  const guestBtn = document.getElementById('btn-signin-guest');
+  guestBtn.style.display = currentUser ? 'none' : 'inline-flex';
+  document.getElementById('btn-signin-guest-label').textContent = t('headerSignIn');
   document.getElementById('cloud-status').style.display = currentUser ? 'inline' : 'none';
 }
 
