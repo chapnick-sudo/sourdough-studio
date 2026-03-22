@@ -795,8 +795,23 @@ html[data-theme="dark"] {
 /* ── AUTH OVERLAY ── */
 #auth-overlay {
   display: none; position: fixed; inset: 0; z-index: 9999;
-  background: var(--bg); align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.55); backdrop-filter: blur(3px);
+  align-items: center; justify-content: center;
 }
+#auth-overlay .auth-dismiss {
+  position: absolute; top: 16px; right: 16px;
+  background: none; border: none; font-size: 22px; cursor: pointer;
+  color: #fff; opacity: 0.7; line-height: 1;
+}
+#auth-overlay .auth-dismiss:hover { opacity: 1; }
+#backup-banner {
+  display: none; background: var(--primary); color: #fff;
+  padding: 10px 16px; font-size: 13px; font-weight: 600;
+  text-align: center; position: relative;
+}
+#backup-banner a { color: #fff; text-decoration: underline; cursor: pointer; margin: 0 6px; }
+#backup-banner .banner-close { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; opacity: 0.8; }
+#btn-signin-guest { display: none; }
 .auth-card {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: 16px; padding: 40px 36px; width: 100%; max-width: 400px;
@@ -899,9 +914,15 @@ textarea.bl-input { resize: vertical; min-height: 70px; }
 <body>
 
 <div id="offline-banner"></div>
+<div id="backup-banner">
+  <span id="backup-banner-msg"></span>
+  <a id="backup-banner-signin"></a>
+  <button class="banner-close" id="backup-banner-close">×</button>
+</div>
 
 <!-- ══ AUTH OVERLAY ══ -->
 <div id="auth-overlay">
+  <button class="auth-dismiss" id="auth-dismiss-btn" style="display:none">×</button>
   <div class="auth-card">
     <div class="auth-logo">🍞 Sourdough <span>Studio</span></div>
     <div class="auth-mode-tabs">
@@ -934,7 +955,7 @@ textarea.bl-input { resize: vertical; min-height: 70px; }
   </div>
 </div>
 
-<header style="display:none">
+<header>
   <div class="header-inner">
     <div class="logo">🍞 Sourdough <span>Studio</span></div>
     <nav class="tabs" id="main-tabs">
@@ -950,6 +971,7 @@ textarea.bl-input { resize: vertical; min-height: 70px; }
         <div class="user-avatar" id="user-avatar">?</div>
         <span id="user-email" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
       </div>
+      <button class="btn btn-primary btn-sm" id="btn-signin-guest" data-i18n="authSignIn">Sign In</button>
       <button class="btn btn-ghost btn-sm" id="btn-logout" style="display:none" data-i18n="authLogout">Logout</button>
       <button id="btn-lang" class="btn-toggle" title="Switch Language">עב</button>
       <button id="btn-theme" class="btn-toggle" title="Toggle Dark Mode">🌙</button>
@@ -1507,19 +1529,22 @@ const sb = supabase.createClient(SB_URL, SB_KEY);
 let currentUser = null;
 
 // ── AUTH ──────────────────────────────────────────
-function showAuthScreen() {
+function showAuthScreen(dismissable = false) {
   document.getElementById('auth-overlay').style.display = 'flex';
-  document.querySelector('header').style.display = 'none';
-  document.querySelector('main').style.display = 'none';
+  document.getElementById('auth-dismiss-btn').style.display = dismissable ? '' : 'none';
 }
 function hideAuthScreen() {
   document.getElementById('auth-overlay').style.display = 'none';
-  document.querySelector('header').style.display = '';
-  document.querySelector('main').style.display = '';
+}
+function updateHeaderForUser() {
   const email = currentUser?.email || '';
-  document.getElementById('user-email').textContent = email;
-  document.getElementById('user-avatar').textContent = email.charAt(0).toUpperCase();
-  document.getElementById('btn-logout').style.display = '';
+  const name  = currentUser?.user_metadata?.full_name || '';
+  document.getElementById('user-email').textContent = name || email;
+  document.getElementById('user-avatar').textContent = email ? (name || email).charAt(0).toUpperCase() : '?';
+  document.getElementById('user-chip').style.display = currentUser ? '' : 'none';
+  document.getElementById('btn-logout').style.display = currentUser ? '' : 'none';
+  document.getElementById('btn-signin-guest').style.display = currentUser ? 'none' : '';
+  document.getElementById('cloud-status').style.display = currentUser ? '' : 'none';
 }
 
 let _authMode = 'login';
@@ -1562,6 +1587,23 @@ document.getElementById('btn-logout').addEventListener('click', async () => {
   await sb.auth.signOut();
 });
 
+document.getElementById('btn-signin-guest').addEventListener('click', () => {
+  showAuthScreen(true);
+});
+
+document.getElementById('auth-dismiss-btn').addEventListener('click', () => {
+  hideAuthScreen();
+});
+
+document.getElementById('backup-banner-signin').addEventListener('click', () => {
+  document.getElementById('backup-banner').style.display = 'none';
+  showAuthScreen(true);
+});
+document.getElementById('backup-banner-close').addEventListener('click', () => {
+  document.getElementById('backup-banner').style.display = 'none';
+  localStorage.setItem('backup_banner_dismissed', '1');
+});
+
 document.getElementById('btn-google-login').addEventListener('click', async () => {
   const { error } = await sb.auth.signInWithOAuth({
     provider: 'google',
@@ -1572,20 +1614,39 @@ document.getElementById('btn-google-login').addEventListener('click', async () =
 
 async function initAuth() {
   const { data: { session } } = await sb.auth.getSession();
-  if (session?.user) { currentUser = session.user; hideAuthScreen(); startApp(); }
-  else showAuthScreen();
+  if (session?.user) { currentUser = session.user; }
+  updateHeaderForUser();
+  startApp();
 
   sb.auth.onAuthStateChange((event, session) => {
     if (session?.user) {
       currentUser = session.user;
       hideAuthScreen();
-      if (event === 'SIGNED_IN') startApp();
+      updateHeaderForUser();
+      if (event === 'SIGNED_IN') {
+        // Merge any local recipes into cloud then reload
+        const localRecipes = state.recipes.filter(r => r.id.startsWith('rec-'));
+        startApp();
+        localRecipes.forEach(r => cloudSaveRecipe(r));
+      }
     } else {
       currentUser = null;
-      state.recipes = []; state.products = DEFAULT_PRODUCTS.map(p => ({...p}));
-      showAuthScreen();
+      updateHeaderForUser();
+      // Stay in app as guest — keep local state
+      state.recipes = JSON.parse(localStorage.getItem('sd_state') ? JSON.parse(localStorage.getItem('sd_state')).recipes || '[]' : '[]');
+      state.products = DEFAULT_PRODUCTS.map(p => ({...p}));
+      renderRecipesTab();
+      renderProductsTab();
     }
   });
+}
+
+function showBackupBanner() {
+  if (localStorage.getItem('backup_banner_dismissed')) return;
+  const banner = document.getElementById('backup-banner');
+  document.getElementById('backup-banner-msg').textContent = t('backupMsg');
+  document.getElementById('backup-banner-signin').textContent = t('backupSignIn');
+  banner.style.display = 'block';
 }
 
 function showCloudStatus(msg, ok = true) {
@@ -1851,6 +1912,11 @@ const TRANSLATIONS = {
     blSpecFDT:'FDT', blSpecSoak:'Soak', blSpecPlusLevain:'+ Levain', blSpecRetard:'Retard',
     blDeleteConfirm:'Delete this bake log? This cannot be undone.',
     blRatingLabel: r => r ? '★'.repeat(r) + '☆'.repeat(5-r) : '☆☆☆☆☆',
+    // Guest mode
+    backupMsg:'Your recipes are saved locally only.',
+    backupSignIn:'Sign in to back them up →',
+    shareRequiresLogin:'Sign in to share recipes',
+    shareToShare:'Sign in to share',
   },
   he: {
     tabCalculator:'מחשבון', tabRecipes:'מתכונים', tabProducts:'מוצרים',
@@ -1973,6 +2039,11 @@ const TRANSLATIONS = {
     blSpecFDT:'FDT', blSpecSoak:'השריה', blSpecPlusLevain:'+ מחמצת', blSpecRetard:'קירור',
     blDeleteConfirm:'למחוק יומן אפייה זה? פעולה זו אינה ניתנת לביטול.',
     blRatingLabel: r => r ? '★'.repeat(r) + '☆'.repeat(5-r) : '☆☆☆☆☆',
+    // Guest mode
+    backupMsg:'המתכונים שלך נשמרים מקומית בלבד.',
+    backupSignIn:'הירשם כדי לגבות אותם ולא לאבד אותם →',
+    shareRequiresLogin:'יש להתחבר כדי לשתף מתכונים',
+    shareToShare:'התחבר לשיתוף',
   }
 };
 
@@ -2635,6 +2706,7 @@ function openSaveRecipeModal(existingId) {
         state.recipes.push(recipe);
         saveState(); renderRecipesTab();
         cloudSaveRecipe(recipe);
+        if (!currentUser) showBackupBanner();
       }
     },
     existing ? t('updateBtn') : t('saveBtn')
@@ -2770,7 +2842,10 @@ function openRecipeDetail(id) {
         <button class="btn btn-primary" id="rd-edit-btn" data-id="${r.id}">✏️ ערוך במחשבון</button>
         <button class="btn btn-secondary" id="rd-pdf-btn" data-id="${r.id}">PDF</button>
         <button class="btn btn-secondary" id="rd-dup-btn" data-id="${r.id}">${t('btnDuplicate')}</button>
-        <button class="btn btn-ghost" id="rd-share-btn" data-id="${r.id}">${r.isPublic ? '🔒 הפוך לפרטי' : '🌐 שתף'}</button>
+        ${currentUser
+          ? `<button class="btn btn-ghost" id="rd-share-btn" data-id="${r.id}">${r.isPublic ? '🔒 הפוך לפרטי' : '🌐 שתף'}</button>`
+          : `<button class="btn btn-ghost" id="rd-share-btn" title="${t('shareRequiresLogin')}" onclick="showAuthScreen(true)" style="opacity:0.5">🔐 ${t('shareToShare')}</button>`
+        }
         <button class="btn btn-danger" id="rd-del-btn" data-id="${r.id}">${t('btnDelete')}</button>
       </div>
     </div>`;
@@ -3462,12 +3537,18 @@ function startApp() {
   switchTab(state.activeTab || 'calculator');
   renderCalculatorTab();
   renderProductsTab();
-  cloudLoad().then(() => {
+  if (currentUser) {
+    cloudLoad().then(() => {
+      renderRecipesTab();
+      renderProductsTab();
+      renderFlourRows('main-flour-rows', state.calculator.flourRows||[], 'main', 'flour');
+      renderFlourRows('levain-flour-rows', state.calculator.levain?.flourRows||[], 'levain', 'flour');
+    });
+  } else {
     renderRecipesTab();
-    renderProductsTab();
     renderFlourRows('main-flour-rows', state.calculator.flourRows||[], 'main', 'flour');
     renderFlourRows('levain-flour-rows', state.calculator.levain?.flourRows||[], 'levain', 'flour');
-  });
+  }
 }
 
 // ════════════════════════════════════════════════
