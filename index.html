@@ -998,7 +998,7 @@ textarea.bl-input { resize: vertical; min-height: 70px; }
         <div class="user-avatar" id="user-avatar">?</div>
         <span id="user-email" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
       </div>
-      <button id="btn-signin-guest">🔐 <span class="lang-en">Sign In / Register</span><span class="lang-he">כניסה / הרשמה</span></button>
+      <a id="btn-signin-guest" href="#" style="display:none; background:var(--primary); color:#fff; padding:8px 18px; border-radius:8px; font-size:14px; font-weight:700; text-decoration:none; white-space:nowrap;">🔐 כניסה / הרשמה</a>
       <button class="btn btn-ghost btn-sm" id="btn-logout" style="display:none" data-i18n="authLogout">Logout</button>
       <button id="btn-lang" class="btn-toggle" title="Switch Language">עב</button>
       <button id="btn-theme" class="btn-toggle" title="Toggle Dark Mode">🌙</button>
@@ -1570,7 +1570,8 @@ function updateHeaderForUser() {
   document.getElementById('user-avatar').textContent = email ? (name || email).charAt(0).toUpperCase() : '?';
   document.getElementById('user-chip').style.display = currentUser ? 'flex' : 'none';
   document.getElementById('btn-logout').style.display = currentUser ? 'inline-flex' : 'none';
-  document.body.classList.toggle('guest', !currentUser);
+  const guestBtn = document.getElementById('btn-signin-guest');
+  guestBtn.style.display = currentUser ? 'none' : 'inline-block';
   document.getElementById('cloud-status').style.display = currentUser ? 'inline' : 'none';
 }
 
@@ -1614,7 +1615,8 @@ document.getElementById('btn-logout').addEventListener('click', async () => {
   await sb.auth.signOut();
 });
 
-document.getElementById('btn-signin-guest').addEventListener('click', () => {
+document.getElementById('btn-signin-guest').addEventListener('click', (e) => {
+  e.preventDefault();
   showAuthScreen(true);
 });
 
