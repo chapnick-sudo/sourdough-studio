@@ -831,7 +831,7 @@ html[data-theme="dark"] {
   border: none; border-radius: 8px;
   padding: 9px 20px; font-size: 14px; font-weight: 800;
   cursor: pointer; align-items: center; gap: 6px;
-  white-space: nowrap;
+  white-space: nowrap; text-decoration: none;
 }
 body.guest #btn-signin-guest { display: inline-flex; }
 #btn-signin-guest:hover { filter: brightness(1.1); }
@@ -998,7 +998,7 @@ textarea.bl-input { resize: vertical; min-height: 70px; }
         <div class="user-avatar" id="user-avatar">?</div>
         <span id="user-email" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
       </div>
-      <a id="btn-signin-guest" href="#" style="display:none; background:var(--primary); color:#fff; padding:8px 18px; border-radius:8px; font-size:14px; font-weight:700; text-decoration:none; white-space:nowrap;">🔐 כניסה / הרשמה</a>
+      <a id="btn-signin-guest" href="#">🔐 כניסה / הרשמה</a>
       <button class="btn btn-ghost btn-sm" id="btn-logout" style="display:none" data-i18n="authLogout">Logout</button>
       <button id="btn-lang" class="btn-toggle" title="Switch Language">עב</button>
       <button id="btn-theme" class="btn-toggle" title="Toggle Dark Mode">🌙</button>
