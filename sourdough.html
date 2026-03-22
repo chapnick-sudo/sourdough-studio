@@ -828,12 +828,16 @@ html[data-theme="dark"] {
 #btn-signin-guest {
   display: none;
   background: var(--primary); color: #fff;
-  border: 2px solid var(--primary); border-radius: 8px;
+  border: none; border-radius: 8px;
   padding: 9px 20px; font-size: 14px; font-weight: 800;
-  cursor: pointer; gap: 6px; align-items: center;
-  white-space: nowrap; letter-spacing: 0.01em;
+  cursor: pointer; align-items: center; gap: 6px;
+  white-space: nowrap;
 }
+body.guest #btn-signin-guest { display: inline-flex; }
 #btn-signin-guest:hover { filter: brightness(1.1); }
+.lang-he { display: none; }
+html[lang="he"] .lang-en { display: none; }
+html[lang="he"] .lang-he { display: inline; }
 .auth-card {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: 16px; padding: 40px 36px; width: 100%; max-width: 400px;
@@ -994,7 +998,7 @@ textarea.bl-input { resize: vertical; min-height: 70px; }
         <div class="user-avatar" id="user-avatar">?</div>
         <span id="user-email" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
       </div>
-      <button id="btn-signin-guest">🔐 Sign In</button>
+      <button id="btn-signin-guest">🔐 <span class="lang-en">Sign In / Register</span><span class="lang-he">כניסה / הרשמה</span></button>
       <button class="btn btn-ghost btn-sm" id="btn-logout" style="display:none" data-i18n="authLogout">Logout</button>
       <button id="btn-lang" class="btn-toggle" title="Switch Language">עב</button>
       <button id="btn-theme" class="btn-toggle" title="Toggle Dark Mode">🌙</button>
@@ -1566,13 +1570,7 @@ function updateHeaderForUser() {
   document.getElementById('user-avatar').textContent = email ? (name || email).charAt(0).toUpperCase() : '?';
   document.getElementById('user-chip').style.display = currentUser ? 'flex' : 'none';
   document.getElementById('btn-logout').style.display = currentUser ? 'inline-flex' : 'none';
-  const guestBtn = document.getElementById('btn-signin-guest');
-  if (currentUser) {
-    guestBtn.style.display = 'none';
-  } else {
-    guestBtn.style.cssText += '; display: inline-flex !important';
-    guestBtn.textContent = (state.lang === 'he') ? '🔐 כניסה / הרשמה' : '🔐 Sign In / Register';
-  }
+  document.body.classList.toggle('guest', !currentUser);
   document.getElementById('cloud-status').style.display = currentUser ? 'inline' : 'none';
 }
 
@@ -2186,7 +2184,6 @@ function applyLang() {
   });
   const btnLang = document.getElementById('btn-lang');
   if (btnLang) btnLang.textContent = lang === 'he' ? 'EN' : 'עב';
-  if (!currentUser) updateHeaderForUser();
   renderResults();
   renderRecipesTab();
   renderProductsTab();
