@@ -3008,10 +3008,12 @@ function openProductModal(id) {
       if (p) {
         Object.assign(p, { name, type, proteinPct, notes, brand, imageUrl, sourceUrl });
         saveState(); renderProductsTab(); cloudSaveProduct(p);
+        if (!currentUser) showBackupBanner();
       } else {
         const prod = { id: uid(), name, type, proteinPct, notes, brand, imageUrl, sourceUrl, builtIn: false };
         state.products.push(prod);
         saveState(); renderProductsTab(); cloudSaveProduct(prod);
+        if (!currentUser) showBackupBanner();
       }
       renderFlourRows('main-flour-rows', state.calculator.flourRows||[], 'main', 'flour');
       renderFlourRows('levain-flour-rows', state.calculator.levain.flourRows||[], 'levain', 'flour');
