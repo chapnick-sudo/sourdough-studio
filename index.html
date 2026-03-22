@@ -825,7 +825,15 @@ html[data-theme="dark"] {
 #backup-banner .banner-btn:hover { opacity: .85; }
 #backup-banner .banner-close { position: absolute; right: 14px; top: 12px; background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; opacity: 0.7; line-height:1; }
 #backup-banner .banner-close:hover { opacity: 1; }
-#btn-signin-guest { display: none; }
+#btn-signin-guest {
+  display: none;
+  background: var(--primary); color: #fff;
+  border: none; border-radius: 8px;
+  padding: 7px 16px; font-size: 13px; font-weight: 700;
+  cursor: pointer; gap: 6px; align-items: center;
+  white-space: nowrap;
+}
+#btn-signin-guest:hover { opacity: .85; }
 .auth-card {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: 16px; padding: 40px 36px; width: 100%; max-width: 400px;
@@ -986,7 +994,7 @@ textarea.bl-input { resize: vertical; min-height: 70px; }
         <div class="user-avatar" id="user-avatar">?</div>
         <span id="user-email" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
       </div>
-      <button class="btn btn-primary btn-sm" id="btn-signin-guest" data-i18n="authSignIn">Sign In</button>
+      <button id="btn-signin-guest" data-i18n="headerSignIn">🔐 Sign In / Register</button>
       <button class="btn btn-ghost btn-sm" id="btn-logout" style="display:none" data-i18n="authLogout">Logout</button>
       <button id="btn-lang" class="btn-toggle" title="Switch Language">עב</button>
       <button id="btn-theme" class="btn-toggle" title="Toggle Dark Mode">🌙</button>
@@ -1556,10 +1564,10 @@ function updateHeaderForUser() {
   const name  = currentUser?.user_metadata?.full_name || '';
   document.getElementById('user-email').textContent = name || email;
   document.getElementById('user-avatar').textContent = email ? (name || email).charAt(0).toUpperCase() : '?';
-  document.getElementById('user-chip').style.display = currentUser ? '' : 'none';
-  document.getElementById('btn-logout').style.display = currentUser ? '' : 'none';
-  document.getElementById('btn-signin-guest').style.display = currentUser ? 'none' : '';
-  document.getElementById('cloud-status').style.display = currentUser ? '' : 'none';
+  document.getElementById('user-chip').style.display = currentUser ? 'flex' : 'none';
+  document.getElementById('btn-logout').style.display = currentUser ? 'inline-flex' : 'none';
+  document.getElementById('btn-signin-guest').style.display = currentUser ? 'none' : 'inline-flex';
+  document.getElementById('cloud-status').style.display = currentUser ? 'inline' : 'none';
 }
 
 let _authMode = 'login';
@@ -1927,6 +1935,7 @@ const TRANSLATIONS = {
     blDeleteConfirm:'Delete this bake log? This cannot be undone.',
     blRatingLabel: r => r ? '★'.repeat(r) + '☆'.repeat(5-r) : '☆☆☆☆☆',
     // Guest mode
+    headerSignIn:'🔐 Sign In / Register',
     backupTitle:'⚠️ Recipe saved locally only',
     backupSub:'If you clear your browser, your recipes will be lost forever.',
     backupBtn:'Sign Up & Back Up Now →',
@@ -2055,6 +2064,7 @@ const TRANSLATIONS = {
     blDeleteConfirm:'למחוק יומן אפייה זה? פעולה זו אינה ניתנת לביטול.',
     blRatingLabel: r => r ? '★'.repeat(r) + '☆'.repeat(5-r) : '☆☆☆☆☆',
     // Guest mode
+    headerSignIn:'🔐 כניסה / הרשמה',
     backupTitle:'⚠️ המתכון נשמר מקומית בלבד',
     backupSub:'אם תנקה את הדפדפן — המתכונים שלך ייאבדו לצמיתות.',
     backupBtn:'הירשם וגבה עכשיו →',
