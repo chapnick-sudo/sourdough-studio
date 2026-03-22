@@ -799,9 +799,9 @@ html[data-theme="dark"] {
   align-items: center; justify-content: center;
 }
 #auth-overlay .auth-dismiss {
-  position: absolute; top: 16px; right: 16px;
+  position: absolute; top: 12px; right: 14px;
   background: none; border: none; font-size: 22px; cursor: pointer;
-  color: #fff; opacity: 0.7; line-height: 1;
+  color: var(--text-muted); opacity: 0.6; line-height: 1; z-index: 1;
 }
 #auth-overlay .auth-dismiss:hover { opacity: 1; }
 #backup-banner {
@@ -828,12 +828,13 @@ html[data-theme="dark"] {
 #btn-signin-guest {
   display: none;
   background: var(--primary); color: #fff;
-  border: none; border-radius: 8px;
-  padding: 7px 16px; font-size: 13px; font-weight: 700;
+  border: 2px solid var(--primary); border-radius: 8px;
+  padding: 9px 20px; font-size: 14px; font-weight: 800;
   cursor: pointer; gap: 6px; align-items: center;
-  white-space: nowrap;
+  white-space: nowrap; letter-spacing: 0.01em;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
 }
-#btn-signin-guest:hover { opacity: .85; }
+#btn-signin-guest:hover { filter: brightness(1.1); }
 .auth-card {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: 16px; padding: 40px 36px; width: 100%; max-width: 400px;
@@ -945,8 +946,8 @@ textarea.bl-input { resize: vertical; min-height: 70px; }
 
 <!-- ══ AUTH OVERLAY ══ -->
 <div id="auth-overlay">
-  <button class="auth-dismiss" id="auth-dismiss-btn" style="display:none">×</button>
-  <div class="auth-card">
+  <div class="auth-card" style="position:relative">
+    <button class="auth-dismiss" id="auth-dismiss-btn" style="display:none">×</button>
     <div class="auth-logo">🍞 Sourdough <span>Studio</span></div>
     <div class="auth-mode-tabs">
       <button class="auth-mode-tab active" data-auth-mode="login" data-i18n="authSignIn">Sign In</button>
