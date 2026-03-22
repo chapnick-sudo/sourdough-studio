@@ -994,7 +994,7 @@ textarea.bl-input { resize: vertical; min-height: 70px; }
         <div class="user-avatar" id="user-avatar">?</div>
         <span id="user-email" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
       </div>
-      <button id="btn-signin-guest">🔐 <span id="btn-signin-guest-label">Sign In / Register</span></button>
+      <button id="btn-signin-guest">🔐 Sign In</button>
       <button class="btn btn-ghost btn-sm" id="btn-logout" style="display:none" data-i18n="authLogout">Logout</button>
       <button id="btn-lang" class="btn-toggle" title="Switch Language">עב</button>
       <button id="btn-theme" class="btn-toggle" title="Toggle Dark Mode">🌙</button>
@@ -1567,8 +1567,12 @@ function updateHeaderForUser() {
   document.getElementById('user-chip').style.display = currentUser ? 'flex' : 'none';
   document.getElementById('btn-logout').style.display = currentUser ? 'inline-flex' : 'none';
   const guestBtn = document.getElementById('btn-signin-guest');
-  guestBtn.style.display = currentUser ? 'none' : 'inline-flex';
-  document.getElementById('btn-signin-guest-label').textContent = t('headerSignIn');
+  if (currentUser) {
+    guestBtn.style.display = 'none';
+  } else {
+    guestBtn.style.cssText += '; display: inline-flex !important';
+    guestBtn.textContent = (state.lang === 'he') ? '🔐 כניסה / הרשמה' : '🔐 Sign In / Register';
+  }
   document.getElementById('cloud-status').style.display = currentUser ? 'inline' : 'none';
 }
 
@@ -2182,8 +2186,7 @@ function applyLang() {
   });
   const btnLang = document.getElementById('btn-lang');
   if (btnLang) btnLang.textContent = lang === 'he' ? 'EN' : 'עב';
-  const guestLabel = document.getElementById('btn-signin-guest-label');
-  if (guestLabel) guestLabel.textContent = t('headerSignIn');
+  if (!currentUser) updateHeaderForUser();
   renderResults();
   renderRecipesTab();
   renderProductsTab();
