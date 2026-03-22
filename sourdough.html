@@ -1639,8 +1639,8 @@ document.getElementById('btn-google-login').addEventListener('click', async () =
 async function initAuth() {
   const { data: { session } } = await sb.auth.getSession();
   if (session?.user) { currentUser = session.user; }
-  updateHeaderForUser();
   startApp();
+  updateHeaderForUser();
 
   sb.auth.onAuthStateChange((event, session) => {
     if (session?.user) {
@@ -2182,6 +2182,8 @@ function applyLang() {
   });
   const btnLang = document.getElementById('btn-lang');
   if (btnLang) btnLang.textContent = lang === 'he' ? 'EN' : 'עב';
+  const guestLabel = document.getElementById('btn-signin-guest-label');
+  if (guestLabel) guestLabel.textContent = t('headerSignIn');
   renderResults();
   renderRecipesTab();
   renderProductsTab();
