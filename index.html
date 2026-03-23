@@ -1314,7 +1314,12 @@ textarea.bl-input { resize: vertical; min-height: 70px; }
         <div id="results-panel">
           <div class="results-header">
             <h3 data-i18n="cardResults">Results</h3>
-            <span id="results-hydration-badge"></span>
+            <div style="display:flex;align-items:center;gap:8px">
+              <button id="btn-round" class="btn btn-sm btn-ghost" title="Round weights" style="font-size:12px;padding:3px 8px;border-radius:12px">
+                <span class="ms" style="font-size:14px;vertical-align:-2px">balance</span> <span data-i18n="btnRound">Round</span>
+              </button>
+              <span id="results-hydration-badge"></span>
+            </div>
           </div>
           <table id="results-table"><tbody id="results-body"></tbody></table>
           <div class="results-actions">
@@ -1932,6 +1937,7 @@ const TRANSLATIONS = {
     // Misc
     removeTitle:'Remove', selectPlaceholder:'— select —',
     popupBlocked:'Please allow popups for PDF export',
+    btnRound:'Round',
     headerSignIn:'🔐 Sign In / Register',
     // Bake Log
     tabBakelog:'Bake Log',
@@ -2061,6 +2067,7 @@ const TRANSLATIONS = {
     // Misc
     removeTitle:'הסר', selectPlaceholder:'— בחר —',
     popupBlocked:'אנא אפשר חלונות קופצים לייצוא PDF',
+    btnRound:'עיגול',
     headerSignIn:'🔐 כניסה / הרשמה',
     // Bake Log
     tabBakelog:'יומן אפייה',
@@ -2318,8 +2325,9 @@ function esc(str) {
   return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function fmt(g) {
+function fmt(g, forceRound) {
   if (!isFinite(g) || g === 0) return '—';
+  if (forceRound || state.calculator.rounded) return Math.round(g) + 'g';
   return g.toFixed(1) + 'g';
 }
 
@@ -2362,9 +2370,33 @@ function renderSumIndicator(elId, sum) {
 // 6. RENDER: RESULTS
 // ════════════════════════════════════════════════
 
+function roundIngredients(c) {
+  const r = JSON.parse(JSON.stringify(c));
+  // Round all component weights
+  r.mainFlourWeight = Math.round(r.mainFlourWeight);
+  r.flourBreakdown.forEach(f => f.weight = Math.round(f.weight));
+  r.levainTotal = Math.round(r.levainTotal);
+  r.levainFlour = Math.round(r.levainFlour);
+  r.levainWater = r.levainTotal - r.levainFlour;
+  r.levainFlourBreakdown.forEach(f => f.weight = Math.round(f.weight));
+  r.basinage = Math.round(r.basinage);
+  r.salt = Math.round(r.salt);
+  r.addIns.forEach(a => a.weight = Math.round(a.weight));
+  r.addInsTotal = r.addIns.reduce((s,a) => s + a.weight, 0);
+  // Adjust main water so total dough matches target exactly
+  const usedSoFar = r.mainFlourWeight + r.levainTotal + r.basinage + r.salt + r.addInsTotal;
+  r.mainWater = r.totalDoughTarget - usedSoFar;
+  r.totalWater = r.mainWater + r.levainWater + r.basinage;
+  r.totalDoughWeight = r.totalDoughTarget;
+  r.mainWaterNegative = r.mainWater < 0;
+  r._rounded = true;
+  return r;
+}
+
 function renderResults() {
   const calc = state.calculator;
-  const c = computeIngredients(calc);
+  let c = computeIngredients(calc);
+  if (state.calculator.rounded) c = roundIngredients(c);
   const tbody = document.getElementById('results-body');
   if (!tbody) return;
 
@@ -2482,6 +2514,13 @@ function renderCalculatorTab() {
 
   // Add-ins
   renderAddInRows();
+
+  // Round button state
+  const roundBtn = document.getElementById('btn-round');
+  if (roundBtn) {
+    roundBtn.classList.toggle('btn-primary', !!calc.rounded);
+    roundBtn.classList.toggle('btn-ghost', !calc.rounded);
+  }
 
   // Results
   renderResults();
@@ -3396,6 +3435,18 @@ document.getElementById('tab-calculator').addEventListener('click', e => {
       renderAddInRows();
     }
     renderResults(); saveState(); return;
+  }
+
+  // Round toggle
+  if (e.target.closest('#btn-round')) {
+    state.calculator.rounded = !state.calculator.rounded;
+    const btn = document.getElementById('btn-round');
+    btn.classList.toggle('btn-primary', state.calculator.rounded);
+    btn.classList.toggle('btn-ghost', !state.calculator.rounded);
+    readCalcFromDOM();
+    renderResults();
+    saveState();
+    return;
   }
 
   // Save recipe
