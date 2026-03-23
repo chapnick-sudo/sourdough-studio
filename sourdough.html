@@ -476,6 +476,13 @@ select { min-width: 140px; }
   padding: 2px 8px;
   border-radius: 20px;
 }
+.btn-hide-builtin {
+  font-size: 11px; padding: 2px 8px; border-radius: 12px;
+  border: 1px solid var(--border); background: none; color: var(--text-muted);
+  cursor: pointer; margin-inline-start: auto; white-space: nowrap;
+}
+.btn-hide-builtin:hover { background: var(--surface-alt); }
+.btn-hide-builtin.active { background: var(--accent-light); color: var(--accent); border-color: var(--accent); }
 .product-category-header .cat-toggle {
   color: var(--text-muted);
   font-size: 14px;
@@ -1983,6 +1990,7 @@ const TRANSLATIONS = {
     removeTitle:'Remove', selectPlaceholder:'— select —',
     popupBlocked:'Please allow popups for PDF export',
     btnRound:'Round',
+    hideBuiltIn:'Hide built-in', showBuiltIn:'Show built-in',
     acctEditName:'Edit Name',
     acctNamePrompt:'Enter your display name:',
     headerSignIn:'🔐 Sign In / Register',
@@ -2115,6 +2123,7 @@ const TRANSLATIONS = {
     removeTitle:'הסר', selectPlaceholder:'— בחר —',
     popupBlocked:'אנא אפשר חלונות קופצים לייצוא PDF',
     btnRound:'עיגול',
+    hideBuiltIn:'הסתר מובנים', showBuiltIn:'הצג מובנים',
     acctEditName:'ערוך שם',
     acctNamePrompt:'הזן שם תצוגה:',
     headerSignIn:'🔐 כניסה / הרשמה',
@@ -2677,6 +2686,9 @@ function renderProductsTab() {
     { type: 'other', label: ()=>t('catOther'), icon: '🫙', showProtein: false },
   ];
 
+  // Track which categories hide built-ins
+  if (!state._hideBuiltIn) state._hideBuiltIn = {};
+
   // Filter + group
   const grouped = {};
   CATS.forEach(c => grouped[c.type] = []);
@@ -2687,6 +2699,7 @@ function renderProductsTab() {
                        !(p.notes||'').toLowerCase().includes(searchQ)) return false;
       if (typeFilter  && p.type !== typeFilter)   return false;
       if (brandFilter && (p.brand||'') !== brandFilter) return false;
+      if (p.builtIn && state._hideBuiltIn[p.type]) return false;
       return true;
     })
     .forEach(p => {
@@ -2727,6 +2740,7 @@ function renderProductsTab() {
           <span class="cat-icon">${cat.icon}</span>
           <h3>${typeof cat.label === 'function' ? cat.label() : cat.label}</h3>
           <span class="cat-count">${products.length}</span>
+          <button class="btn-hide-builtin ${state._hideBuiltIn[cat.type] ? 'active' : ''}" data-hide-cat="${cat.type}" title="${t('hideBuiltIn')}">${state._hideBuiltIn[cat.type] ? t('showBuiltIn') : t('hideBuiltIn')}</button>
           <span class="cat-toggle">▾</span>
         </div>
         <div class="product-category-body">
@@ -2747,7 +2761,18 @@ function renderProductsTab() {
   }).join('');
 
   container.querySelectorAll('[data-toggle-cat]').forEach(btn => {
-    btn.addEventListener('click', () => btn.closest('.product-category').classList.toggle('collapsed'));
+    btn.addEventListener('click', (e) => {
+      if (e.target.closest('[data-hide-cat]')) return; // don't collapse when clicking hide btn
+      btn.closest('.product-category').classList.toggle('collapsed');
+    });
+  });
+  container.querySelectorAll('[data-hide-cat]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const catType = btn.dataset.hideCat;
+      state._hideBuiltIn[catType] = !state._hideBuiltIn[catType];
+      renderProductsTab();
+    });
   });
 }
 
