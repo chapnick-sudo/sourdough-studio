@@ -2255,11 +2255,12 @@ function computeIngredients(calc) {
 
   const totalDoughWeight = flourWeight + totalWater + salt + addInsTotal;
 
+  const mainFlourWeight = flourWeight - levainFlour;
   const mainFlourSum = (calc.flourRows||[]).reduce((s,r) => s + (parseFloat(r.splitPct)||0), 0);
   const flourBreakdown = (calc.flourRows||[]).map(r => ({
     productId: r.productId,
     pct: parseFloat(r.splitPct) || 0,
-    weight: flourWeight * (parseFloat(r.splitPct)||0) / 100
+    weight: mainFlourWeight * (parseFloat(r.splitPct)||0) / 100
   }));
 
   const levainFlourSum = (calc.levain.flourRows||[]).reduce((s,r) => s + (parseFloat(r.splitPct)||0), 0);
@@ -2270,7 +2271,7 @@ function computeIngredients(calc) {
   }));
 
   return {
-    flourWeight, flourBreakdown, mainFlourSum,
+    flourWeight, mainFlourWeight, flourBreakdown, mainFlourSum,
     levainFlour, levainFlourBreakdown, levainFlourSum,
     levainWater, levainTotal, levainPct,
     mainWater, mainWaterNegative: mainWater < 0,
@@ -2394,7 +2395,7 @@ function renderResults() {
   const tr = (label, weight, cls='') => `<tr class="${cls}"><td>${label}</td><td>${weight}</td></tr>`;
 
   // Flour
-  rows.push(tr(`<strong>${t('rowTotalFlour')}</strong>`, `<strong>${fmt(c.flourWeight)}</strong>`));
+  rows.push(tr(`<strong>${t('rowTotalFlour')}</strong>`, `<strong>${fmt(c.mainFlourWeight)}</strong>`));
   if (c.flourBreakdown.length > 1 || c.flourBreakdown.some(r => r.productId)) {
     for (const f of c.flourBreakdown) {
       const name = f.productId ? productName(f.productId) : '(unset)';
@@ -2840,7 +2841,7 @@ function openRecipeDetail(id) {
   );
 
   const rows = [
-    ['<strong>קמח בצק</strong>', `<strong>${Math.round(c.flourWeight)} g</strong>`],
+    ['<strong>קמח בצק</strong>', `<strong>${Math.round(c.mainFlourWeight)} g</strong>`],
     ...flourRows,
     ['מים ראשיים', `${Math.round(c.mainWater)} g`],
     ...(c.basinage > 0 ? [['בסינאז׳', `${Math.round(c.basinage)} g`]] : []),
@@ -2868,7 +2869,7 @@ function openRecipeDetail(id) {
       ${r.description ? `<div class="rd-desc">${esc(r.description)}</div>` : ''}
       <div class="rd-stats">
         <div class="rd-stat rd-stat-flour">
-          <div class="rd-stat-val">${Math.round(c.flourWeight)}g</div>
+          <div class="rd-stat-val">${Math.round(c.mainFlourWeight)}g</div>
           <div class="rd-stat-lbl">סך קמח</div>
         </div>
         <div class="rd-stat rd-stat-water">
@@ -3223,7 +3224,7 @@ function copyResults() {
   const lines = [
     '=== SOURDOUGH RECIPE ===' + scaleLabel,
     '',
-    `Total Flour:       ${s(c.flourWeight)}`,
+    `Total Flour:       ${s(c.mainFlourWeight)}`,
   ];
   if (c.flourBreakdown.length > 1 || c.flourBreakdown.some(r=>r.productId)) {
     c.flourBreakdown.forEach(f => {
@@ -3508,7 +3509,7 @@ function printRecipePDF(calc, name, notes) {
   let ingredientRows = '';
   // Flour
   ingredientRows += divider();
-  ingredientRows += row('<strong>Total Flour</strong>', fmt(c.flourWeight));
+  ingredientRows += row('<strong>Total Flour</strong>', fmt(c.mainFlourWeight));
   c.flourBreakdown.forEach(f => {
     if (f.productId) ingredientRows += row(`↳ ${productNameWithBrand(f.productId, true)} (${fmtPct(f.pct)})`, fmt(f.weight), true);
   });
