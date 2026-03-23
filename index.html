@@ -345,8 +345,7 @@ select { min-width: 140px; }
   /* Auth card */
   .auth-card { padding: 28px 20px; }
 
-  /* User chip */
-  #user-email { max-width: 80px !important; }
+  /* Account dropdown */
 
   /* Cloud status */
   #cloud-status { display: none; }
@@ -830,16 +829,7 @@ html[data-theme="dark"] {
 #backup-banner .banner-btn:hover { opacity: .85; }
 #backup-banner .banner-close { position: absolute; right: 14px; top: 12px; background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; opacity: 0.7; line-height:1; }
 #backup-banner .banner-close:hover { opacity: 1; }
-#btn-signin-guest {
-  display: none;
-  background: var(--accent); color: #fff;
-  border: none; border-radius: 8px;
-  padding: 6px 14px; font-size: 13px; font-weight: 700;
-  cursor: pointer; align-items: center; gap: 6px;
-  white-space: nowrap; text-decoration: none;
-}
-body.guest #btn-signin-guest { display: inline-flex; }
-#btn-signin-guest:hover { filter: brightness(1.1); }
+/* old signin button removed — replaced by account dropdown */
 .lang-he { display: none; }
 html[lang="he"] .lang-en { display: none; }
 html[lang="he"] .lang-he { display: inline; }
@@ -859,10 +849,15 @@ html[lang="he"] .lang-he { display: inline; }
 .auth-forgot { text-align: center; margin-top: 12px; font-size: 13px; color: var(--text-muted); }
 .auth-forgot a { color: var(--primary); cursor: pointer; text-decoration: none; }
 
-/* ── USER MENU ── */
-.user-chip { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); }
-.user-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
-#btn-logout { font-size: 12px; padding: 4px 10px; }
+/* ── ACCOUNT DROPDOWN ── */
+#account-dropdown .acct-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; font-size: 13px; color: var(--text); cursor: pointer; border: none; background: none; width: 100%; text-align: inherit; }
+#account-dropdown .acct-item:hover { background: var(--surface-alt); }
+#account-dropdown .acct-item .ms { font-size: 20px; color: var(--text-muted); }
+#account-dropdown .acct-divider { height: 1px; background: var(--border); margin: 4px 0; }
+#account-dropdown .acct-header { padding: 12px 16px 8px; }
+#account-dropdown .acct-name { font-weight: 700; font-size: 14px; }
+#account-dropdown .acct-email { font-size: 12px; color: var(--text-muted); }
+[dir="rtl"] #account-dropdown { right: auto; left: 0; }
 
 /* ── SHARE BADGE ── */
 .badge-public { background: #d1fae5; color: #065f46; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
@@ -1010,12 +1005,14 @@ textarea.bl-input { resize: vertical; min-height: 70px; }
     </nav>
     <div class="header-controls">
       <span id="cloud-status" style="font-size:12px;transition:opacity 1s;opacity:0;"></span>
-      <div class="user-chip" id="user-chip">
-        <div class="user-avatar" id="user-avatar">?</div>
-        <span id="user-email" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+      <div id="account-menu-wrap" style="position:relative">
+        <button id="btn-account" class="btn-toggle" title="Account" style="font-size:24px;padding:4px;line-height:1">
+          <span class="ms" style="font-size:28px;vertical-align:-4px;color:var(--text-muted)">account_circle</span>
+        </button>
+        <div id="account-dropdown" style="display:none;position:absolute;top:110%;right:0;min-width:240px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:999;padding:8px 0">
+          <!-- Filled dynamically -->
+        </div>
       </div>
-      <a id="btn-signin-guest" href="#">🔐 כניסה / הרשמה</a>
-      <button class="btn btn-ghost btn-sm" id="btn-logout" style="display:none" data-i18n="authLogout">Logout</button>
       <button id="btn-lang" class="btn-toggle" title="Switch Language">עב</button>
       <button id="btn-theme" class="btn-toggle" title="Toggle Dark Mode">🌙</button>
     </div>
@@ -1585,15 +1582,53 @@ function hideAuthScreen() {
   document.getElementById('auth-overlay').style.display = 'none';
 }
 function updateHeaderForUser() {
-  const email = currentUser?.email || '';
-  const name  = currentUser?.user_metadata?.full_name || '';
-  document.getElementById('user-email').textContent = name || email;
-  document.getElementById('user-avatar').textContent = email ? (name || email).charAt(0).toUpperCase() : '?';
-  document.getElementById('user-chip').style.display = currentUser ? 'flex' : 'none';
-  document.getElementById('btn-logout').style.display = currentUser ? 'inline-flex' : 'none';
-  const guestBtn = document.getElementById('btn-signin-guest');
-  guestBtn.style.display = currentUser ? 'none' : 'inline-block';
   document.getElementById('cloud-status').style.display = currentUser ? 'inline' : 'none';
+  const icon = document.querySelector('#btn-account .ms');
+  if (icon) icon.style.color = currentUser ? 'var(--accent)' : 'var(--text-muted)';
+}
+function renderAccountDropdown() {
+  const dd = document.getElementById('account-dropdown');
+  if (!dd) return;
+  if (currentUser) {
+    const email = currentUser.email || '';
+    const name = currentUser.user_metadata?.display_name || currentUser.user_metadata?.full_name || '';
+    dd.innerHTML = `
+      <div class="acct-header">
+        <div class="acct-name">${esc(name || email.split('@')[0])}</div>
+        <div class="acct-email">${esc(email)}</div>
+      </div>
+      <div class="acct-divider"></div>
+      <button class="acct-item" id="acct-edit-name"><span class="ms">edit</span> ${t('acctEditName')}</button>
+      <button class="acct-item" id="acct-logout"><span class="ms">logout</span> ${t('authLogout')}</button>
+    `;
+    dd.querySelector('#acct-edit-name')?.addEventListener('click', async () => {
+      dd.style.display = 'none';
+      const newName = prompt(t('acctNamePrompt'), name || '');
+      if (newName !== null && newName.trim() !== '') {
+        try {
+          const { error } = await sb.auth.updateUser({ data: { display_name: newName.trim() } });
+          if (!error) {
+            currentUser.user_metadata.display_name = newName.trim();
+            renderAccountDropdown();
+          }
+        } catch(e) { /* ignore */ }
+      }
+    });
+    dd.querySelector('#acct-logout')?.addEventListener('click', async () => {
+      try {
+        const { error } = await sb.auth.signOut();
+        if (!error) dd.style.display = 'none';
+      } catch(e) { dd.style.display = 'none'; }
+    });
+  } else {
+    dd.innerHTML = `
+      <button class="acct-item" id="acct-signin"><span class="ms">login</span> ${t('headerSignIn')}</button>
+    `;
+    dd.querySelector('#acct-signin')?.addEventListener('click', () => {
+      dd.style.display = 'none';
+      showAuthScreen(true);
+    });
+  }
 }
 
 let _authMode = 'login';
@@ -1632,13 +1667,18 @@ document.getElementById('auth-submit').addEventListener('click', async () => {
 document.getElementById('auth-email').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('auth-password').focus(); });
 document.getElementById('auth-password').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('auth-submit').click(); });
 
-document.getElementById('btn-logout').addEventListener('click', async () => {
-  await sb.auth.signOut();
+// Account icon toggle dropdown
+document.getElementById('btn-account').addEventListener('click', () => {
+  const dd = document.getElementById('account-dropdown');
+  const isOpen = dd.style.display !== 'none';
+  dd.style.display = isOpen ? 'none' : 'block';
+  if (!isOpen) renderAccountDropdown();
 });
-
-document.getElementById('btn-signin-guest').addEventListener('click', (e) => {
-  e.preventDefault();
-  showAuthScreen(true);
+// Close dropdown on outside click
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#account-menu-wrap')) {
+    document.getElementById('account-dropdown').style.display = 'none';
+  }
 });
 
 document.getElementById('auth-dismiss-btn').addEventListener('click', () => {
@@ -1666,12 +1706,14 @@ async function initAuth() {
   if (session?.user) { currentUser = session.user; }
   startApp();
   updateHeaderForUser();
+  renderAccountDropdown();
 
   sb.auth.onAuthStateChange((event, session) => {
     if (session?.user) {
       currentUser = session.user;
       hideAuthScreen();
       updateHeaderForUser();
+      renderAccountDropdown();
       if (event === 'SIGNED_IN') {
         // Merge any local recipes into cloud then reload
         const localRecipes = state.recipes.filter(r => r.id.startsWith('rec-'));
@@ -1681,6 +1723,7 @@ async function initAuth() {
     } else {
       currentUser = null;
       updateHeaderForUser();
+      renderAccountDropdown();
       // Stay in app as guest — keep local state
       state.recipes = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}').recipes || [];
       state.products = DEFAULT_PRODUCTS.map(p => ({...p}));
@@ -1938,6 +1981,8 @@ const TRANSLATIONS = {
     removeTitle:'Remove', selectPlaceholder:'— select —',
     popupBlocked:'Please allow popups for PDF export',
     btnRound:'Round',
+    acctEditName:'Edit Name',
+    acctNamePrompt:'Enter your display name:',
     headerSignIn:'🔐 Sign In / Register',
     // Bake Log
     tabBakelog:'Bake Log',
@@ -2068,6 +2113,8 @@ const TRANSLATIONS = {
     removeTitle:'הסר', selectPlaceholder:'— בחר —',
     popupBlocked:'אנא אפשר חלונות קופצים לייצוא PDF',
     btnRound:'עיגול',
+    acctEditName:'ערוך שם',
+    acctNamePrompt:'הזן שם תצוגה:',
     headerSignIn:'🔐 כניסה / הרשמה',
     // Bake Log
     tabBakelog:'יומן אפייה',
@@ -2209,8 +2256,8 @@ function applyLang() {
   });
   const btnLang = document.getElementById('btn-lang');
   if (btnLang) btnLang.textContent = lang === 'he' ? 'EN' : 'עב';
-  const guestBtn = document.getElementById('btn-signin-guest');
-  if (guestBtn) guestBtn.textContent = t('headerSignIn');
+  // Refresh account dropdown on lang switch
+  renderAccountDropdown();
   renderResults();
   renderReverseCalc();
   renderRecipesTab();
